@@ -51,9 +51,10 @@ npm run dev
 ```
 or 
 ```bash
-cd frontend
+cd backend
 yarn install
-yarn run dev
+yarn dev
+```
 
 ### 3. Setup Frontend
 ```bash
@@ -65,12 +66,12 @@ or
 ```bash
 cd frontend
 yarn install
-yarn run dev
+yarn dev
 ```
 
 ## 🎮 How to Use
 
-1. **Start the Backend Server**
+1. **Start the Backend**
    ```bash
    cd backend
    npm run dev
@@ -78,10 +79,11 @@ yarn run dev
    ```
    Server will run on `http://localhost:8017`
 
-2. **Start the Frontend Development Server**
+2. **Start the Frontend Development**
    ```bash
    cd frontend
    npm run dev
+   or yarn dev
    ```
    Frontend will run on `http://localhost:5173`
 
