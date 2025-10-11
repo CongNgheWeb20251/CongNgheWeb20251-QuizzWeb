@@ -13,14 +13,17 @@ A real-time quiz web application built with React frontend and Node.js backend, 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React 19** - Modern component-based UI framework
-- **Vite** - Fast development server and build tool
-- **Socket.io Client** - Real-time communication
-- **Material-UI** - UI component library
-- **TailwindCSS** - Utility-first CSS framework
-- **React Router** - Client-side routing
-- **Redux Toolkit** - State management
-- **Axios** - HTTP client for API calls
+| Công nghệ                       | Dùng để làm gì                                             |
+| ------------------------------- | ---------------------------------------------------------- |
+| **HTML5**                       | Cấu trúc giao diện (câu hỏi, nút, layout cơ bản)           |
+| **CSS3**                        | Làm đẹp giao diện, bố cục, responsive                      |
+| **JavaScript (ES6+)**           | Logic chọn đáp án, đếm thời gian, xử lý sự kiện người dùng |
+| **React**                       | Tạo UI component, quản lý giao diện phức tạp               |
+| **React Router**                | Điều hướng chuyển trang trong ứng dụng React               |
+| **React state / Redux Toolkit** | Quản lý dữ liệu trạng thái (đáp án, thời gian, điểm)       |
+| **Axios hoặc Fetch API**        | Gọi API lấy câu hỏi hoặc gửi kết quả lên server            |
+| **Vite**                        | Công cụ dev server & build project React nhanh gọn         |
+
 
 ### Backend
 - **Node.js + Express** - Server-side framework
