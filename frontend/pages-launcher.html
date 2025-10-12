@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizzWeb - Frontend Pages</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .pages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .page-link {
+            display: block;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        .page-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .page-link h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .page-link p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info li {
+            color: #666;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        .info li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .info code {
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 25px;
+            }
+
+            .pages {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🎯 QuizzWeb Frontend Pages</h1>
+            <p class="subtitle">Welcome! Choose a page to view:</p>
+
+            <div class="pages">
+                <a href="./landing_page/quizzy.html" class="page-link">
+                    <div class="icon">🌟</div>
+                    <h2>Landing Page</h2>
+                    <p>Modern dark-themed promotional site with hero section, quiz categories, features, and footer.</p>
+                    <span class="badge">Static HTML/CSS</span>
+                </a>
+
+                <a href="./create%20quiz/index.html" class="page-link">
+                    <div class="icon">✏️</div>
+                    <h2>Create Quiz - Step 1</h2>
+                    <p>Accessible quiz creation form with detailed settings, toggles, and responsive design.</p>
+                    <span class="badge">Static HTML/CSS</span>
+                </a>
+
+                <a href="http://localhost:5173" class="page-link" target="_blank" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="icon">⚛️</div>
+                    <h2>React App <span style="font-size: 0.8rem;">(Main)</span></h2>
+                    <p>Full React application with quiz functionality, real-time features, and routing.</p>
+                    <span class="badge" style="background: #f5576c;">Need npm run dev</span>
+                </a>
+            </div>
+
+            <div class="info">
+                <div class="info-section">
+                    <h3>📂 File Locations:</h3>
+                    <ul>
+                        <li><strong>Landing Page:</strong> <code>frontend/landing_page/quizzy.html</code></li>
+                        <li><strong>Create Quiz:</strong> <code>frontend/create quiz/index.html</code></li>
+                        <li><strong>React App:</strong> <code>frontend/src/</code> (requires npm/yarn)</li>
+                    </ul>
+                </div>
+
+                <div class="info-section">
+                    <h3>🚀 How to Run All Pages:</h3>
+                    <ul>
+                        <li><strong>Static Pages:</strong> Just open HTML files directly or use this launcher</li>
+                        <li><strong>With Server:</strong> Run <code>python -m http.server 8000</code> in frontend folder</li>
+                        <li><strong>React App:</strong> Run <code>npm run dev</code> in frontend folder (port 5173)</li>
+                        <li><strong>Backend:</strong> Run <code>npm run dev</code> in backend folder (port 8017)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
