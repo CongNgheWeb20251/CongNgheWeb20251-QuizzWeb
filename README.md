@@ -1,16 +1,17 @@
-# QuizzWeb - Realtime Quiz Application
+# QuizzWeb - Ứng Dụng Quiz Thời Gian Thực
 
-A real-time quiz web application built with React frontend and Node.js backend, featuring live quiz sessions and interactive gameplay.
+Ứng dụng web quiz thời gian thực được xây dựng với React (frontend) và Node.js (backend), hỗ trợ phiên quiz trực tiếp và trải nghiệm chơi tương tác.
 
-## 🚀 Features
+## Tính Năng
 
-- **Real-time Quiz Sessions** - Live multiplayer quiz games
-- **Interactive UI** - Modern React-based user interface
-- **Socket.io Integration** - Real-time communication between players
-- **Responsive Design** - Works on desktop and mobile devices
-- **Material-UI Components** - Clean and professional interface
+- **Phiên Quiz Thời Gian Thực** - Trò chơi quiz nhiều người chơi trực tuyến
+- **Giao Diện Tương Tác** - Giao diện người dùng hiện đại dựa trên React
+- **Tích Hợp Socket.io** - Giao tiếp thời gian thực giữa người chơi
+- **Thiết Kế Responsive** - Hoạt động trên cả desktop và mobile
+- **Material-UI Components** - Giao diện chuyên nghiệp và đẹp mắt
+- **Landing Page** - Trang giới thiệu sản phẩm với thiết kế dark theme hiện đại
 
-## 🛠️ Tech Stack
+## 🛠️ Công Nghệ Sử Dụng
 
 ### Frontend
 | Công nghệ                       | Dùng để làm gì                                             |
@@ -26,73 +27,32 @@ A real-time quiz web application built with React frontend and Node.js backend, 
 
 
 ### Backend
-- **Node.js + Express** - Server-side framework
-- **Socket.io** - Real-time WebSocket communication
-- **MongoDB** - Database for storing quiz data
-- **JWT** - Authentication and authorization
-- **Babel** - JavaScript transpilation
+- **Node.js + Express** - Framework server-side
+- **Socket.io** - Giao tiếp WebSocket thời gian thực
+- **MongoDB** - Cơ sở dữ liệu lưu trữ dữ liệu quiz
+- **JWT** - Xác thực và phân quyền
+- **Babel** - Biên dịch JavaScript
 
 
-## ⚙️ Installation & Setup
+## 📁 Cấu Trúc Thư Mục
 
-### Prerequisites
-- Node.js (>= 18.x)
-- npm or yarn
-- MongoDB
-
-### 1. Clone the repository
-```bash
-git clone <your-repo-url>
-cd quizzWeb
 ```
-
-### 2. Setup Backend
-```bash
-cd backend
-npm install
-npm run dev
+CongNgheWeb20251-QuizzWeb/
+├── frontend/
+│   ├── landing_page/          # Trang giới thiệu sản phẩm (HTML/CSS)
+│   │   ├── quizzy.html
+│   │   └── quizzy.css
+│   ├── src/                   # Source code React chính
+│   │   ├── apis/              # Các API calls
+│   │   ├── assets/            # Hình ảnh, icons
+│   │   ├── components/        # React components
+│   │   └── ...
+│   └── public/
+└── backend/
+    ├── src/
+    │   ├── routes/            # API routes
+    │   ├── controllers/       # Business logic
+    │   ├── models/            # Database models
+    │   └── server.js          # Entry point
+    └── ...
 ```
-or 
-```bash
-cd backend
-yarn install
-yarn dev
-```
-
-### 3. Setup Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-or 
-```bash
-cd frontend
-yarn install
-yarn dev
-```
-
-## 🎮 How to Use
-
-1. **Start the Backend**
-   ```bash
-   cd backend
-   npm run dev
-   or yarn dev
-   ```
-   Server will run on `http://localhost:8017`
-
-2. **Start the Frontend Development**
-   ```bash
-   cd frontend
-   npm run dev
-   or yarn dev
-   ```
-   Frontend will run on `http://localhost:5173`
-
-
-## 🙏 Acknowledgments
-
-- Socket.io for real-time communication
-- Material-UI for beautiful components
-- React and Node.js communities
