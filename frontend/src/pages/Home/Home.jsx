@@ -1,4 +1,3 @@
-import React from 'react'
 import './Home.css'
 import { useNavigate } from 'react-router-dom'
 
@@ -7,6 +6,14 @@ function Home() {
 
   const handleStarted = () => {
     navigate('/create/step1')
+  }
+
+  const handleSignIn = () => {
+    navigate('/signin')
+  }
+
+  const handleRegister = () => {
+    navigate('/signup')
   }
 
   return (
@@ -22,8 +29,8 @@ function Home() {
               <a href="#about">About</a>
             </nav>
             <div className="nav-buttons">
-              <button className="btn-signin">Sign In</button>
-              <button className="btn-register">Register</button>
+              <button className="btn-signin" onClick={handleSignIn}>Sign In</button>
+              <button className="btn-register" onClick={handleRegister}>Register</button>
             </div>
           </div>
         </div>
