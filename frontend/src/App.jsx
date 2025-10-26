@@ -5,6 +5,8 @@ import CreateQuizStep2 from '~/pages/CreateQuizz/CreateQuizStep2.jsx'
 import SignIn from '~/pages/SignIn/SignIn.jsx'
 import Register from '~/pages/Register/Register.jsx'
 import Dashboard from '~/pages/Dashboard/Dashboard.jsx'
+import Quizzes from '~/pages/Quizzes/Quizzes.jsx'
+import QuizDetail from '~/pages/Quizzes/QuizDetail.jsx'
 
 function App() {
 
@@ -17,6 +19,8 @@ function App() {
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/quizzes" element={<Quizzes />} />
+      <Route path="/quizzes/:id" element={<QuizDetail />} />
     </Routes>
   )
 }

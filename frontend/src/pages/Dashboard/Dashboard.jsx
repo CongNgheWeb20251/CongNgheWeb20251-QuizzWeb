@@ -25,6 +25,15 @@ function Dashboard() {
     }
   const [selectedMenu, setSelectedMenu] = useState('dashboard');
 
+  const handleMenuClick = (menuId) => {
+    setSelectedMenu(menuId);
+    if (menuId === 'quizzes') {
+      navigate('/quizzes');
+    } else if (menuId === 'dashboard') {
+      navigate('/dashboard');
+    }
+  };
+
   const menuItems = [
     { id: 'dashboard', icon: <DashboardIcon />, label: 'Dashboard' },
     { id: 'quizzes', icon: <Quiz />, label: 'Quizzes' },
@@ -102,7 +111,7 @@ function Dashboard() {
               <div
                 key={item.id}
                 className={`nav-item ${selectedMenu === item.id ? 'active' : ''}`}
-                onClick={() => setSelectedMenu(item.id)}
+                onClick={() => handleMenuClick(item.id)}
               >
                 {item.icon}
                 <span>{item.label}</span>
