@@ -21,7 +21,7 @@ import './Dashboard.css';
 function Dashboard() {
     const navigate = useNavigate();
     const handleCreateQuiz = () => {
-        navigate('/create/step1');
+        navigate('/create-quiz/step1');
     }
   const [selectedMenu, setSelectedMenu] = useState('dashboard');
 
