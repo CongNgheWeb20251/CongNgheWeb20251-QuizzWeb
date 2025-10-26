@@ -1,0 +1,268 @@
+.register-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Cột bên trái */
+.left-column {
+  width: 40%;
+  background-color: #000;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Hiệu ứng lưới 3D */
+.grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(to right, rgba(123, 31, 162, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(123, 31, 162, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  transform: perspective(500px) rotateX(30deg);
+  animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 50px 50px; }
+}
+
+/* Logo */
+.logo {
+  font-size: 4rem;
+  font-weight: bold;
+  z-index: 1;
+  letter-spacing: -1px;
+}
+
+.logo-qui {
+  background: linear-gradient(45deg, #9333EA, #7C3AED);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-zzy {
+  background: linear-gradient(45deg, #E879F9, #D946EF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Cột bên phải */
+.right-column {
+  width: 60%;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.register-form-container {
+  width: 100%;
+  max-width: 600px;
+  padding: 40px;
+}
+
+.register-form-wrapper {
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 32px;
+}
+
+.welcome-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1A202C;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #718096;
+  margin-bottom: 24px;
+}
+
+.account-types {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.account-type {
+  padding: 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.account-type.active {
+  background-color: rgba(147, 51, 234, 0.1);
+  border-color: #9333EA;
+}
+
+.account-type-icon {
+  color: #9333EA;
+  margin-bottom: 0.5rem;
+}
+
+.account-type-info h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.account-type-info p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.social-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  background: transparent;
+  color: #4A5568;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.social-btn:hover {
+  background-color: #F7FAFC;
+  border-color: #CBD5E0;
+}
+
+.social-icon {
+  font-size: 20px;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background-color: #e5e5e5;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.divider span {
+  background-color: white;
+  padding: 0 1rem;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group.half {
+  width: 100%;
+}
+
+.signup-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(45deg, #9333EA, #7C3AED);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  margin-top: 1rem;
+}
+
+.signup-btn:hover {
+  opacity: 0.9;
+}
+
+.signin-link {
+  text-align: center;
+  margin-top: 24px;
+  color: #718096;
+  font-size: 14px;
+}
+
+.signin-link a {
+  color: #3182CE;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signin-link a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .left-column {
+    width: 35%;
+  }
+  
+  .right-column {
+    width: 65%;
+  }
+}
+
+@media (max-width: 768px) {
+  .left-column {
+    display: none;
+  }
+  
+  .right-column {
+    width: 100%;
+  }
+  
+  .register-form-container {
+    padding: 20px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

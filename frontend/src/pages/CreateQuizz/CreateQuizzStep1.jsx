@@ -1,4 +1,3 @@
-import React from 'react'
 import './CreateQuizzStep1.css'
 
 function CreateQuizzStep1() {
@@ -56,7 +55,7 @@ function CreateQuizzStep1() {
                     className="cq-field-control"
                     defaultValue="Introduction to Environmental Science"
                     required
-                    maxLength="100"
+                    maxLength={100}
                     data-field="quiz-title"
                     aria-describedby="quizTitleHint"
                   />
@@ -73,9 +72,9 @@ function CreateQuizzStep1() {
                     id="quizDescription"
                     name="quizDescription"
                     className="cq-field-control cq-field-textarea"
-                    rows="4"
+                    rows={4}
                     required
-                    maxLength="500"
+                    maxLength={500}
                     data-field="quiz-description"
                     aria-describedby="quizDescriptionHint"
                     defaultValue="Test your knowledge about environmental science basics, including renewable energy, ecosystems, and sustainability."
