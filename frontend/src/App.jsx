@@ -7,6 +7,7 @@ import Register from '~/pages/Register/Register.jsx'
 import Dashboard from '~/pages/Dashboard/Dashboard.jsx'
 import Quizzes from '~/pages/Quizzes/Quizzes.jsx'
 import QuizDetail from '~/pages/Quizzes/QuizDetail.jsx'
+import Settings from '~/pages/Settings/Settings.jsx'
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/quizzes" element={<Quizzes />} />
       <Route path="/quizzes/:id" element={<QuizDetail />} />
+      <Route path="/settings" element={<Settings />} />
     </Routes>
   )
 }

@@ -34,6 +34,15 @@ function Dashboard() {
     }
   };
 
+  const [selectedManage, setSelectedManage] = useState('dashboard');
+
+  const handleManageClick = (manageId) => {
+    setSelectedMenu(manageId);
+    if (manageId === 'settings') {
+      navigate('/settings');
+    }
+  };
+
   const menuItems = [
     { id: 'dashboard', icon: <DashboardIcon />, label: 'Dashboard' },
     { id: 'quizzes', icon: <Quiz />, label: 'Quizzes' },
@@ -124,8 +133,8 @@ function Dashboard() {
             {manageItems.map((item) => (
               <div
                 key={item.id}
-                className={`nav-item ${selectedMenu === item.id ? 'active' : ''}`}
-                onClick={() => setSelectedMenu(item.id)}
+                className={`nav-item ${selectedManage === item.id ? 'active' : ''}`}
+                onClick={() => handleManageClick(item.id)}
               >
                 {item.icon}
                 <span>{item.label}</span>
