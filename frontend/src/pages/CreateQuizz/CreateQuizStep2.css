@@ -1,0 +1,251 @@
+/* Create Quiz Step 2 - Inherits base styles from CreateQuizStep1.css */
+/* Additional styles for questions management */
+
+.cq-section-header {
+  margin-bottom: 2rem;
+}
+
+/* Questions List */
+.cq-questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Question Card */
+.cq-question-card {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.cq-question-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Question Header */
+.cq-question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.cq-question-number {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.cq-question-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cq-question-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cq-meta-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.cq-meta-input {
+  width: 70px;
+  padding: 0.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.cq-question-type {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: white;
+  cursor: pointer;
+}
+
+.cq-btn-delete {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.cq-btn-delete:hover {
+  background: #fee2e2;
+}
+
+/* Answer Options */
+.cq-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cq-option-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: white;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.cq-option-row:hover {
+  border-color: #d1d5db;
+}
+
+.cq-option-radio {
+  display: flex;
+  align-items: center;
+}
+
+.cq-option-radio input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #8b5cf6;
+}
+
+.cq-option-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.cq-option-input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.cq-btn-remove-option {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.cq-btn-remove-option:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.cq-btn-add-option {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 2px dashed #d1d5db;
+  border-radius: 6px;
+  color: #8b5cf6;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cq-btn-add-option:hover {
+  border-color: #8b5cf6;
+  background: #f5f3ff;
+}
+
+/* Add Question Button */
+.cq-btn-add-question {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.cq-btn-add-question:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.cq-btn-add-question svg {
+  stroke-width: 2.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cq-question-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .cq-question-controls {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .cq-question-type {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .cq-option-row {
+    flex-wrap: wrap;
+  }
+
+  .cq-option-input {
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 640px) {
+  .cq-question-card {
+    padding: 1rem;
+  }
+
+  .cq-meta-input {
+    width: 60px;
+  }
+}

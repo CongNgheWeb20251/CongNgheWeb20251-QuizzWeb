@@ -1,0 +1,339 @@
+/* Sign In Container - Two Column Layout */
+.signin-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* ===== LEFT COLUMN - BRANDING ===== */
+.signin-left {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+/* Grid Wireframe Effect */
+.signin-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.grid-wireframe {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(138, 43, 226, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(138, 43, 226, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridMove 20s linear infinite;
+  transform: perspective(500px) rotateX(60deg);
+  transform-origin: center center;
+}
+
+@keyframes gridMove {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 50px 50px, 50px 50px;
+  }
+}
+
+/* Gradient Glow Effect */
+.gradient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(
+    circle,
+    rgba(138, 43, 226, 0.4) 0%,
+    rgba(255, 140, 0, 0.3) 30%,
+    rgba(255, 215, 0, 0.2) 50%,
+    transparent 70%
+  );
+  filter: blur(60px);
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* Brand Logo */
+.signin-brand {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+}
+
+.brand-logo {
+  font-size: 5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #8a2be2 0%, #ff8c00 50%, #ffd700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  letter-spacing: -2px;
+  animation: logoShine 3s ease-in-out infinite;
+}
+
+@keyframes logoShine {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2);
+  }
+}
+
+.brand-tagline {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+/* ===== RIGHT COLUMN - SIGN IN FORM ===== */
+.signin-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 2rem;
+}
+
+.signin-form-wrapper {
+  width: 100%;
+  max-width: 450px;
+}
+
+/* Header */
+.signin-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.signin-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+}
+
+.signin-subtitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Social Sign In Buttons */
+.social-signin {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1.5px solid #e0e0e0;
+  background: #ffffff;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.social-btn:hover {
+  background: #f9f9f9;
+  border-color: #d0d0d0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  gap: 1rem;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider-text {
+  font-size: 0.875rem;
+  color: #999;
+  font-weight: 500;
+}
+
+/* Form */
+.signin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-input {
+  padding: 0.875rem 1rem;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #333;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #8a2be2;
+  box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.1);
+}
+
+.form-input::placeholder {
+  color: #999;
+}
+
+/* Submit Button */
+.signin-submit-btn {
+  margin-top: 0.5rem;
+  padding: 0.875rem 1rem;
+  background: linear-gradient(135deg, #8a2be2 0%, #9d4edd 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.3);
+}
+
+.signin-submit-btn:hover {
+  background: linear-gradient(135deg, #7b1fa2 0%, #8a2be2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(138, 43, 226, 0.4);
+}
+
+.signin-submit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(138, 43, 226, 0.3);
+}
+
+/* Footer - Sign Up Link */
+.signin-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.signup-prompt {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.signup-link {
+  background: none;
+  border: none;
+  color: #8a2be2;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  padding: 0;
+  font-size: inherit;
+}
+
+.signup-link:hover {
+  color: #7b1fa2;
+  text-decoration: underline;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 968px) {
+  .signin-container {
+    flex-direction: column;
+  }
+
+  .signin-left {
+    min-height: 300px;
+    flex: 0 0 auto;
+  }
+
+  .brand-logo {
+    font-size: 3.5rem;
+  }
+
+  .signin-right {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .signin-right {
+    padding: 1.5rem;
+  }
+
+  .signin-title {
+    font-size: 1.75rem;
+  }
+
+  .brand-logo {
+    font-size: 2.5rem;
+  }
+
+  .social-btn {
+    font-size: 0.875rem;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .form-input {
+    padding: 0.75rem 0.875rem;
+  }
+}
