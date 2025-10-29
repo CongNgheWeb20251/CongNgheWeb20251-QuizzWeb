@@ -1,42 +1,30 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  Google, 
-  Facebook, 
-  Person, 
-  Email, 
-  Lock,
-  School,
-  PersonOutline 
-} from '@mui/icons-material'
-import { InputAdornment, TextField } from '@mui/material'
+import Google from '@mui/icons-material/Google'
+import Facebook from '@mui/icons-material/Facebook'
+import Person from '@mui/icons-material/Person'
+import Email from '@mui/icons-material/Email'
+import Lock from '@mui/icons-material/Lock'
+import School from '@mui/icons-material/School'
+import PersonOutline from '@mui/icons-material/PersonOutline'
+import InputAdornment from '@mui/material/InputAdornment'
+import TextField from '@mui/material/TextField'
+
 import './Register.css'
 import { registerUserAPI } from '~/apis/index'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
+import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
+import { useForm } from 'react-hook-form'
+import { FIELD_REQUIRED_MESSAGE, EMAIL_RULE, EMAIL_RULE_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE, PASSWORD_CONFIRMATION_MESSAGE } from '~/utils/validators'
 
 function Register() {
   const navigate = useNavigate()
   const [accountType, setAccountType] = useState('student')
-  const [formData, setFormData] = useState({
-    fullName: '',
-    username: '',
-    email: '',
-    password: '',
-    accountType: accountType
-  })
+  const { register, handleSubmit, formState: { errors } } = useForm()
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const { fullName, username, email, password, accountType } = formData
+  const handleRegister = (data) => {
+    const { fullName, username, email, password } = data
     // console.log('Register data:', { fullName, username, email, password, accountType })
     toast.promise(
       registerUserAPI({ fullName, username, email, password, accountType }),
@@ -76,7 +64,7 @@ function Register() {
                   <p>Take quizzes and track your progress</p>
                 </div>
               </div>
-              <div 
+              <div
                 className={`account-type ${accountType === 'teacher' ? 'active' : ''}`}
                 onClick={() => setAccountType('teacher')}
               >
@@ -106,45 +94,49 @@ function Register() {
             </div>
 
             {/* Form đăng ký */}
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(handleRegister)}>
               <div className="form-row">
                 <div className="form-group half">
                   <TextField
                     fullWidth
                     label="Full Name"
                     name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
                     placeholder="John Doe"
                     variant="outlined"
-                    required
+                    error={!!errors['fullName']}
+                    {...register('fullName', {
+                      required: FIELD_REQUIRED_MESSAGE
+                    })}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
                           <Person />
                         </InputAdornment>
-                      ),
+                      )
                     }}
                   />
+                  <FieldErrorAlert errors={errors} fieldName="fullName" />
                 </div>
                 <div className="form-group half">
                   <TextField
                     fullWidth
                     label="Username"
                     name="username"
-                    value={formData.username}
-                    onChange={handleChange}
                     placeholder="johndoe"
                     variant="outlined"
-                    required
+                    error={!!errors['username']}
+                    {...register('username', {
+                      required: FIELD_REQUIRED_MESSAGE
+                    })}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
                           <Person />
                         </InputAdornment>
-                      ),
+                      )
                     }}
                   />
+                  <FieldErrorAlert errors={errors} fieldName="username" />
                 </div>
               </div>
 
@@ -154,19 +146,26 @@ function Register() {
                   label="Email"
                   name="email"
                   type="email"
-                  value={formData.email}
-                  onChange={handleChange}
                   placeholder="name@example.com"
                   variant="outlined"
-                  required
+                  error={!!errors['email']}
+                  {...register('email', {
+                    required: FIELD_REQUIRED_MESSAGE,
+                    pattern: {
+                      value: EMAIL_RULE,
+                      message: EMAIL_RULE_MESSAGE
+                    }
+                  })}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
                         <Email />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
+                <FieldErrorAlert errors={errors} fieldName="email" />
+
               </div>
 
               <div className="form-group">
@@ -175,18 +174,22 @@ function Register() {
                   label="Password"
                   name="password"
                   type="password"
-                  value={formData.password}
-                  onChange={handleChange}
+                  placeholder="Enter your password"
                   variant="outlined"
-                  required
+                  error={!!errors['password']}
+                  {...register('password', {
+                    required: FIELD_REQUIRED_MESSAGE,
+                    pattern: { value: PASSWORD_RULE, message: PASSWORD_RULE_MESSAGE }
+                  })}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
                         <Lock />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
+                <FieldErrorAlert errors={errors} fieldName="password" />
               </div>
 
               <button type="submit" className="signup-btn">
