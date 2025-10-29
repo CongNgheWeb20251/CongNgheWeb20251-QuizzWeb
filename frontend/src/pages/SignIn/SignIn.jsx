@@ -4,9 +4,15 @@ import { Google, Facebook, Person, Email, Lock } from '@mui/icons-material'
 import { InputAdornment, TextField } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import './SignIn.css'
+import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
+import { useDispatch } from 'react-redux'
+import { loginUserAPI } from '~/redux/user/userSlice'
 
 function SignIn() {
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+    // const { register, handleSubmit, formState: { errors } } = useForm()
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -23,7 +29,17 @@ function SignIn() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
+    // console.log('Form submitted:', formData)
+    const { username, email, password } = formData
+    console.log('Sign In data:', { username, email, password })
+    // toast.promise(
+    //   dispatch(loginUserAPI({ username, email, password })),
+    //   { pending: 'Logging in...' }
+    // ).then((res) => {
+    //   if (!res.error) {
+    //     navigate('/dashboard', { replace: true })
+    //   }
+    // })
   }
 
   const handleSignUp = () => {

@@ -11,14 +11,19 @@ import {
 } from '@mui/icons-material'
 import { InputAdornment, TextField } from '@mui/material'
 import './Register.css'
+import { registerUserAPI } from '~/apis/index'
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 
 function Register() {
+  const navigate = useNavigate()
   const [accountType, setAccountType] = useState('student')
   const [formData, setFormData] = useState({
     fullName: '',
     username: '',
     email: '',
-    password: ''
+    password: '',
+    accountType: accountType
   })
 
   const handleChange = (e) => {
@@ -31,7 +36,14 @@ function Register() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log('Form submitted:', { ...formData, accountType })
+    const { fullName, username, email, password, accountType } = formData
+    console.log('Register data:', { fullName, username, email, password, accountType })
+    // toast.promise(
+    //   registerUserAPI({ fullName, username, email, password }),
+    //   { pending: 'Registering...' }
+    // ).then((user) => {
+    //   navigate(`/login?registeredEmail=${user.email}`)
+    // })
   }
 
   return (
