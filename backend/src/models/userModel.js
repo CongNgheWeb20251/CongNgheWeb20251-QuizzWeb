@@ -16,7 +16,7 @@ const USER_COLLECTION_SCHEMA = Joi.object({
   password: Joi.string().required(),
   //
   username: Joi.string().required().trim().strict(),
-  displayName: Joi.string().required().trim().strict(),
+  fullName: Joi.string().required().trim().strict(),
   avatar: Joi.string().default(null),
   role: Joi.string().valid(USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT).optional(),
 

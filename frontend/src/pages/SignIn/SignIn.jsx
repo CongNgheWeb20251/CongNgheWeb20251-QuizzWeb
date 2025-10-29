@@ -1,18 +1,20 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Google, Facebook, Person, Email, Lock } from '@mui/icons-material'
-import { InputAdornment, TextField } from '@mui/material'
+import { Alert, InputAdornment, TextField } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import './SignIn.css'
-import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { useDispatch } from 'react-redux'
 import { loginUserAPI } from '~/redux/user/userSlice'
 
 function SignIn() {
-    const navigate = useNavigate()
-    const dispatch = useDispatch()
-    // const { register, handleSubmit, formState: { errors } } = useForm()
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  let [searchParams] = useSearchParams()
+  const registeredEmail = searchParams.get('registeredEmail')
+  const verifiedEmail = searchParams.get('verifiedEmail')
+  // const { register, handleSubmit, formState: { errors } } = useForm()
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -32,22 +34,16 @@ function SignIn() {
     // console.log('Form submitted:', formData)
     const { username, email, password } = formData
     console.log('Sign In data:', { username, email, password })
-    // toast.promise(
-    //   dispatch(loginUserAPI({ username, email, password })),
-    //   { pending: 'Logging in...' }
-    // ).then((res) => {
-    //   if (!res.error) {
-    //     navigate('/dashboard', { replace: true })
-    //   }
-    // })
+    toast.promise(
+      dispatch(loginUserAPI({ username, email, password })),
+      { pending: 'Logging in...' }
+    ).then((res) => {
+      if (!res.error) {
+        navigate('/dashboard', { replace: true })
+      }
+    })
   }
 
-  const handleSignUp = () => {
-    navigate('/signup')
-  }
-  const handleSignIn = () => {
-    navigate('/dashboard')
-  }
 
   return (
     <div className="signin-layout">
@@ -66,6 +62,30 @@ function SignIn() {
           <div className="signin-form-wrapper">
             <h1 className="welcome-text">Welcome back</h1>
             <p className="subtitle">Enter your credentials to access your account</p>
+            {verifiedEmail && (
+              <Alert
+                severity="success"
+                sx={{
+                  mb: 2,
+                  borderRadius: 2,
+                  fontSize: { xs: '0.875rem', md: '1rem' }
+                }}
+              >
+                Your email <strong>{verifiedEmail}</strong> has been verified!
+              </Alert>
+            )}
+            {registeredEmail && (
+              <Alert
+                severity="info"
+                sx={{
+                  mb: 2,
+                  borderRadius: 2,
+                  fontSize: { xs: '0.875rem', md: '1rem' }
+                }}
+              >
+                Please check <strong>{registeredEmail}</strong> to verify your account!
+              </Alert>
+            )}
 
             {/* Nút đăng nhập mạng xã hội */}
             <div className="social-buttons">
@@ -101,7 +121,7 @@ function SignIn() {
                       <InputAdornment position="start">
                         <Person />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
               </div>
@@ -122,7 +142,7 @@ function SignIn() {
                       <InputAdornment position="start">
                         <Email />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
               </div>
@@ -142,12 +162,12 @@ function SignIn() {
                       <InputAdornment position="start">
                         <Lock />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
               </div>
 
-              <button type="submit" className="signin-btn" onClick={handleSignIn}>
+              <button type="submit" className="signin-btn">
                 Sign In
               </button>
             </form>

@@ -8,6 +8,7 @@ import Dashboard from '~/pages/Dashboard/Dashboard.jsx'
 import Quizzes from '~/pages/Quizzes/Quizzes.jsx'
 import QuizDetail from '~/pages/Quizzes/QuizDetail.jsx'
 import Settings from '~/pages/Settings/Settings.jsx'
+import AccountVerification from './pages/Auth/AccountVerification'
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
       <Route path='/create/step1' element={<CreateQuizStep1 />} />
       <Route path='/create-quiz/step1' element={<CreateQuizStep1 />} />
       <Route path='/create-quiz/step2' element={<CreateQuizStep2 />} />
+      <Route path='/account/verification' element={<AccountVerification />} />
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard />} />

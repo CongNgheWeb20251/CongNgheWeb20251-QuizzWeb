@@ -37,13 +37,13 @@ function Register() {
   const handleSubmit = (e) => {
     e.preventDefault()
     const { fullName, username, email, password, accountType } = formData
-    console.log('Register data:', { fullName, username, email, password, accountType })
-    // toast.promise(
-    //   registerUserAPI({ fullName, username, email, password }),
-    //   { pending: 'Registering...' }
-    // ).then((user) => {
-    //   navigate(`/login?registeredEmail=${user.email}`)
-    // })
+    // console.log('Register data:', { fullName, username, email, password, accountType })
+    toast.promise(
+      registerUserAPI({ fullName, username, email, password, accountType }),
+      { pending: 'Registering...' }
+    ).then((user) => {
+      navigate(`/signin?registeredEmail=${user.email}`)
+    })
   }
 
   return (
@@ -66,7 +66,7 @@ function Register() {
 
             {/* Account Type Selection */}
             <div className="account-types">
-              <div 
+              <div
                 className={`account-type ${accountType === 'student' ? 'active' : ''}`}
                 onClick={() => setAccountType('student')}
               >
