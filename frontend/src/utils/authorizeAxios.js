@@ -1,4 +1,14 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import { interceptorLoadingElements } from '~/utils/formatter'
+import { refreshTokenAPI } from '~/apis/index'
+import { logoutUserAPI } from '~/redux/user/userSlice';
+
+// Lệnh này để gọi hàm trong main.jsx => giúp file js này có thể gọi dispatch() của redux (bình thường chỉ có thể gọi trong jsx)
+let axiosReduxStore
+export const injectStore = mainStore => {
+  axiosReduxStore = mainStore
+}
 
 let authorizedAxiosInstance = axios.create();
 
@@ -38,13 +48,31 @@ authorizedAxiosInstance.interceptors.response.use((response) => {
     interceptorLoadingElements(false);
 
     if(error.response?.status === 401) {
-      // Chưa đăng nhập hoặc token không hợp lệ
+      axiosReduxStore.dispatch(logoutUserAPI(false));
     }
 
     const originalRequest = error.config;
 
     if(error.response?.status === 410 && originalRequest) {
-      // token hết hạn, cần lấy token mới
+      if(!requestTokenPromise) {
+        requestTokenPromise = refreshTokenAPI()
+        .then((data) => {
+          return data?.accessToken;
+        })
+        .catch((error) => {
+          // console.error('Error refreshing token:', error);
+          // Nếu refresh token không thành công, logout user
+          axiosReduxStore.dispatch(logoutUserAPI(false));
+          return Promise.reject(error);
+        })
+        .finally(() => {
+          requestTokenPromise = null;
+        });
+      }
+      return requestTokenPromise.then(() => {
+        // Sau khi refresh token thành công, gửi lại request ban đầu bị lỗi do token hết hạn
+        return authorizedAxiosInstance(originalRequest);
+      });
     }
 
     let errorMessage = error?.message;
