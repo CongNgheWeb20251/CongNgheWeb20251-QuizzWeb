@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
@@ -7,18 +7,31 @@ import { store } from '~/redux/store'
 import { PersistGate } from 'redux-persist/integration/react'
 import { persistStore } from 'redux-persist'
 import { injectStore } from '~/utils/authorizeAxios'
+import { ToastContainer } from 'react-toastify'
+import { ConfirmProvider } from 'material-ui-confirm'
 
 const persistor = persistStore(store)
 injectStore(store)
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <BrowserRouter basename="/" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+const rootElement = document.getElementById('root')
+// Tránh tạo lại khi reload
+if (!rootElement._reactRoot) {
+  rootElement._reactRoot = createRoot(rootElement)
+}
+
+const root = rootElement._reactRoot
+
+root.render(
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <BrowserRouter basename="/" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <ConfirmProvider defaultOptions ={{ confirmationButtonProps: { color:'error', variant: 'contained' },
+          cancellationButtonProps: { color: 'inherit', variant: 'outlined' },
+          allowClose: false }}>
           <App />
-        </BrowserRouter>
-      </PersistGate>
-    </Provider>
-  </StrictMode>
+          <ToastContainer theme="colored" />
+        </ConfirmProvider>
+      </BrowserRouter>
+    </PersistGate>
+  </Provider>
 )

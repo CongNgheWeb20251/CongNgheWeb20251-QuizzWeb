@@ -23,6 +23,8 @@ const START_SERVER = () => {
   // process.stdin.resume()
   app.use(express.json())
   app.use(cookieParser())
+
+  // Enable CORS with proper configuration
   app.use(cors(corsOptions))
 
   app.get('/', (req, res) => {

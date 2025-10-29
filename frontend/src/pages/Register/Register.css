@@ -102,28 +102,44 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+
+  /* ensure readable text regardless of background */
+  background-color: #fff;
+  color: #1A202C; /* dark text for good contrast */
 }
 
-.account-type.active {
-  background-color: rgba(147, 51, 234, 0.1);
-  border-color: #9333EA;
-}
-
-.account-type-icon {
-  color: #9333EA;
+/* make icons follow text color so they never clash */
+.account-type .account-type-icon {
+  color: inherit;
   margin-bottom: 0.5rem;
+  font-size: 20px;
 }
 
-.account-type-info h3 {
+/* headings inherit color for consistency */
+.account-type .account-type-info h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
+  color: inherit;
 }
 
-.account-type-info p {
+/* default description color (subtle) */
+.account-type .account-type-info p {
   margin: 0;
   font-size: 0.875rem;
-  color: #666;
+  color: #6B7280; /* slightly muted gray */
+}
+
+/* active state: light purple background but dark purple text for contrast */
+.account-type.active {
+  background-color: rgba(147, 51, 234, 0.08);
+  border-color: #9333EA;
+  color: #4C1D95; /* darker purple for readable text */
+}
+
+/* make description more visible when active */
+.account-type.active .account-type-info p {
+  color: rgba(76, 29, 135, 0.9);
 }
 
 .social-buttons {
