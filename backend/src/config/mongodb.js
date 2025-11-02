@@ -1,7 +1,7 @@
 /* eslint-disable indent */
-import { MongoClient, ServerApiVersion } from 'mongodb'
+import { MongoClient, ServerApiVersion } from 'mongodb' // lấy class kết nối chính và đối tượng enums từ thư viện mongodb
 import { env } from './environment'
-let dbInstance = null
+let dbInstance = null // lưu lại kết nối db đã tạo (singleton pattent)
 
 const mongoClient = new MongoClient(env.MONGODB_URI, {
     serverApi: {
