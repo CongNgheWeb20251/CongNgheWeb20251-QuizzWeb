@@ -8,7 +8,7 @@ Hệ thống quản lý thi trắc nghiệm trực tuyến **QuizzWeb** gồm c�
 - **Logging & Monitoring** – ghi log sự kiện.
 
 ---
-![ERD QuizzWeb](./quizzweb_erd.png)
+![ERD QuizzWeb](quizzweb_erd.png)
 ## Database Schema (MongoDB)
 
 #### users
