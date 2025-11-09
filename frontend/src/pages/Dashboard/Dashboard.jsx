@@ -1,92 +1,91 @@
-import { useState } from 'react';
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  Search,
-  Add,
-  Dashboard as DashboardIcon,
-  Quiz,
-  People,
-  Settings,
-} from '@mui/icons-material';
-import {
-  Typography,
-  IconButton,
-  Button,
-  TextField,
-  InputAdornment,
-  LinearProgress,
-} from '@mui/material';
-import './Dashboard.css';
+import Search from '@mui/icons-material/Search'
+import Add from '@mui/icons-material/Add'
+import DashboardIcon from '@mui/icons-material/Dashboard'
+import Quiz from '@mui/icons-material/Quiz'
+import People from '@mui/icons-material/People'
+import Settings from '@mui/icons-material/Settings'
+
+import Typography from '@mui/material/Typography'
+import IconButton from '@mui/material/IconButton'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import InputAdornment from '@mui/material/InputAdornment'
+import LinearProgress from '@mui/material/LinearProgress'
+
+import './Dashboard.css'
+import UserAvatar from '~/components/UserAvatar/UserAvatar'
 
 function Dashboard() {
-    const navigate = useNavigate();
-    const handleCreateQuiz = () => {
-        navigate('/create-quiz/step1');
-    }
-  const [selectedMenu, setSelectedMenu] = useState('dashboard');
+  const navigate = useNavigate()
+  const handleCreateQuiz = () => {
+    navigate('/create-quiz/step1')
+  }
+  const [selectedMenu, setSelectedMenu] = useState('dashboard')
 
   const handleMenuClick = (menuId) => {
-    setSelectedMenu(menuId);
+    setSelectedMenu(menuId)
     if (menuId === 'quizzes') {
-      navigate('/quizzes');
+      navigate('/quizzes')
     } else if (menuId === 'dashboard') {
-      navigate('/dashboard');
+      navigate('/dashboard')
     }
-  };
+  }
 
-  const [selectedManage, setSelectedManage] = useState('dashboard');
+  const [selectedManage, setSelectedManage] = useState('dashboard')
 
   const handleManageClick = (manageId) => {
-    setSelectedMenu(manageId);
+    setSelectedMenu(manageId)
     if (manageId === 'settings') {
-      navigate('/settings');
+      navigate('/settings')
     }
-  };
+  }
 
   const menuItems = [
     { id: 'dashboard', icon: <DashboardIcon />, label: 'Dashboard' },
     { id: 'quizzes', icon: <Quiz />, label: 'Quizzes' },
-    { id: 'students', icon: <People />, label: 'Students' },
-  ];
+    { id: 'students', icon: <People />, label: 'Students' }
+  ]
 
   const manageItems = [
-    { id: 'settings', icon: <Settings />, label: 'Settings' },
-  ];
+    { id: 'settings', icon: <Settings />, label: 'Settings' }
+  ]
 
   const stats = [
     {
       title: 'Total Quizzes',
       value: '2,543',
       change: '+12.5%',
-      isPositive: true,
+      isPositive: true
     },
     {
       title: 'Students',
       value: '2,543',
       change: '+12.5%',
-      isPositive: true,
+      isPositive: true
     },
     {
       title: 'Avg. Completion',
       value: '2,543',
       change: '-12.5%',
-      isPositive: false,
-    },
-  ];
+      isPositive: false
+    }
+  ]
 
   const topStudents = [
     { name: 'Alex John', subject: 'Science', score: 950 },
     { name: 'Emma Watson', subject: 'Mathematics', score: 920 },
     { name: 'Michael Clark', subject: 'Physics', score: 980 },
     { name: 'Sophia Green', subject: 'English', score: 890 },
-    { name: 'Lucia Wilde', subject: 'Science', score: 870 },
-  ];
+    { name: 'Lucia Wilde', subject: 'Science', score: 870 }
+  ]
 
   const recentQuizzes = [
     { title: 'Introduction to Biology', questions: 15, completions: 28, rate: 75 },
     { title: 'Introduction to Biology', questions: 15, completions: 28, rate: 40 },
-    { title: 'Introduction to Biology', questions: 15, completions: 28, rate: 90 },
-  ];
+    { title: 'Introduction to Biology', questions: 15, completions: 28, rate: 90 }
+  ]
 
   return (
     <div className="dashboard-layout">
@@ -108,7 +107,7 @@ function Dashboard() {
                   <InputAdornment position="start">
                     <Search />
                   </InputAdornment>
-                ),
+                )
               }}
             />
           </div>
@@ -158,17 +157,20 @@ function Dashboard() {
                 <InputAdornment position="start">
                   <Search />
                 </InputAdornment>
-              ),
+              )
             }}
           />
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<Add />}
-            className="create-btn"
-          >
-            Create Quiz
-          </Button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<Add />}
+              className="create-btn"
+            >
+              Create Quiz
+            </Button>
+            <UserAvatar />
+          </div>
         </div>
 
         {/* Header */}
@@ -279,7 +281,7 @@ function Dashboard() {
         </div>
       </main>
     </div>
-  );
+  )
 }
 
-export default Dashboard;
+export default Dashboard
