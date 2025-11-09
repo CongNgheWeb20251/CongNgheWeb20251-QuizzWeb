@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
-import { Box, Tab, Tabs, Typography } from '@mui/material';
+import React, { useState } from 'react'
+import Box from '@mui/material/Box'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
+import Typography from '@mui/material/Typography'
 
 // Import tab components
-import ProfileTab from './tabs/ProfileTab';
-import AccountTab from './tabs/AccountTab';
-import NotificationsTab from './tabs/NotificationsTab';
-import AppearanceTab from './tabs/AppearanceTab';
-import PrivacyTab from './tabs/PrivacyTab';
-import BillingTab from './tabs/BillingTab';
+import ProfileTab from './tabs/ProfileTab'
+import AccountTab from './tabs/AccountTab'
+import NotificationsTab from './tabs/NotificationsTab'
+import AppearanceTab from './tabs/AppearanceTab'
+import PrivacyTab from './tabs/PrivacyTab'
+import BillingTab from './tabs/BillingTab'
 
 // Import styles
-import { StyledSettings, TabPanelContent } from './styles/Settings.styles';
+import { StyledSettings, TabPanelContent } from './styles/Settings.styles'
+import UserAvatar from '~/components/UserAvatar/UserAvatar'
 
 const TabPanel = ({ children, value, index, ...other }) => (
   <div
@@ -22,23 +26,28 @@ const TabPanel = ({ children, value, index, ...other }) => (
   >
     {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
   </div>
-);
+)
 
 const Settings = () => {
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(0)
 
   const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
+    setActiveTab(newValue)
+  }
 
   return (
     <StyledSettings>
-      <Typography variant="h4" component="h1">
-        Settings
-      </Typography>
-      <Typography variant="subtitle1" sx={{ color: 'rgba(255,255,255,0.7)', marginBottom: 3 }}>
-        Manage your account settings and preferences
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        <Box>
+          <Typography variant="h4" component="h1">
+            Settings
+          </Typography>
+          <Typography variant="subtitle1" sx={{ color: 'rgba(255,255,255,0.7)', marginBottom: 3 }}>
+            Manage your account settings and preferences
+          </Typography>
+        </Box>
+        <UserAvatar />
+      </Box>
 
       <Tabs
         value={activeTab}
@@ -86,7 +95,7 @@ const Settings = () => {
         </TabPanelContent>
       </TabPanel>
     </StyledSettings>
-  );
-};
+  )
+}
 
-export default Settings;
+export default Settings

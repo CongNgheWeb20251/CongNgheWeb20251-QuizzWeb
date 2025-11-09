@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getQuizzes } from '~/apis'
 import QuizCard from '~/components/QuizCard'
+import UserAvatar from '~/components/UserAvatar/UserAvatar'
 import './Quizzes.css'
 
 function Quizzes() {
@@ -12,7 +13,7 @@ function Quizzes() {
 
   useEffect(() => {
     let mounted = true
-    
+
     async function loadQuizzes() {
       setLoading(true)
       try {
@@ -21,6 +22,7 @@ function Quizzes() {
           setQuizzes(data)
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Error loading quizzes:', error)
       } finally {
         if (mounted) setLoading(false)
@@ -48,9 +50,12 @@ function Quizzes() {
           <h2 className="quizzes-title">Quizzes</h2>
           <p className="quizzes-subtitle">Manage and create your quizzes</p>
         </div>
-        <button className="cq-btn cq-btn-primary" onClick={handleCreateNew}>
-          + Create New Quiz
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button className="cq-btn cq-btn-primary" onClick={handleCreateNew}>
+            + Create New Quiz
+          </button>
+          <UserAvatar />
+        </div>
       </div>
 
       <div className="quizzes-container">
