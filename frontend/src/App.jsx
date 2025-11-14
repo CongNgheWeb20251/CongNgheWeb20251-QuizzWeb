@@ -36,12 +36,13 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<Register />} />
+        <Route path='/account/verification' element={<AccountVerification />} />
+
       </Route>
       <Route element={<ProtectedRoute user={currUser} />}>
         <Route path='/create/step1' element={<CreateQuizStep1 />} />
         <Route path='/create-quiz/step1' element={<CreateQuizStep1 />} />
         <Route path='/create-quiz/step2' element={<CreateQuizStep2 />} />
-        <Route path='/account/verification' element={<AccountVerification />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/quizzes" element={<Quizzes />} />
         <Route path="/quizzes/:id" element={<QuizDetail />} />
