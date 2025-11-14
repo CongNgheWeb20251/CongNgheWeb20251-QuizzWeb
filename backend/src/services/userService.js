@@ -75,7 +75,8 @@ const verifyAccount = async (resBody) => {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Account not found!')
     }
     if (existingUser.isActive) {
-      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Account is already active!')
+      // Nếu đã active rồi thì trả về thông tin luôn, không cần update
+      return pickUser(existingUser)
     }
     if (resBody.token !== existingUser.verifyToken) {
       throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Invalid verification token!')
