@@ -248,7 +248,7 @@ function CreateQuizStep1() {
 
             {/* Footer Buttons */}
             <div className="cq-form-footer">
-              <button type="button" className="cq-btn cq-btn-secondary" onClick={handleBack}>
+              <button type="button" className="cq-btn cq-btn-primary" onClick={handleBack}>
                 Prev
               </button>
               <button type="submit" className="cq-btn cq-btn-primary">

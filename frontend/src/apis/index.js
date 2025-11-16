@@ -278,4 +278,20 @@ export const refreshTokenAPI = async () => {
   return response.data
 }
 
+// Dashboard APIs
+export const getDashboardStatsAPI = async () => {
+  const response = await authorizedAxiosInstance.get('/v1/dashboard/stats')
+  return response.data
+}
+
+export const getTopStudentsAPI = async (limit = 5) => {
+  const response = await authorizedAxiosInstance.get(`/v1/dashboard/top-students?limit=${limit}`)
+  return response.data
+}
+
+export const getRecentQuizzesAPI = async (limit = 3) => {
+  const response = await authorizedAxiosInstance.get(`/v1/dashboard/recent-quizzes?limit=${limit}`)
+  return response.data
+}
+
 
