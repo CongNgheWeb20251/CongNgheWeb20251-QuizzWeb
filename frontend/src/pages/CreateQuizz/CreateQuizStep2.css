@@ -121,12 +121,42 @@
   border-color: #d1d5db;
 }
 
+.cq-option-row-readonly {
+  background: #f9fafb;
+}
+
+.cq-option-row-readonly .cq-option-input {
+  background: #f3f4f6;
+  cursor: not-allowed;
+  color: #374151;
+  font-weight: 600;
+}
+
+.cq-helper-text {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
+}
+
 .cq-option-radio {
   display: flex;
   align-items: center;
 }
 
 .cq-option-radio input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #8b5cf6;
+}
+
+.cq-option-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.cq-option-checkbox input[type="checkbox"] {
   width: 20px;
   height: 20px;
   cursor: pointer;

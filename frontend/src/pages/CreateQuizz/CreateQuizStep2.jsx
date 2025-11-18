@@ -12,7 +12,7 @@ function CreateQuizStep2() {
       id: 1,
       text: 'Which of the following is NOT a renewable energy source?',
       points: 10,
-      type: 'multiple-choice',
+      type: 'single-choice',
       options: [
         { id: 1, text: 'Solar Power', isCorrect: false },
         { id: 2, text: 'Wind Power', isCorrect: false },
@@ -23,9 +23,34 @@ function CreateQuizStep2() {
   ])
 
   const handleQuestionChange = (questionId, field, value) => {
-    setQuestions(questions.map(q => 
-      q.id === questionId ? { ...q, [field]: value } : q
-    ))
+    setQuestions(questions.map(q => {
+      if (q.id === questionId) {
+        // When changing question type, update options accordingly
+        if (field === 'type') {
+          if (value === 'true-false') {
+            return {
+              ...q,
+              type: value,
+              options: [
+                { id: 1, text: 'True', isCorrect: false },
+                { id: 2, text: 'False', isCorrect: false }
+              ]
+            }
+          } else if (value === 'single-choice' || value === 'multiple-choice') {
+            return {
+              ...q,
+              type: value,
+              options: [
+                { id: 1, text: '', isCorrect: false },
+                { id: 2, text: '', isCorrect: false }
+              ]
+            }
+          }
+        }
+        return { ...q, [field]: value }
+      }
+      return q
+    }))
   }
 
   const handleOptionChange = (questionId, optionId, field, value) => {
@@ -45,12 +70,25 @@ function CreateQuizStep2() {
   const handleCorrectAnswerChange = (questionId, optionId) => {
     setQuestions(questions.map(q => {
       if (q.id === questionId) {
-        return {
-          ...q,
-          options: q.options.map(opt => ({
-            ...opt,
-            isCorrect: opt.id === optionId
-          }))
+        // For multiple-choice, allow multiple correct answers (checkbox behavior)
+        if (q.type === 'multiple-choice') {
+          return {
+            ...q,
+            options: q.options.map(opt => 
+              opt.id === optionId 
+                ? { ...opt, isCorrect: !opt.isCorrect }
+                : opt
+            )
+          }
+        } else {
+          // For single-choice and true-false, only one correct answer (radio behavior)
+          return {
+            ...q,
+            options: q.options.map(opt => ({
+              ...opt,
+              isCorrect: opt.id === optionId
+            }))
+          }
         }
       }
       return q
@@ -88,7 +126,7 @@ function CreateQuizStep2() {
       id: Math.max(...questions.map(q => q.id)) + 1,
       text: '',
       points: 10,
-      type: 'multiple-choice',
+      type: 'single-choice',
       options: [
         { id: 1, text: '', isCorrect: false },
         { id: 2, text: '', isCorrect: false }
@@ -188,9 +226,9 @@ function CreateQuizStep2() {
                         value={question.type}
                         onChange={(e) => handleQuestionChange(question.id, 'type', e.target.value)}
                       >
+                        <option value="single-choice">Single Choice</option>
                         <option value="multiple-choice">Multiple Choice</option>
                         <option value="true-false">True/False</option>
-                        <option value="short-answer">Short Answer</option>
                       </select>
                       {questions.length > 1 && (
                         <button
@@ -220,9 +258,9 @@ function CreateQuizStep2() {
                   </div>
 
                   {/* Answer Options */}
-                  {question.type === 'multiple-choice' && (
+                  {question.type === 'single-choice' && (
                     <div className="cq-form-group">
-                      <label className="cq-label">Answer Options</label>
+                      <label className="cq-label">Answer Options (Select one correct answer)</label>
                       <div className="cq-options-list">
                         {question.options.map((option, oIndex) => (
                           <div key={option.id} className="cq-option-row">
@@ -266,6 +304,81 @@ function CreateQuizStep2() {
                       </div>
                     </div>
                   )}
+
+                  {question.type === 'multiple-choice' && (
+                    <div className="cq-form-group">
+                      <label className="cq-label">Answer Options (Select all correct answers)</label>
+                      <div className="cq-options-list">
+                        {question.options.map((option, oIndex) => (
+                          <div key={option.id} className="cq-option-row">
+                            <div className="cq-option-checkbox">
+                              <input
+                                type="checkbox"
+                                checked={option.isCorrect}
+                                onChange={() => handleCorrectAnswerChange(question.id, option.id)}
+                                title="Mark as correct answer"
+                              />
+                            </div>
+                            <input
+                              type="text"
+                              className="cq-option-input"
+                              value={option.text}
+                              onChange={(e) => handleOptionChange(question.id, option.id, 'text', e.target.value)}
+                              placeholder={`Option ${oIndex + 1}`}
+                            />
+                            {question.options.length > 2 && (
+                              <button
+                                type="button"
+                                className="cq-btn-remove-option"
+                                onClick={() => handleRemoveOption(question.id, option.id)}
+                                title="Remove option"
+                              >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          className="cq-btn-add-option"
+                          onClick={() => handleAddOption(question.id)}
+                        >
+                          + Add Option
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* True/False Options */}
+                  {question.type === 'true-false' && (
+                    <div className="cq-form-group">
+                      <label className="cq-label">Correct Answer</label>
+                      <div className="cq-options-list">
+                        {question.options.map((option) => (
+                          <div key={option.id} className="cq-option-row cq-option-row-readonly">
+                            <div className="cq-option-radio">
+                              <input
+                                type="radio"
+                                name={`correct-${question.id}`}
+                                checked={option.isCorrect}
+                                onChange={() => handleCorrectAnswerChange(question.id, option.id)}
+                                title="Mark as correct answer"
+                              />
+                            </div>
+                            <input
+                              type="text"
+                              className="cq-option-input"
+                              value={option.text}
+                              readOnly
+                              disabled
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -280,7 +393,7 @@ function CreateQuizStep2() {
 
             {/* Footer Buttons */}
             <div className="cq-form-footer">
-              <button type="button" className="cq-btn cq-btn-secondary" onClick={handleBack}>
+              <button type="button" className="cq-btn cq-btn-primary" onClick={handleBack}>
                 &lt; Prev
               </button>
               <button type="button" className="cq-btn cq-btn-primary" onClick={handlePublish}>
