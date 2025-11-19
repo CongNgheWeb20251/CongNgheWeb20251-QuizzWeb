@@ -31,7 +31,7 @@ const USER_COLLECTION_SCHEMA = Joi.object({
 
 })
 
-const UNCHANGE_FIELDS = ['_id', 'email', 'username', 'createdAt']
+const UNCHANGE_FIELDS = ['_id', 'email', 'createdAt']
 
 const validBeforeCreate = async (data) => {
   return await USER_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })

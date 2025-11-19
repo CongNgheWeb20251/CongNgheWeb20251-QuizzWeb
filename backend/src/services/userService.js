@@ -105,14 +105,6 @@ const login = async (resBody, device) => {
     if (!existingUser.isActive) {
       throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Account is not active! Please verify your account first.')
     }
-    // Nếu tài khoản là social login thì không thể đăng nhập bằng email/password
-    if (existingUser.authProvider !== 'local') {
-      throw new ApiError(StatusCodes.BAD_REQUEST, `This account was created with ${existingUser.authProvider}. Please use that login method.`)
-    }
-    // Kiểm tra mật khẩu
-    if (!existingUser.password) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'This account does not have a password. Please use social login.')
-    }
     if (!bcrypt.compareSync(resBody.password, existingUser.password)) {
       throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid password!')
     }
@@ -184,7 +176,41 @@ const refreshToken = async (clientRefreshToken) => {
 }
 
 const update = async (userId, userAvatarFile, updateData) => {
-  //
+  try {
+    // Kiểm tra xem người dùng có tồn tại không
+    const existingUser = await userModel.findOneById(userId)
+    if (!existingUser) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
+    }
+    // Khi thay đổi mật khẩu thì chắc chắn user đã active, nhưng cứ làm bước này cho chắc.
+    if (!existingUser.isActive) {
+      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Account is not active! Please verify your account first.')
+    }
+    let updatedUser = { }
+    // Trường hợp thay đổi mật khẩu
+    if (updateData.new_password && updateData.current_password) {
+      // Kiểm tra xem current_password có đúng hay không
+      if (!bcrypt.compareSync(updateData.current_password, existingUser.password)) {
+        // Nên tránh mã authorized 401 vì khi trả về mã 401 cho bên fe thì phần interceptor sẽ logout luôn
+        throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Current password is incorrect!')
+      }
+      updatedUser = await userModel.update(
+        userId,
+        { password: bcrypt.hashSync(updateData.new_password, 8) }
+      )
+
+    } else if (userAvatarFile) {
+      // upload lên cloundinary
+    } else {
+      // update các thông tin khác
+      updatedUser = await userModel.update(userId, updateData)
+    }
+    // Cập nhật thông tin người dùng
+    return pickUser(updatedUser)
+
+  } catch (error) {
+    throw error
+  }
 }
 
 export const userService = {
@@ -193,5 +219,5 @@ export const userService = {
   login,
   loginGoogle,
   refreshToken,
-  update,
+  update
 }
