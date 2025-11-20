@@ -10,6 +10,7 @@ import { env } from '~/config/environment'
 import { WEBSITE_DOMAIN } from '~/utils/constants'
 import { JwtProvider } from '~/providers/JwtProvider'
 import { BrevoProvider } from '~/providers/BrevoProvider'
+import { cloudinaryProvider } from '~/providers/cloudinaryProvider'
 
 
 const createNew = async (userData) => {
@@ -201,6 +202,9 @@ const update = async (userId, userAvatarFile, updateData) => {
 
     } else if (userAvatarFile) {
       // upload lên cloundinary
+      const userAvatar = await cloudinaryProvider.streamUploadWithOverwrite(userAvatarFile.buffer, 'avatars', `user_${userId}`)
+      // Lưu lại url avatar vào database
+      updatedUser = await userModel.update(userId, { avatar: userAvatar.secure_url })
     } else {
       // update các thông tin khác
       updatedUser = await userModel.update(userId, updateData)

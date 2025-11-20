@@ -31,7 +31,7 @@ const ProfileTab = () => {
 
   const submitChangeGeneralInformation = (data) => {
     const { username, fullName, bio } = data
-    console.log('data: ', data)
+    // console.log('data: ', data)
 
     // Nếu không có sự thay đổi gì về displayname thì không làm gì cả
     if (username === currentUser?.username && fullName === currentUser?.fullName && bio === currentUser?.bio) return
@@ -51,7 +51,7 @@ const ProfileTab = () => {
 
   const uploadAvatar = (e) => {
     // Lấy file thông qua e.target?.files[0] và validate nó trước khi xử lý
-    console.log('e.target?.files[0]: ', e.target?.files[0])
+    // console.log('e.target?.files[0]: ', e.target?.files[0])
     const error = singleFileValidator(e.target?.files[0])
     if (error) {
       toast.error(error)
@@ -68,6 +68,18 @@ const ProfileTab = () => {
     // }
 
     // Gọi API...
+    toast.promise(
+      dispatch(updateUserAPI(reqData)),
+      {
+        pending: 'Uploading...'
+      }
+    ).then(res => {
+      if (!res.error) {
+        toast.success('Avatar updated successfully!', { theme: 'colored' })
+      }
+      // cần clear giá trị fileInput, nếu không thì nếu gọi api lỗi mà upload lại thì kh có value nữa
+      e.target.value = ''
+    })
 
   }
 
