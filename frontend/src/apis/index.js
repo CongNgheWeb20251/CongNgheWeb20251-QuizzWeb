@@ -14,7 +14,7 @@ export async function getQuizzes() {
   // TODO: Replace with real API call
   // const { data } = await api.get('/quizzes')
   // return data
-  
+
   // Mock data
   return [
     {
@@ -126,15 +126,15 @@ export async function getQuiz(id) {
   // TODO: Replace with real API call
   // const { data } = await api.get(`/quizzes/${id}`)
   // return data
-  
+
   // Mock data - find quiz or return default
   const allQuizzes = await getQuizzes()
   const quiz = allQuizzes.find(q => q.id === id)
-  
+
   if (quiz) {
     return quiz
   }
-  
+
   // Default if not found
   return {
     id,
@@ -162,7 +162,7 @@ export async function createQuiz(quizData) {
   // const { data } = await api.post('/quizzes', quizData)
   // return data
 
-  console.log('Creating quiz:', quizData)
+  // console.log('Creating quiz:', quizData)
   return {
     id: `q${Date.now()}`,
     ...quizData,
@@ -186,7 +186,7 @@ export async function updateQuiz(id, updateData) {
   // TODO: Replace with real API call
   // const { data } = await api.put(`/quizzes/${id}`, updateData)
   // return data
-  
+
   console.log('Updating quiz:', id, updateData)
   return { id, ...updateData }
 }
@@ -245,7 +245,6 @@ export async function exportQuiz(id, format = 'pdf') {
   //   responseType: 'blob'
   // })
   // return data
-  
   console.log('Exporting quiz:', id, 'format:', format)
   return new Blob(['Quiz export content'], { type: 'application/octet-stream' })
 }
@@ -292,6 +291,18 @@ export const getTopStudentsAPI = async (limit = 5) => {
 export const getRecentQuizzesAPI = async (limit = 3) => {
   const response = await authorizedAxiosInstance.get(`/v1/dashboard/recent-quizzes?limit=${limit}`)
   return response.data
+}
+
+
+// createQuiz
+export const createQuizStep1API = async (data) => {
+  const response = await authorizedAxiosInstance.post('/v1/quizzes', data)
+  return response.data
+}
+
+export const fetchQuizzesAPI = async (searchPath) => {
+  const res = await authorizedAxiosInstance.get(`/v1/quizzes${searchPath}`)
+  return res.data
 }
 
 

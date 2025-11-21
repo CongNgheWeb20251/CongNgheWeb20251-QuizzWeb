@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb'
 const ANSWER_OPTION_COLLECTION_NAME = 'answerOptions'
 const ANSWER_OPTION_COLLECTION_SCHEMA = Joi.object({
   questionId: Joi.string().required(),
-  quizId: Joi.string().required(),
+  quizzId: Joi.string().required(),
   content: Joi.string().required().trim().strict(),
   isCorrect: Joi.boolean().default(false),
   // thứ tự hiển thị đap án
