@@ -52,8 +52,6 @@ export const activeQuizzSlice = createSlice({
         question.answerOptions = mapOrder(question?.answerOptions, question?.answerIds, '_id')
 
       })
-      // lấy ra tất cả users trong board (owners và members) để tiện cho việc search thành viên khi thêm thẻ
-      quizz.allUsers = quizz.owners.concat(quizz.members)
       // action.payload là dữ liệu trả về từ API (response.data)
       state.currentActiveQuizz = quizz
     })

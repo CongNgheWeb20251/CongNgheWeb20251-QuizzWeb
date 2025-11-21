@@ -102,8 +102,6 @@ const update = async (quizId, updateData) => {
 const getDetails = async (userId, quizId) => {
   const queryConditions = [
     { _id: new ObjectId(quizId) },
-    // Dk1 board chua xoa
-    { _destroy: false },
     { $or: [
       { createdBy: new ObjectId(userId) }
       // { memberIds: { $all: [new ObjectId(userId)] } }

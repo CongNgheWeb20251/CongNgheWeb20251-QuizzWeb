@@ -6,8 +6,9 @@ const createNew = async (req, res, next) => {
     const userId = req.jwtDecoded._id
     const data = req.body
     // console.log('quizController.createNew:', { userId, data })
-    const result = await quizService.createNew({ userId, data })
-    res.status(StatusCodes.CREATED).json({ message: 'Quiz created successfully', data: result })
+    const createdQuiz = await quizService.createNew({ userId, data })
+    // Trả về quiz object đầy đủ (có _id) thay vì insertResult
+    res.status(StatusCodes.CREATED).json(createdQuiz)
 
   } catch (error) {
     next(error)

@@ -15,7 +15,7 @@ import storage from 'redux-persist/lib/storage'
 const rootPersistConfig = {
   key: 'root',
   storage : storage,
-  whitelist: ['user'] // choose which reducers to persist (user)
+  whitelist: ['user', 'activeQuizz'] // choose which reducers to persist (user)
 }
 
 const reducers = combineReducers({
