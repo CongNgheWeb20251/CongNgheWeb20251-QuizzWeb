@@ -33,7 +33,7 @@ function QuizDetail() {
   const handleEdit = () => {
     console.log('Edit quiz:', id)
     // TODO: Implement edit redirect to /create-quiz/step1?id=...
-    navigate(`/edit/${id}/step2`)
+    navigate(`/edit/${id}/step1`)
   }
 
   const handleDelete = () => {

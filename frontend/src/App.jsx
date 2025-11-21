@@ -12,6 +12,7 @@ import AccountVerification from './pages/Auth/AccountVerification'
 import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { Navigate, Outlet } from 'react-router-dom'
+import EditQuizInfo from '~/pages/EditQuizz/EditQuizInfo.jsx'
 
 const ProtectedRoute = ({ user }) => {
   if (!user) {
@@ -40,6 +41,7 @@ function App() {
       </Route>
       <Route element={<ProtectedRoute user={currUser} />}>
         <Route path='/create-quiz' element={<CreateQuizStep1 />} />
+        <Route path='/edit/:id/step1' element={<EditQuizInfo />} />
         <Route path='/edit/:id/step2' element={<CreateQuizStep2 />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/quizzes" element={<Quizzes />} />

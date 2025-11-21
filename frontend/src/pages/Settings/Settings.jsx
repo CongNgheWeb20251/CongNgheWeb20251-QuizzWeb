@@ -3,6 +3,9 @@ import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { useNavigate } from 'react-router-dom'
 
 // Import tab components
 import ProfileTab from './tabs/ProfileTab'
@@ -30,6 +33,7 @@ const TabPanel = ({ children, value, index, ...other }) => (
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState(0)
+  const navigate = useNavigate()
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue)
@@ -37,7 +41,7 @@ const Settings = () => {
 
   return (
     <StyledSettings>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+      {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
         <Box>
           <Typography variant="h4" component="h1">
             Settings
@@ -47,6 +51,47 @@ const Settings = () => {
           </Typography>
         </Box>
         <UserAvatar />
+      </Box> */}
+      <Box sx={{ mb: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon fontSize="small" />}
+            onClick={() => navigate('/dashboard')}
+            sx={{
+              color: 'rgba(230,238,248,0.9)',
+              borderColor: 'rgba(255,255,255,0.06)',
+              textTransform: 'none',
+              px: 2,
+              py: 1,
+              backgroundColor: 'transparent',
+              transition: 'background-color 160ms, transform 200ms, box-shadow 160ms',
+              '& .MuiButton-startIcon': {
+                transition: 'transform 200ms'
+              },
+              '&:hover': {
+                backgroundColor: 'rgba(139,92,246,0.12)',
+                borderColor: 'rgba(139,92,246,0.35)',
+                boxShadow: '0 6px 18px rgba(11,21,38,0.6)',
+                '& .MuiButton-startIcon': {
+                  transform: 'translateX(-4px)'
+                }
+              }
+            }}
+          >
+            Dashboard
+          </Button>
+          <UserAvatar />
+        </Box>
+
+        <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Typography component="h1" sx={{ fontWeight: 900, fontSize: { xs: 22, md: 28 }, color: '#e6eef8' }}>
+            Settings
+          </Typography>
+          <Typography sx={{ color: 'rgba(230,238,248,0.75)', mt: 0.5, fontSize: 14 }}>
+            Manage your account settings and preferences
+          </Typography>
+        </Box>
       </Box>
 
       <Tabs
