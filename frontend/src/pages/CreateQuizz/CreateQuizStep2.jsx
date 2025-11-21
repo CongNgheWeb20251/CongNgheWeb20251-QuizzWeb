@@ -1,6 +1,25 @@
+/* eslint-disable no-console */
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import './CreateQuizStep2.css'
+import Button from '@mui/material/Button'
+import Box from '@mui/material/Box'
+import TextField from '@mui/material/TextField'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import Switch from '@mui/material/Switch'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import Container from '@mui/material/Container'
+import InputAdornment from '@mui/material/InputAdornment'
+import Radio from '@mui/material/Radio'
+import RadioGroup from '@mui/material/RadioGroup'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import IconButton from '@mui/material/IconButton'
+
+import AddIcon from '@mui/icons-material/Add'
 
 function CreateQuizStep2() {
   const navigate = useNavigate()
@@ -8,18 +27,18 @@ function CreateQuizStep2() {
   const quizDataFromStep1 = location.state?.quizData || {}
 
   const [questions, setQuestions] = useState([
-    {
-      id: 1,
-      text: 'Which of the following is NOT a renewable energy source?',
-      points: 10,
-      type: 'single-choice',
-      options: [
-        { id: 1, text: 'Solar Power', isCorrect: false },
-        { id: 2, text: 'Wind Power', isCorrect: false },
-        { id: 3, text: 'Natural Gas', isCorrect: true },
-        { id: 4, text: 'Hydroelectric Power', isCorrect: false }
-      ]
-    }
+    // {
+    //   id: 1,
+    //   text: 'Which of the following is NOT a renewable energy source?',
+    //   points: 10,
+    //   type: 'single-choice',
+    //   options: [
+    //     { id: 1, text: 'Solar Power', isCorrect: false },
+    //     { id: 2, text: 'Wind Power', isCorrect: false },
+    //     { id: 3, text: 'Natural Gas', isCorrect: true },
+    //     { id: 4, text: 'Hydroelectric Power', isCorrect: false }
+    //   ]
+    // }
   ])
 
   const handleQuestionChange = (questionId, field, value) => {
@@ -58,7 +77,7 @@ function CreateQuizStep2() {
       if (q.id === questionId) {
         return {
           ...q,
-          options: q.options.map(opt => 
+          options: q.options.map(opt =>
             opt.id === optionId ? { ...opt, [field]: value } : opt
           )
         }
@@ -74,8 +93,8 @@ function CreateQuizStep2() {
         if (q.type === 'multiple-choice') {
           return {
             ...q,
-            options: q.options.map(opt => 
-              opt.id === optionId 
+            options: q.options.map(opt =>
+              opt.id === optionId
                 ? { ...opt, isCorrect: !opt.isCorrect }
                 : opt
             )
@@ -98,8 +117,9 @@ function CreateQuizStep2() {
   const handleAddOption = (questionId) => {
     setQuestions(questions.map(q => {
       if (q.id === questionId) {
+        const maxId = q.options && q.options.length ? Math.max(...q.options.map(o => Number(o.id))) : 0
         const newOption = {
-          id: Math.max(...q.options.map(o => o.id)) + 1,
+          id: maxId + 1,
           text: '',
           isCorrect: false
         }
@@ -122,8 +142,9 @@ function CreateQuizStep2() {
   }
 
   const handleAddQuestion = () => {
+    const maxId = questions && questions.length ? Math.max(...questions.map(q => Number(q.id))) : 0
     const newQuestion = {
-      id: Math.max(...questions.map(q => q.id)) + 1,
+      id: maxId + 1,
       text: '',
       points: 10,
       type: 'single-choice',
@@ -132,7 +153,7 @@ function CreateQuizStep2() {
         { id: 2, text: '', isCorrect: false }
       ]
     }
-    setQuestions([...questions, newQuestion])
+    setQuestions(prev => [...prev, newQuestion])
   }
 
   const handleRemoveQuestion = (questionId) => {
@@ -142,7 +163,7 @@ function CreateQuizStep2() {
   }
 
   const handleBack = () => {
-    navigate('/create-quiz/step1', { state: { quizData: quizDataFromStep1 } })
+    navigate('/dashboard', { state: { quizData: quizDataFromStep1 } })
   }
 
   const handleSaveDraft = () => {
@@ -159,7 +180,7 @@ function CreateQuizStep2() {
     console.log('Publish quiz:', { ...quizDataFromStep1, questions })
     // TODO: Validate, call API, navigate to success page
     alert('Quiz published successfully! (TODO: implement API)')
-    navigate('/dashboard')
+    // navigate('/dashboard')
   }
 
   return (
@@ -173,236 +194,334 @@ function CreateQuizStep2() {
             </svg>
           </button>
           <div>
-            <h1 className="cq-title">Create Quiz - 2</h1>
+            <h1 className="cq-title">Edit Quiz - 2</h1>
             <p className="cq-subtitle">Add questions, set answers and configure quiz settings.</p>
           </div>
         </div>
         <div className="cq-header-right">
-          <button type="button" className="cq-btn cq-btn-secondary" onClick={handleSaveDraft}>
+          <Button
+            variant="outlined"
+            sx={{
+              color: '#64748b',
+              borderColor: '#cbd5e1',
+              '&:hover': {
+                borderColor: '#94a3b8',
+                backgroundColor: '#f8fafc'
+              }
+            }}
+            onClick={handleSaveDraft}
+          >
             Save Draft
-          </button>
-          <button type="button" className="cq-btn cq-btn-primary" onClick={handlePreview}>
+          </Button>
+          <button type="button" className="cq-btn-1 cq-btn-primary" onClick={handlePreview}>
             Preview
           </button>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="cq-main">
-        <div className="cq-card">
-          <div className="cq-card-header">
-            <h2 className="cq-card-title">Create New Quiz</h2>
-          </div>
+      <Container maxWidth="md">
+        <Paper
+          elevation={3}
+          sx={{
+            padding: '2rem',
+            borderRadius: '16px',
+            backgroundColor: 'white',
+            border: '1px solid #e2e8f0'
+          }}
+        >
+          {/* Quiz Header */}
+          <Box
+            sx={{
+              padding: '1.5rem',
+              backgroundColor: '#8b5cf6',
+              borderRadius: '12px',
+              marginBottom: '2rem',
+              textAlign: 'center'
+            }}
+          >
+            <Typography variant="h5" sx={{ color: 'white', fontWeight: 600, marginBottom: '0.5rem' }}>
+              {'Create New Quiz'}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+              {'Add a description for your quiz'}
+            </Typography>
+          </Box>
 
-          <div className="cq-form">
-            {/* Section Header */}
-            <div className="cq-section-header">
-              <div>
-                <h3 className="cq-section-title">Quiz Questions</h3>
-                <p className="cq-section-desc">Create and manage your quiz questions.</p>
+          {/* Quiz Questions Section */}
+          <Box sx={{ marginBottom: '2rem' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: '0.5rem' }}>
+              Quiz Questions
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: '1.5rem' }}>
+              Create and add new questions.
+            </Typography>
+
+            {questions.length === 0 ? (
+              /* Empty State */
+              <Box
+                sx={{
+                  padding: '3rem',
+                  textAlign: 'center',
+                  backgroundColor: '#f8fafc',
+                  borderRadius: '12px',
+                  border: '2px dashed #cbd5e1'
+                }}
+              >
+                <Typography variant="h6" sx={{ color: '#64748b', marginBottom: '1rem' }}>
+                  No Questions Yet
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#94a3b8', marginBottom: '1.5rem' }}>
+                  Start by adding your first question to the quiz.
+                </Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon size={20} />}
+                  onClick={handleAddQuestion}
+                  sx={{
+                    backgroundColor: '#8b5cf6',
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: '#7c3aed'
+                    }
+                  }}
+                >
+                  Add Question
+                </Button>
+              </Box>
+            ) : (
+              /* Questions List */
+              <div className="cq-questions-list">
+                {questions.map((question, qIndex) => (
+                  <div key={question.id} className="cq-question-card">
+                    <div className="cq-question-header">
+                      <h4 className="cq-question-number">Question {qIndex + 1}</h4>
+                      <div className="cq-question-controls">
+                        <div className="cq-question-meta">
+                          <label className="cq-meta-label">Points:</label>
+                          <input
+                            type="number"
+                            className="cq-meta-input"
+                            value={question.points}
+                            onChange={(e) => handleQuestionChange(question.id, 'points', parseInt(e.target.value) || 0)}
+                            min="1"
+                          />
+                        </div>
+                        <select
+                          className="cq-question-type"
+                          value={question.type}
+                          onChange={(e) => handleQuestionChange(question.id, 'type', e.target.value)}
+                        >
+                          <option value="single-choice">Single Choice</option>
+                          <option value="multiple-choice">Multiple Choice</option>
+                          <option value="true-false">True/False</option>
+                        </select>
+                        {questions.length > 1 && (
+                          <button
+                            type="button"
+                            className="cq-btn-delete"
+                            onClick={() => handleRemoveQuestion(question.id)}
+                            title="Delete question"
+                          >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                              <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="cq-form-group">
+                      <label className="cq-label">Question Text</label>
+                      <textarea
+                        className="cq-textarea"
+                        rows={2}
+                        value={question.text}
+                        onChange={(e) => handleQuestionChange(question.id, 'text', e.target.value)}
+                        placeholder="Enter your question here..."
+                      />
+                    </div>
+
+                    {question.type === 'single-choice' && (
+                      <div className="cq-form-group">
+                        <label className="cq-label">Answer Options (Select one correct answer)</label>
+                        <div className="cq-options-list">
+                          {question.options.map((option, oIndex) => (
+                            <div key={option.id} className="cq-option-row">
+                              <div className="cq-option-radio">
+                                <input
+                                  type="radio"
+                                  name={`correct-${question.id}`}
+                                  checked={option.isCorrect}
+                                  onChange={() => handleCorrectAnswerChange(question.id, option.id)}
+                                  title="Mark as correct answer"
+                                />
+                              </div>
+                              <input
+                                type="text"
+                                className="cq-option-input"
+                                value={option.text}
+                                onChange={(e) => handleOptionChange(question.id, option.id, 'text', e.target.value)}
+                                placeholder={`Option ${oIndex + 1}`}
+                              />
+                              {question.options.length > 2 && (
+                                <button
+                                  type="button"
+                                  className="cq-btn-remove-option"
+                                  onClick={() => handleRemoveOption(question.id, option.id)}
+                                  title="Remove option"
+                                >
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            className="cq-btn-add-option"
+                            onClick={() => handleAddOption(question.id)}
+                          >
+                            + Add Option
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {question.type === 'multiple-choice' && (
+                      <div className="cq-form-group">
+                        <label className="cq-label">Answer Options (Select all correct answers)</label>
+                        <div className="cq-options-list">
+                          {question.options.map((option, oIndex) => (
+                            <div key={option.id} className="cq-option-row">
+                              <div className="cq-option-checkbox">
+                                <input
+                                  type="checkbox"
+                                  checked={option.isCorrect}
+                                  onChange={() => handleCorrectAnswerChange(question.id, option.id)}
+                                  title="Mark as correct answer"
+                                />
+                              </div>
+                              <input
+                                type="text"
+                                className="cq-option-input"
+                                value={option.text}
+                                onChange={(e) => handleOptionChange(question.id, option.id, 'text', e.target.value)}
+                                placeholder={`Option ${oIndex + 1}`}
+                              />
+                              {question.options.length > 2 && (
+                                <button
+                                  type="button"
+                                  className="cq-btn-remove-option"
+                                  onClick={() => handleRemoveOption(question.id, option.id)}
+                                  title="Remove option"
+                                >
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            className="cq-btn-add-option"
+                            onClick={() => handleAddOption(question.id)}
+                          >
+                            + Add Option
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {question.type === 'true-false' && (
+                      <div className="cq-form-group">
+                        <label className="cq-label">Correct Answer</label>
+                        <div className="cq-options-list">
+                          {question.options.map((option) => (
+                            <div key={option.id} className="cq-option-row cq-option-row-readonly">
+                              <div className="cq-option-radio">
+                                <input
+                                  type="radio"
+                                  name={`correct-${question.id}`}
+                                  checked={option.isCorrect}
+                                  onChange={() => handleCorrectAnswerChange(question.id, option.id)}
+                                  title="Mark as correct answer"
+                                />
+                              </div>
+                              <input
+                                type="text"
+                                className="cq-option-input"
+                                value={option.text}
+                                readOnly
+                                disabled
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon size={20} />}
+                  onClick={handleAddQuestion}
+                  fullWidth
+                  sx={{
+                    backgroundColor: '#8b5cf6',
+                    color: 'white',
+                    padding: '0.75rem',
+                    '&:hover': {
+                      backgroundColor: '#7c3aed'
+                    }
+                  }}
+                >
+                  Add Question
+                </Button>
               </div>
-            </div>
+            )}
+          </Box>
 
-            {/* Questions List */}
-            <div className="cq-questions-list">
-              {questions.map((question, qIndex) => (
-                <div key={question.id} className="cq-question-card">
-                  {/* Question Header */}
-                  <div className="cq-question-header">
-                    <h4 className="cq-question-number">Question {qIndex + 1}</h4>
-                    <div className="cq-question-controls">
-                      <div className="cq-question-meta">
-                        <label className="cq-meta-label">Points:</label>
-                        <input
-                          type="number"
-                          className="cq-meta-input"
-                          value={question.points}
-                          onChange={(e) => handleQuestionChange(question.id, 'points', parseInt(e.target.value) || 0)}
-                          min="1"
-                        />
-                      </div>
-                      <select
-                        className="cq-question-type"
-                        value={question.type}
-                        onChange={(e) => handleQuestionChange(question.id, 'type', e.target.value)}
-                      >
-                        <option value="single-choice">Single Choice</option>
-                        <option value="multiple-choice">Multiple Choice</option>
-                        <option value="true-false">True/False</option>
-                      </select>
-                      {questions.length > 1 && (
-                        <button
-                          type="button"
-                          className="cq-btn-delete"
-                          onClick={() => handleRemoveQuestion(question.id)}
-                          title="Delete question"
-                        >
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Question Text */}
-                  <div className="cq-form-group">
-                    <label className="cq-label">Question Text</label>
-                    <textarea
-                      className="cq-textarea"
-                      rows={2}
-                      value={question.text}
-                      onChange={(e) => handleQuestionChange(question.id, 'text', e.target.value)}
-                      placeholder="Enter your question here..."
-                    />
-                  </div>
-
-                  {/* Answer Options */}
-                  {question.type === 'single-choice' && (
-                    <div className="cq-form-group">
-                      <label className="cq-label">Answer Options (Select one correct answer)</label>
-                      <div className="cq-options-list">
-                        {question.options.map((option, oIndex) => (
-                          <div key={option.id} className="cq-option-row">
-                            <div className="cq-option-radio">
-                              <input
-                                type="radio"
-                                name={`correct-${question.id}`}
-                                checked={option.isCorrect}
-                                onChange={() => handleCorrectAnswerChange(question.id, option.id)}
-                                title="Mark as correct answer"
-                              />
-                            </div>
-                            <input
-                              type="text"
-                              className="cq-option-input"
-                              value={option.text}
-                              onChange={(e) => handleOptionChange(question.id, option.id, 'text', e.target.value)}
-                              placeholder={`Option ${oIndex + 1}`}
-                            />
-                            {question.options.length > 2 && (
-                              <button
-                                type="button"
-                                className="cq-btn-remove-option"
-                                onClick={() => handleRemoveOption(question.id, option.id)}
-                                title="Remove option"
-                              >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                                </svg>
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          className="cq-btn-add-option"
-                          onClick={() => handleAddOption(question.id)}
-                        >
-                          + Add Option
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {question.type === 'multiple-choice' && (
-                    <div className="cq-form-group">
-                      <label className="cq-label">Answer Options (Select all correct answers)</label>
-                      <div className="cq-options-list">
-                        {question.options.map((option, oIndex) => (
-                          <div key={option.id} className="cq-option-row">
-                            <div className="cq-option-checkbox">
-                              <input
-                                type="checkbox"
-                                checked={option.isCorrect}
-                                onChange={() => handleCorrectAnswerChange(question.id, option.id)}
-                                title="Mark as correct answer"
-                              />
-                            </div>
-                            <input
-                              type="text"
-                              className="cq-option-input"
-                              value={option.text}
-                              onChange={(e) => handleOptionChange(question.id, option.id, 'text', e.target.value)}
-                              placeholder={`Option ${oIndex + 1}`}
-                            />
-                            {question.options.length > 2 && (
-                              <button
-                                type="button"
-                                className="cq-btn-remove-option"
-                                onClick={() => handleRemoveOption(question.id, option.id)}
-                                title="Remove option"
-                              >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                                </svg>
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          className="cq-btn-add-option"
-                          onClick={() => handleAddOption(question.id)}
-                        >
-                          + Add Option
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* True/False Options */}
-                  {question.type === 'true-false' && (
-                    <div className="cq-form-group">
-                      <label className="cq-label">Correct Answer</label>
-                      <div className="cq-options-list">
-                        {question.options.map((option) => (
-                          <div key={option.id} className="cq-option-row cq-option-row-readonly">
-                            <div className="cq-option-radio">
-                              <input
-                                type="radio"
-                                name={`correct-${question.id}`}
-                                checked={option.isCorrect}
-                                onChange={() => handleCorrectAnswerChange(question.id, option.id)}
-                                title="Mark as correct answer"
-                              />
-                            </div>
-                            <input
-                              type="text"
-                              className="cq-option-input"
-                              value={option.text}
-                              readOnly
-                              disabled
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Add Question Button */}
-            <button type="button" className="cq-btn-add-question" onClick={handleAddQuestion}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              Add Question
-            </button>
-
-            {/* Footer Buttons */}
-            <div className="cq-form-footer">
-              <button type="button" className="cq-btn cq-btn-primary" onClick={handleBack}>
-                &lt; Prev
-              </button>
-              <button type="button" className="cq-btn cq-btn-primary" onClick={handlePublish}>
-                Preview & Publish
-              </button>
-            </div>
-          </div>
-        </div>
-      </main>
+          {/* Footer Buttons */}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginTop: '2rem'
+            }}
+          >
+            <Button
+              variant="contained"
+              onClick={handleBack}
+              sx={{
+                backgroundColor: '#8b5cf6',
+                color: 'white',
+                padding: '0.6rem 2rem',
+                '&:hover': {
+                  backgroundColor: '#7c3aed'
+                }
+              }}
+            >
+              Prev
+            </Button>
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: '#10b981',
+                color: 'white',
+                padding: '0.6rem 2rem',
+                '&:hover': {
+                  backgroundColor: '#059669'
+                }
+              }}
+              onClick={handlePublish}
+            >
+              Publish & Finish
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
     </div>
   )
 }

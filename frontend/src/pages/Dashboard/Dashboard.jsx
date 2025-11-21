@@ -33,7 +33,6 @@ function Dashboard() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true)
-        
         // Fetch all data in parallel
         const [statsData, studentsData, quizzesData] = await Promise.all([
           getDashboardStatsAPI(),
@@ -85,7 +84,7 @@ function Dashboard() {
   }, [])
 
   const handleCreateQuiz = () => {
-    navigate('/create-quiz/step1')
+    navigate('/create-quiz')
   }
 
   const handleMenuClick = (menuId) => {

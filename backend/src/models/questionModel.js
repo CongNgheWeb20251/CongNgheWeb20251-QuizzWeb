@@ -8,7 +8,7 @@ const QUESTION_COLLECTION_SCHEMA = Joi.object({
   options: Joi.object().required(),
   correctAnswer: Joi.string().required().trim().strict(),
   level: Joi.string().required().trim().strict(),
-  examId: Joi.string().required(),
+  quizzId: Joi.string().required(),
   answerIds: Joi.array().items(Joi.string()).default([]),
 
   createdBy: Joi.string().optional(),
