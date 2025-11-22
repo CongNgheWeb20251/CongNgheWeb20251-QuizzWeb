@@ -57,7 +57,7 @@ const Settings = () => {
           <Button
             variant="outlined"
             startIcon={<ArrowBackIcon fontSize="small" />}
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/teacher/dashboard')}
             sx={{
               color: 'rgba(230,238,248,0.9)',
               borderColor: 'rgba(255,255,255,0.06)',

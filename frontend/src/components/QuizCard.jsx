@@ -6,7 +6,7 @@ const QuizCard = ({ quiz }) => {
   const navigate = useNavigate()
 
   const handleViewClick = () => {
-    navigate(`/quizzes/${quiz._id}`)
+    navigate(`/teacher/quizzes/${quiz._id}`)
   }
 
   const handleMoreClick = () => {
