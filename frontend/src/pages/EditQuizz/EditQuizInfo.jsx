@@ -27,7 +27,7 @@ export default function EditQuizInfo() {
   const { id } = useParams()
 
   const handleNext = () => {
-    navigate(`/edit/${quizData._id}/step2`)
+    navigate(`/teacher/edit/${quizData._id}/step2`)
   }
 
 
@@ -37,7 +37,7 @@ export default function EditQuizInfo() {
   }
 
   const handleBack = () => {
-    navigate(`/quizzes/${quizData._id}`)
+    navigate('/teacher/quizzes')
   }
 
 

@@ -84,15 +84,15 @@ function Dashboard() {
   }, [])
 
   const handleCreateQuiz = () => {
-    navigate('/create-quiz')
+    navigate('/teacher/create-quiz')
   }
 
   const handleMenuClick = (menuId) => {
     setSelectedMenu(menuId)
     if (menuId === 'quizzes') {
-      navigate('/quizzes')
+      navigate('/teacher/quizzes')
     } else if (menuId === 'dashboard') {
-      navigate('/dashboard')
+      navigate('/teacher/dashboard')
     }
   }
 

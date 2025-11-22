@@ -33,11 +33,11 @@ function CreateQuizStep1() {
     console.log('Step 1 data:', quizData)
     const result = await createQuizStep1API({ ...quizData, status: 'draft' })
     console.log('Step 1 API result:', result)
-    navigate(`/edit/${result.insertedId}/step2`)
+    navigate(`/teacher/edit/${result.insertedId}/step2`)
   }
 
   const handleBack = () => {
-    navigate('/dashboard')
+    navigate('/teacher/dashboard')
   }
 
   const formRef = useRef(null)
@@ -55,7 +55,7 @@ function CreateQuizStep1() {
       const result = await createQuizStep1API({ ...quizData, status: 'draft' })
       console.log('Saved draft:', result)
       // Navigate to edit step2 (same as Next) so user can continue editing the quiz
-      navigate(`/edit/${result.insertedId}/step1`)
+      navigate(`/teacher/edit/${result.insertedId}/step1`)
     } catch (err) {
       console.error('Failed to save draft', err)
     }

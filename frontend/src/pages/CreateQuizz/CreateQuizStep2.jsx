@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import './CreateQuizStep2.css'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
@@ -167,7 +167,7 @@ function CreateQuizStep2() {
   }
 
   const handleBack = () => {
-    navigate(`/edit/${quizData._id}/step1`)
+    navigate(`/teacher/edit/${quizData._id}/step1`)
   }
 
   const handleSaveDraft = () => {
@@ -176,8 +176,7 @@ function CreateQuizStep2() {
   }
 
   const handlePreview = () => {
-    console.log('Preview quiz:', { ...quizData, questions })
-    // TODO: Show preview modal
+    localStorage.setItem('previewQuiz', JSON.stringify({ ...quizData, questions }))
   }
 
   const handlePublish = () => {
@@ -228,9 +227,17 @@ function CreateQuizStep2() {
           >
             Save Draft
           </Button>
-          <button type="button" className="cq-btn-1 cq-btn-primary" onClick={handlePreview}>
+          <Link
+            to={`/teacher/quizzes/${quizData._id}/preview`}
+            // state={{ quizData: { ...quizData, questions } }}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cq-btn-1 cq-btn-primary"
+            onClick={handlePreview}
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
             Preview
-          </button>
+          </Link>
         </div>
       </header>
 

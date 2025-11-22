@@ -32,7 +32,7 @@ function Quizzes() {
     if (pageParam && Number(pageParam) !== DEFAULT_PAGE) params.set('page', pageParam)
     if (filterParam && filterParam !== 'all') params.set('filter', filterParam)
     const qs = params.toString()
-    return `/quizzes${qs ? `?${qs}` : ''}`
+    return `/teacher/quizzes${qs ? `?${qs}` : ''}`
   }
 
   // fetch quizzes khi filter hoặc page thay đổi
@@ -72,7 +72,7 @@ function Quizzes() {
   // }, [])
 
   const handleCreateNew = () => {
-    navigate('/create-quiz')
+    navigate('/teacher/create-quiz')
   }
 
   const filteredQuizzes = quizzes.filter(q => {
@@ -87,7 +87,7 @@ function Quizzes() {
         <Button
           variant="outlined"
           startIcon={<ArrowBackIcon fontSize="small" />}
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/teacher/dashboard')}
           sx={{
             color: 'rgba(255,255,255,0.9)',
             borderColor: 'rgba(255,255,255,0.06)',
