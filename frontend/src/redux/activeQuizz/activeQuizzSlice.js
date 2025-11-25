@@ -45,11 +45,11 @@ export const activeQuizzSlice = createSlice({
       // Sắp xếp thứ tự column theo columnOrderIds từ trên root cao nhất
       quizz.questions = mapOrder(
         quizz?.questions,
-        quizz?.questionIds,
+        quizz?.questionOrderIds,
         '_id'
       )
       quizz.questions.forEach((question) => {
-        question.answerOptions = mapOrder(question?.answerOptions, question?.answerIds, '_id')
+        question.options = mapOrder(question?.options, question?.optionOrderIds, '_id')
 
       })
       // action.payload là dữ liệu trả về từ API (response.data)

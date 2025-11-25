@@ -2,6 +2,7 @@ import express from 'express'
 import { authMiddleware } from '~/middlewares/authMiddleware'
 import { quizValidation } from '~/validations/quizValidation'
 import { quizController } from '~/controllers/quizController'
+import { questionController } from '~/controllers/questionController'
 
 const Router = express.Router()
 
@@ -14,6 +15,15 @@ Router.route('')
 
 Router.route('/:id')
   .get(quizController.getDetails)
+  .put(quizValidation.updateInfo, quizController.updateInfo)
 
+// Router.route('/:id/publish')
+//   .post(quizController.publishQuiz)
+
+// Router.route('/:id/unpublish')
+//   .post(quizController.unpublishQuiz)
+
+Router.route('/:quizId/questions/batch')
+  .post(questionController.updateQuestionsInBatch)
 
 export const quizRoute = Router

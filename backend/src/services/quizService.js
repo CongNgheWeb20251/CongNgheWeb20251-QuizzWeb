@@ -34,9 +34,9 @@ const getDetails = async (userId, quizzId) => {
     }
     const quizClone = cloneDeep(quiz)
     quizClone.questions.forEach(question => {
-      question.answerOptions = quizClone.answerOptions.filter(answerOption => answerOption.questionId.toString() === question._id.toString())
+      question.options = quizClone.options.filter(option => option.questionId.toString() === question._id.toString())
     })
-    delete quizClone.answerOptions
+    delete quizClone.options
 
     return quizClone
   } catch (error) {
@@ -59,9 +59,19 @@ const getQuizzes = async (userId, page, itemsPerPage, filter) => {
   }
 }
 
+const updateInfo = async (quizId, updateData) => {
+  try {
+    const updatedQuiz = await quizModel.update(quizId, updateData)
+    return updatedQuiz
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 
 export const quizService = {
   createNew,
   getDetails,
-  getQuizzes
+  getQuizzes,
+  updateInfo
 }

@@ -38,8 +38,21 @@ const getQuizzes = async (req, res, next) => {
   }
 }
 
+const updateInfo = async (req, res, next) => {
+  try {
+    const quizId = req.params.id
+    const updateData = req.body
+    const updatedQuiz = await quizService.updateInfo(quizId, updateData)
+    res.status(StatusCodes.OK).json(updatedQuiz)
+  } catch (error) {
+    next(error)
+  }
+}
+
+
 export const quizController = {
   createNew,
   getDetails,
-  getQuizzes
+  getQuizzes,
+  updateInfo
 }

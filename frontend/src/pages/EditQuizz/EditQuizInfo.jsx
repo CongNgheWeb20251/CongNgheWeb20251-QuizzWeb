@@ -15,8 +15,14 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { useDispatch, useSelector } from 'react-redux'
-import { selectCurrentActiveQuizz, fetchQuizzDetailsAPI } from '~/redux/activeQuizz/activeQuizzSlice'
+import { selectCurrentActiveQuizz, fetchQuizzDetailsAPI, updateCurrentActiveQuizz } from '~/redux/activeQuizz/activeQuizzSlice'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useForm, Controller } from 'react-hook-form'
+import { FIELD_REQUIRED_MESSAGE } from '~/utils/validators'
+import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
+import { updateQuizInfo } from '~/apis'
+import { toast } from 'react-toastify'
+import { cloneDeep } from 'lodash'
 
 
 export default function EditQuizInfo() {
@@ -26,28 +32,67 @@ export default function EditQuizInfo() {
   const [isLoading, setIsLoading] = useState(false)
   const { id } = useParams()
 
+  const initialFormData = {
+    title: quizData?.title,
+    description: quizData?.description,
+    category: quizData?.category,
+    level: quizData?.level,
+    timeLimit: quizData?.timeLimit,
+    passingScore: quizData?.passingScore,
+    // shuffleQuestions: quizData?.shuffleQuestions,
+    showResults: quizData?.showResults,
+    allowRetake: quizData?.allowRetake
+  }
+
+  const { control, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: initialFormData
+  })
+
+  // const currentFormData = watch()
+
+  // Check if form has changes
+  // const hasChanges = () => {
+  //   if (!quizData) return false
+  //   return !isEqual(currentFormData, quizData)
+  // }
+
+  useEffect(() => {
+    setIsLoading(true)
+    dispatch(fetchQuizzDetailsAPI(id)).finally(() => setIsLoading(false))
+  }, [dispatch, id])
+
   const handleNext = () => {
     navigate(`/teacher/edit/${quizData._id}/step2`)
   }
 
+  const submitUpdateQuiz = async (data) => {
+    const { title, description, category, level, timeLimit, passingScore, showResults, allowRetake } = data
 
-  const handleSave = () => {
-    // Dùng react hook form để xử lí sau .....
-    // Handle save logic here
+    // Prepare update data
+    if (title === quizData.title && description === quizData.description && category === quizData.category && level === quizData.level && timeLimit === quizData.timeLimit && passingScore === quizData.passingScore && showResults === quizData.showResults && allowRetake === quizData.allowRetake) {
+      toast.info('No changes to save.')
+      return
+    }
+    // console.log("data", data)
+
+    try {
+      const updatedQuiz = await updateQuizInfo(id, data)
+      toast.success('Quiz information updated successfully!')
+      // console.log("first", updatedQuiz)
+      // Update redux store
+      const quizClone = cloneDeep(quizData)
+      const updatedQuizData = { ...quizClone, ...updatedQuiz }
+      dispatch(updateCurrentActiveQuizz(updatedQuizData))
+    } catch (error) {
+      toast.error('Failed to update quiz information. Please try again.')
+      // eslint-disable-next-line no-console
+      console.error('Update quiz error:', error)
+    }
   }
 
   const handleBack = () => {
     navigate('/teacher/quizzes')
   }
-
-
-  useEffect(() => {
-    // Chỉ fetch nếu quizData chưa có hoặc _id không khớp với id từ URL
-    if (!quizData || quizData._id !== id) {
-      setIsLoading(true)
-      dispatch(fetchQuizzDetailsAPI(id)).finally(() => setIsLoading(false))
-    }
-  }, [dispatch, id, quizData])
 
   if (isLoading || !quizData) {
     return (
@@ -93,405 +138,500 @@ export default function EditQuizInfo() {
         </Box>
 
         {/* Main Content - Two Column Layout */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
-            gap: '2rem'
-          }}
-        >
-          {/* Left Column - Quiz Details */}
-          <Paper
-            elevation={2}
+        <form onSubmit={handleSubmit(submitUpdateQuiz)}>
+          <Box
             sx={{
-              padding: '2rem',
-              borderRadius: '16px',
-              backgroundColor: 'white',
-              border: '1px solid #e2e8f0'
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
+              gap: '2rem'
             }}
           >
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 600, marginBottom: '1.5rem', color: '#0f172a' }}
+            {/* Left Column - Quiz Details */}
+            <Paper
+              elevation={2}
+              sx={{
+                padding: '2rem',
+                borderRadius: '16px',
+                backgroundColor: 'white',
+                border: '1px solid #e2e8f0'
+              }}
             >
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, marginBottom: '1.5rem', color: '#0f172a' }}
+              >
               Quiz Details
-            </Typography>
+              </Typography>
 
-            {/* Title */}
-            <Box sx={{ marginBottom: '1.5rem' }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
-              >
+              {/* Title */}
+              <Box sx={{ marginBottom: '1.5rem' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
+                >
                 Quiz Title *
-              </Typography>
-              <TextField
-                fullWidth
-                defaultValue={quizData.title}
-                // onChange={(e) => handleInputChange('title', e.target.value)}
-                placeholder="Enter quiz title"
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                    backgroundColor: '#fafbfc',
-                    '&:hover fieldset': {
-                      borderColor: '#8b5cf6'
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#8b5cf6'
-                    }
-                  }
-                }}
-              />
-            </Box>
+                </Typography>
+                <Controller
+                  name="title"
+                  control={control}
+                  rules={{
+                    required: FIELD_REQUIRED_MESSAGE,
+                    minLength: { value: 3, message: 'Min Length is 3 characters' },
+                    maxLength: { value: 100, message: 'Max Length is 100 characters' }
+                  }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="Enter quiz title"
+                      error={!!errors.title}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          backgroundColor: '#fafbfc',
+                          '&:hover fieldset': {
+                            borderColor: '#8b5cf6'
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#8b5cf6'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                />
+                <FieldErrorAlert errors={errors} fieldName="title" />
+              </Box>
 
-            {/* Description */}
-            <Box sx={{ marginBottom: '1.5rem' }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
-              >
+              {/* Description */}
+              <Box sx={{ marginBottom: '1.5rem' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
+                >
                 Description
-              </Typography>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                defaultValue={quizData.description}
-                placeholder="Enter quiz description"
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                    backgroundColor: '#fafbfc',
-                    '&:hover fieldset': {
-                      borderColor: '#8b5cf6'
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#8b5cf6'
-                    }
-                  }
-                }}
-              />
-            </Box>
+                </Typography>
+                <Controller
+                  name="description"
+                  control={control}
+                  rules={{
+                    required: FIELD_REQUIRED_MESSAGE,
+                    minLength: { value: 3, message: 'Min Length is 3 characters' },
+                    maxLength: { value: 500, message: 'Max Length is 500 characters' }
+                  }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      multiline
+                      rows={4}
+                      placeholder="Enter quiz description"
+                      error={!!errors.description}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          backgroundColor: '#fafbfc',
+                          '&:hover fieldset': {
+                            borderColor: '#8b5cf6'
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#8b5cf6'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                />
+                <FieldErrorAlert errors={errors} fieldName="description" />
+              </Box>
 
-            {/* Category */}
-            <Box sx={{ marginBottom: '1.5rem' }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
-              >
+              {/* Category */}
+              <Box sx={{ marginBottom: '1.5rem' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
+                >
                 Category *
-              </Typography>
-              <FormControl fullWidth>
-                <Select
-                  defaultValue={quizData.category}
-                  sx={{
-                    borderRadius: '8px',
-                    backgroundColor: '#fafbfc',
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#8b5cf6'
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#8b5cf6'
-                    }
-                  }}
-                >
-                  <MenuItem value="programming">Programming</MenuItem>
-                  <MenuItem value="mathematics">Mathematics</MenuItem>
-                  <MenuItem value="science">Science</MenuItem>
-                  <MenuItem value="history">History</MenuItem>
-                  <MenuItem value="technology">Technology</MenuItem>
-                  <MenuItem value="geography">Geography</MenuItem>
-                  <MenuItem value="literature">Literature</MenuItem>
-                  <MenuItem value="other">Other</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+                </Typography>
+                <FormControl fullWidth>
+                  <Controller
+                    name="category"
+                    control={control}
+                    rules={{ required: FIELD_REQUIRED_MESSAGE }}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        error={!!errors.category}
+                        sx={{
+                          borderRadius: '8px',
+                          backgroundColor: '#fafbfc',
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#8b5cf6'
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#8b5cf6'
+                          }
+                        }}
+                      >
+                        <MenuItem value="programming">Programming</MenuItem>
+                        <MenuItem value="mathematics">Mathematics</MenuItem>
+                        <MenuItem value="science">Science</MenuItem>
+                        <MenuItem value="history">History</MenuItem>
+                        <MenuItem value="technology">Technology</MenuItem>
+                        <MenuItem value="geography">Geography</MenuItem>
+                        <MenuItem value="literature">Literature</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+                <FieldErrorAlert errors={errors} fieldName="category" />
+              </Box>
 
-            {/* level */}
-            <Box sx={{ marginBottom: '1.5rem' }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
-              >
+              {/* level */}
+              <Box sx={{ marginBottom: '1.5rem' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
+                >
                 Level *
-              </Typography>
-              <FormControl fullWidth>
-                <Select
-                  defaultValue={quizData.level}
-                  sx={{
-                    borderRadius: '8px',
-                    backgroundColor: '#fafbfc',
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#8b5cf6'
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#8b5cf6'
-                    }
-                  }}
-                >
-                  <MenuItem value="easy">Easy</MenuItem>
-                  <MenuItem value="medium">Medium</MenuItem>
-                  <MenuItem value="hard">Hard</MenuItem>
-                  <MenuItem value="expert">Expert</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Paper>
+                </Typography>
+                <FormControl fullWidth>
+                  <Controller
+                    name="level"
+                    control={control}
+                    rules={{ required: FIELD_REQUIRED_MESSAGE }}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        error={!!errors.level}
+                        sx={{
+                          borderRadius: '8px',
+                          backgroundColor: '#fafbfc',
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#8b5cf6'
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#8b5cf6'
+                          }
+                        }}
+                      >
+                        <MenuItem value="easy">Easy</MenuItem>
+                        <MenuItem value="medium">Medium</MenuItem>
+                        <MenuItem value="hard">Hard</MenuItem>
+                        <MenuItem value="expert">Expert</MenuItem>
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+                <FieldErrorAlert errors={errors} fieldName="level" />
+              </Box>
+            </Paper>
 
-          {/* Right Column - Quiz Settings */}
-          <Paper
-            elevation={2}
-            sx={{
-              padding: '2rem',
-              borderRadius: '16px',
-              backgroundColor: 'white',
-              border: '1px solid #e2e8f0'
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 600, marginBottom: '1.5rem', color: '#0f172a' }}
+            {/* Right Column - Quiz Settings */}
+            <Paper
+              elevation={2}
+              sx={{
+                padding: '2rem',
+                borderRadius: '16px',
+                backgroundColor: 'white',
+                border: '1px solid #e2e8f0'
+              }}
             >
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, marginBottom: '1.5rem', color: '#0f172a' }}
+              >
               Quiz Settings
-            </Typography>
+              </Typography>
 
-            {/* Time Limit */}
-            <Box sx={{ marginBottom: '1.5rem' }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
-              >
+              {/* Time Limit */}
+              <Box sx={{ marginBottom: '1.5rem' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
+                >
                 Time Limit (minutes) *
-              </Typography>
-              <TextField
-                fullWidth
-                type="number"
-                defaultValue={quizData.timeLimit}
-                placeholder="Enter time limit"
-                InputProps={{
-                  inputProps: { min: 1 }
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                    backgroundColor: '#fafbfc',
-                    '&:hover fieldset': {
-                      borderColor: '#8b5cf6'
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#8b5cf6'
-                    }
-                  }
-                }}
-              />
-            </Box>
+                </Typography>
+                <Controller
+                  name="timeLimit"
+                  control={control}
+                  rules={{
+                    required: FIELD_REQUIRED_MESSAGE,
+                    min: { value: 1, message: 'Time limit must be at least 1 minute' },
+                    max: { value: 300, message: 'Time limit cannot exceed 300 minutes' }
+                  }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      type="number"
+                      placeholder="Enter time limit"
+                      error={!!errors.timeLimit}
+                      InputProps={{
+                        inputProps: { min: 1, max: 300 }
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          backgroundColor: '#fafbfc',
+                          '&:hover fieldset': {
+                            borderColor: '#8b5cf6'
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#8b5cf6'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                />
+                <FieldErrorAlert errors={errors} fieldName="timeLimit" />
+              </Box>
 
-            {/* Passing Score */}
-            <Box sx={{ marginBottom: '1.5rem' }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
-              >
+              {/* Passing Score */}
+              <Box sx={{ marginBottom: '1.5rem' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
+                >
                 Passing Score (%) *
-              </Typography>
-              <TextField
-                fullWidth
-                type="number"
-                defaultValue={quizData.passingScore}
-                placeholder="Enter passing score"
-                InputProps={{
-                  inputProps: { min: 0, max: 100 }
-                }}
+                </Typography>
+                <Controller
+                  name="passingScore"
+                  control={control}
+                  rules={{
+                    required: FIELD_REQUIRED_MESSAGE,
+                    min: { value: 0, message: 'Passing score cannot be negative' },
+                    max: { value: 100, message: 'Passing score cannot exceed 100%' }
+                  }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      type="number"
+                      placeholder="Enter passing score"
+                      error={!!errors.passingScore}
+                      InputProps={{
+                        inputProps: { min: 0, max: 100 }
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          backgroundColor: '#fafbfc',
+                          '&:hover fieldset': {
+                            borderColor: '#8b5cf6'
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#8b5cf6'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                />
+                <FieldErrorAlert errors={errors} fieldName="passingScore" />
+              </Box>
+
+              {/* Divider */}
+              <Box
                 sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                    backgroundColor: '#fafbfc',
-                    '&:hover fieldset': {
-                      borderColor: '#8b5cf6'
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#8b5cf6'
-                    }
-                  }
+                  borderTop: '1px solid #e2e8f0',
+                  marginY: '1.5rem'
                 }}
               />
-            </Box>
 
-            {/* Divider */}
-            <Box
-              sx={{
-                borderTop: '1px solid #e2e8f0',
-                marginY: '1.5rem'
-              }}
-            />
-
-            {/* Shuffle Questions */}
-            <Box sx={{ marginBottom: '1rem' }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={quizData.shuffleQuestions}
-                    sx={{
-                      '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: '#8b5cf6'
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: '#8b5cf6'
+              {/* Shuffle Questions */}
+              {/* <Box sx={{ marginBottom: '1rem' }}>
+                <Controller
+                  name="shuffleQuestions"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          {...field}
+                          checked={field.value}
+                          sx={{
+                            '& .MuiSwitch-switchBase.Mui-checked': {
+                              color: '#8b5cf6'
+                            },
+                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                              backgroundColor: '#8b5cf6'
+                            }
+                          }}
+                        />
                       }
-                    }}
-                  />
-                }
-                label={
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 500, color: '#0f172a' }}>
-                      Shuffle Questions
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#64748b' }}>
-                      Randomize question order for each attempt
-                    </Typography>
-                  </Box>
-                }
-              />
-            </Box>
-
-            {/* Show Results */}
-            <Box sx={{ marginBottom: '1rem' }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={quizData.showResults}
-                    sx={{
-                      '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: '#8b5cf6'
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: '#8b5cf6'
+                      label={
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 500, color: '#0f172a' }}>
+                          Shuffle Questions
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#64748b' }}>
+                          Randomize question order for each attempt
+                          </Typography>
+                        </Box>
                       }
-                    }}
-                  />
-                }
-                label={
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 500, color: '#0f172a' }}>
-                      Show Results Immediately
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#64748b' }}>
-                      Display score and answers after submission
-                    </Typography>
-                  </Box>
-                }
-              />
-            </Box>
+                    />
+                  )}
+                />
+              </Box> */}
 
-            {/* Allow Retake */}
-            <Box>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={quizData.allowRetake}
-                    sx={{
-                      '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: '#8b5cf6'
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: '#8b5cf6'
+              {/* Show Results */}
+              <Box sx={{ marginBottom: '1rem' }}>
+                <Controller
+                  name="showResults"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          {...field}
+                          checked={field.value}
+                          sx={{
+                            '& .MuiSwitch-switchBase.Mui-checked': {
+                              color: '#8b5cf6'
+                            },
+                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                              backgroundColor: '#8b5cf6'
+                            }
+                          }}
+                        />
                       }
-                    }}
-                  />
-                }
-                label={
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 500, color: '#0f172a' }}>
-                      Allow Retake
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#64748b' }}>
-                      Students can retake the quiz multiple times
-                    </Typography>
-                  </Box>
-                }
-              />
-            </Box>
+                      label={
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 500, color: '#0f172a' }}>
+                          Show Results Immediately
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#64748b' }}>
+                          Display score and answers after submission
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  )}
+                />
+              </Box>
 
-            {/* Info Box */}
-            <Box
-              sx={{
-                marginTop: '2rem',
-                padding: '1rem',
-                backgroundColor: '#fef3c7',
-                borderRadius: '8px',
-                border: '1px solid #fbbf24'
-              }}
-            >
-              <Typography variant="body2" sx={{ color: '#92400e', fontWeight: 500 }}>
+              {/* Allow Retake */}
+              <Box>
+                <Controller
+                  name="allowRetake"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          {...field}
+                          checked={field.value}
+                          sx={{
+                            '& .MuiSwitch-switchBase.Mui-checked': {
+                              color: '#8b5cf6'
+                            },
+                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                              backgroundColor: '#8b5cf6'
+                            }
+                          }}
+                        />
+                      }
+                      label={
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 500, color: '#0f172a' }}>
+                          Allow Retake
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#64748b' }}>
+                          Students can retake the quiz multiple times
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  )}
+                />
+              </Box>
+
+              {/* Info Box */}
+              <Box
+                sx={{
+                  marginTop: '2rem',
+                  padding: '1rem',
+                  backgroundColor: '#fef3c7',
+                  borderRadius: '8px',
+                  border: '1px solid #fbbf24'
+                }}
+              >
+                <Typography variant="body2" sx={{ color: '#92400e', fontWeight: 500 }}>
                 💡 Note
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#92400e' }}>
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#92400e' }}>
                 Changes to these settings will apply to all future quiz attempts. Existing attempts
                 will not be affected.
-              </Typography>
-            </Box>
-          </Paper>
-        </Box>
+                </Typography>
+              </Box>
+            </Paper>
+          </Box>
 
-        {/* Action Buttons */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: '1rem',
-            marginTop: '2rem'
-          }}
-        >
-          <Button
-            variant="outlined"
-            startIcon={<SaveIcon fontSize='small' />}
-            onClick={handleSave}
+          {/* Action Buttons */}
+          <Box
             sx={{
-              borderColor: '#cbd5e1',
-              color: '#64748b',
-              padding: '0.75rem 1.5rem',
-              '&:hover': {
-                borderColor: '#94a3b8',
-                backgroundColor: '#f8fafc'
-              }
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              marginTop: '2rem'
             }}
           >
-            Save
-          </Button>
-
-          <Box sx={{ display: 'flex', gap: '1rem' }}>
             <Button
-              variant="contained"
-              startIcon={<RemoveRedEyeIcon fontSize="small" />}
+              type="submit"
+              variant="outlined"
+              startIcon={<SaveIcon fontSize='small' />}
               sx={{
-                backgroundColor: '#8b5cf6',
-                color: 'white',
+                borderColor: '#cbd5e1',
+                color: '#64748b',
                 padding: '0.75rem 1.5rem',
                 '&:hover': {
-                  backgroundColor: '#7c3aed'
+                  borderColor: '#94a3b8',
+                  backgroundColor: '#f8fafc'
+                },
+                '&.Mui-disabled': {
+                  opacity: 0.5
                 }
               }}
             >
+            Save Changes
+            </Button>
+
+            <Box sx={{ display: 'flex', gap: '1rem' }}>
+              <Button
+                variant="contained"
+                startIcon={<RemoveRedEyeIcon fontSize="small" />}
+                sx={{
+                  backgroundColor: '#8b5cf6',
+                  color: 'white',
+                  padding: '0.75rem 1.5rem',
+                  '&:hover': {
+                    backgroundColor: '#7c3aed'
+                  }
+                }}
+              >
               Preview
-            </Button>
-            <Button
-              variant="contained"
-              endIcon={<ArrowForwardIcon fontSize="small" />}
-              sx={{
-                backgroundColor: '#10b981',
-                color: 'white',
-                padding: '0.75rem 2rem',
-                '&:hover': {
-                  backgroundColor: '#059669'
-                }
-              }}
-              onClick={handleNext}
-            >
+              </Button>
+              <Button
+                variant="contained"
+                endIcon={<ArrowForwardIcon fontSize="small" />}
+                sx={{
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  padding: '0.75rem 2rem',
+                  '&:hover': {
+                    backgroundColor: '#059669'
+                  }
+                }}
+                onClick={handleNext}
+              >
               Edit Questions
-            </Button>
+              </Button>
+            </Box>
           </Box>
-        </Box>
+        </form>
       </Container>
     </Box>
   )

@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb'
 import { questionModel } from './questionModel'
 import { answerOptionModel } from './answerModel'
 import { pagingSkipValue } from '~/utils/algorithms'
+import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
 const QUIZ_COLLECTION_NAME = 'quizzes'
 const QUIZ_COLLECTION_SCHEMA = Joi.object({
@@ -11,7 +12,9 @@ const QUIZ_COLLECTION_SCHEMA = Joi.object({
   description: Joi.string().optional().trim().strict(),
   category: Joi.string().required().trim().strict(),
   level: Joi.string().required().trim().strict(),
-  questionIds: Joi.array().items(Joi.string()).default([]),
+  questionOrderIds: Joi.array().items(
+    Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+  ).default([]),
   status: Joi.string().valid('draft', 'published').default('draft'),
 
   createdBy: Joi.string().required(),
@@ -19,7 +22,9 @@ const QUIZ_COLLECTION_SCHEMA = Joi.object({
   totalPoints: Joi.number(),
   passingScore: Joi.number().required(),
   timeLimit: Joi.number().required(),
-
+  // shuffleQuestions: Joi.boolean().default(false),
+  allowRetake: Joi.boolean().default(true),
+  showResults: Joi.boolean().default(true),
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null)
 })
@@ -51,14 +56,6 @@ const findOneById = async (id) => {
   }
 }
 
-const findAll = async () => {
-  try {
-    const quizzes = await DB_GET().collection(QUIZ_COLLECTION_NAME).find({}).toArray()
-    return quizzes
-  } catch (error) {
-    throw new Error(error)
-  }
-}
 
 const findByCreator = async (userId) => {
   try {
@@ -113,14 +110,14 @@ const getDetails = async (userId, quizId) => {
       { $lookup: {
         from: questionModel.QUESTION_COLLECTION_NAME,
         localField: '_id',
-        foreignField: 'quizzId',
+        foreignField: 'quizId',
         as: 'questions'
       } },
       { $lookup: {
         from: answerOptionModel.ANSWER_OPTION_COLLECTION_NAME,
         localField: '_id',
-        foreignField: 'quizzId',
-        as: 'answerOptions'
+        foreignField: 'quizId',
+        as: 'options'
       } }
     ]).toArray()
     return quizz[0] || null
@@ -169,7 +166,7 @@ const getQuizzes = async (userId, page, itemsPerPage, filter) => {
           { $lookup: {
             from: questionModel.QUESTION_COLLECTION_NAME,
             localField: '_id',
-            foreignField: 'quizzId',
+            foreignField: 'quizId',
             as: 'questions'
           } },
           // Thêm field questionsCount
@@ -196,16 +193,45 @@ const getQuizzes = async (userId, page, itemsPerPage, filter) => {
   }
 }
 
+// Thêm questionId vào mảng questionOrderIds của quiz
+const pushQuestionIds = async (question) => {
+  try {
+    const updateResult = await DB_GET().collection(QUIZ_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(question.quizId) },
+      { $push: { questionOrderIds: new ObjectId(question._id) } },
+      { returnDocument: 'after' }
+    )
+    return updateResult
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+// Xóa questionId khỏi mảng questionOrderIds của quiz
+const pullQuestionIds = async (question) => {
+  try {
+    const updateResult = await DB_GET().collection(QUIZ_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(question.quizId) },
+      { $pull: { questionOrderIds: new ObjectId(question._id) } },
+      { returnDocument: 'after' }
+    )
+    return updateResult
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const quizModel = {
   QUIZ_COLLECTION_NAME,
   QUIZ_COLLECTION_SCHEMA,
   createNew,
   findOneById,
-  findAll,
   findByCreator,
   findByStatus,
   update,
   deleteOne,
   getDetails,
-  getQuizzes
+  getQuizzes,
+  pushQuestionIds,
+  pullQuestionIds
 }
