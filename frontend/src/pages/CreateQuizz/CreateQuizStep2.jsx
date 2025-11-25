@@ -22,6 +22,9 @@ import { useSelector, useDispatch } from 'react-redux'
 import { selectCurrentActiveQuizz, fetchQuizzDetailsAPI } from '~/redux/activeQuizz/activeQuizzSlice'
 import { useParams } from 'react-router-dom'
 import AddIcon from '@mui/icons-material/Add'
+import { toast } from 'react-toastify'
+import { createQuestionsInBatchAPI } from '~/apis'
+import { isEqual, cloneDeep } from 'lodash'
 
 function CreateQuizStep2() {
   const navigate = useNavigate()
@@ -34,20 +37,27 @@ function CreateQuizStep2() {
       ? quizData.questions
       : []
   )
+  const [originalQuestions, setOriginalQuestions] = useState([]) // Lưu dữ liệu gốc từ server
   const { id } = useParams()
 
   useEffect(() => {
-    // Chỉ fetch nếu quizData chưa có hoặc _id không khớp với id từ URL
-    if (!quizData || quizData._id !== id) {
-      setIsLoading(true)
-      dispatch(fetchQuizzDetailsAPI(id)).finally(() => setIsLoading(false))
+    setIsLoading(true)
+    dispatch(fetchQuizzDetailsAPI(id)).finally(() => setIsLoading(false))
+  }, [id, dispatch])
+
+  // Đồng bộ questions từ quizData khi có dữ liệu mới từ Redux
+  useEffect(() => {
+    if (quizData?.questions && quizData.questions.length > 0) {
+      const questionsData = cloneDeep(quizData.questions) // Deep clone
+      setQuestions(questionsData)
+      setOriginalQuestions(questionsData) // Lưu snapshot gốc
     }
-  }, [quizData, id, dispatch])
+  }, [quizData])
 
 
   const handleQuestionChange = (questionId, field, value) => {
     setQuestions(questions.map(q => {
-      if (q._id === questionId) {
+      if (q.tempId === questionId) {
         // When changing question type, update options accordingly
         if (field === 'type') {
           if (value === 'true-false') {
@@ -55,8 +65,8 @@ function CreateQuizStep2() {
               ...q,
               type: value,
               options: [
-                { _id: 1, text: 'True', isCorrect: false },
-                { _id: 2, text: 'False', isCorrect: false }
+                { tempId: q.tempId * 10 + 1, content: 'True', isCorrect: false },
+                { tempId: q.tempId * 10 + 2, content: 'False', isCorrect: false }
               ]
             }
           } else if (value === 'single-choice' || value === 'multiple-choice') {
@@ -64,8 +74,8 @@ function CreateQuizStep2() {
               ...q,
               type: value,
               options: [
-                { _id: 1, text: '', isCorrect: false },
-                { _id: 2, text: '', isCorrect: false }
+                { tempId: q.tempId * 10 + 1, content: '', isCorrect: false },
+                { tempId: q.tempId * 10 + 2, content: '', isCorrect: false }
               ]
             }
           }
@@ -78,11 +88,11 @@ function CreateQuizStep2() {
 
   const handleOptionChange = (questionId, optionId, field, value) => {
     setQuestions(questions.map(q => {
-      if (q._id === questionId) {
+      if (q.tempId === questionId) {
         return {
           ...q,
           options: q.options.map(opt =>
-            opt._id === optionId ? { ...opt, [field]: value } : opt
+            opt.tempId === optionId ? { ...opt, [field]: value } : opt
           )
         }
       }
@@ -92,13 +102,13 @@ function CreateQuizStep2() {
 
   const handleCorrectAnswerChange = (questionId, optionId) => {
     setQuestions(questions.map(q => {
-      if (q._id === questionId) {
+      if (q.tempId === questionId) {
         // For multiple-choice, allow multiple correct answers (checkbox behavior)
         if (q.type === 'multiple-choice') {
           return {
             ...q,
             options: q.options.map(opt =>
-              opt._id === optionId
+              opt.tempId === optionId
                 ? { ...opt, isCorrect: !opt.isCorrect }
                 : opt
             )
@@ -109,7 +119,7 @@ function CreateQuizStep2() {
             ...q,
             options: q.options.map(opt => ({
               ...opt,
-              isCorrect: opt._id === optionId
+              isCorrect: opt.tempId === optionId
             }))
           }
         }
@@ -120,11 +130,11 @@ function CreateQuizStep2() {
 
   const handleAddOption = (questionId) => {
     setQuestions(questions.map(q => {
-      if (q._id === questionId) {
-        const maxId = q.options && q.options.length ? Math.max(...q.options.map(o => Number(o._id))) : 0
+      if (q.tempId === questionId) {
+        const maxOptionIndex = q.options && q.options.length ? Math.max(...q.options.map(o => Number(o.tempId) % 10)) : 0
         const newOption = {
-          _id: maxId + 1,
-          text: '',
+          tempId: q.tempId * 10 + maxOptionIndex + 1,
+          content: '',
           isCorrect: false
         }
         return { ...q, options: [...q.options, newOption] }
@@ -135,10 +145,10 @@ function CreateQuizStep2() {
 
   const handleRemoveOption = (questionId, optionId) => {
     setQuestions(questions.map(q => {
-      if (q._id === questionId && q.options.length > 2) {
+      if (q.tempId === questionId && q.options.length > 2) {
         return {
           ...q,
-          options: q.options.filter(opt => opt._id !== optionId)
+          options: q.options.filter(opt => opt.tempId !== optionId)
         }
       }
       return q
@@ -146,15 +156,16 @@ function CreateQuizStep2() {
   }
 
   const handleAddQuestion = () => {
-    const maxId = questions && questions.length ? Math.max(...questions.map(q => Number(q._id))) : 0
+    const maxId = questions && questions.length ? Math.max(...questions.map(q => Number(q.tempId))) : 0
+    const newQuestionTempId = maxId + 1
     const newQuestion = {
-      _id: maxId + 1,
-      text: '',
+      tempId: newQuestionTempId,
+      content: '',
       points: 10,
       type: 'single-choice',
       options: [
-        { _id: 1, text: '', isCorrect: false },
-        { _id: 2, text: '', isCorrect: false }
+        { tempId: newQuestionTempId * 10 + 1, content: '', isCorrect: false },
+        { tempId: newQuestionTempId * 10 + 2, content: '', isCorrect: false }
       ]
     }
     setQuestions(prev => [...prev, newQuestion])
@@ -162,7 +173,7 @@ function CreateQuizStep2() {
 
   const handleRemoveQuestion = (questionId) => {
     if (questions.length > 1) {
-      setQuestions(questions.filter(q => q._id !== questionId))
+      setQuestions(questions.filter(q => q.tempId !== questionId))
     }
   }
 
@@ -170,9 +181,72 @@ function CreateQuizStep2() {
     navigate(`/teacher/edit/${quizData._id}/step1`)
   }
 
-  const handleSaveDraft = () => {
+  const validateQuestions = () => {
+    if (questions.length === 0) {
+      toast.error('Please add at least one question before proceeding.')
+      return false
+    }
+
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i]
+
+      // Check if question content is empty
+      if (!question.content || question.content.trim() === '') {
+        toast.error(`Question ${i + 1}: Question content cannot be empty.`)
+        return false
+      }
+
+      // Check if at least one correct answer is selected
+      const hasCorrectAnswer = question.options.some(opt => opt.isCorrect)
+      if (!hasCorrectAnswer) {
+        toast.error(`Question ${i + 1}: Please select at least one correct answer.`)
+        return false
+      }
+
+      // Check if all options have content (except for true-false which has fixed content)
+      if (question.type !== 'true-false') {
+        for (let j = 0; j < question.options.length; j++) {
+          const option = question.options[j]
+          if (!option.content || option.content.trim() === '') {
+            toast.error(`Question ${i + 1}, Option ${j + 1}: Option content cannot be empty.`)
+            return false
+          }
+        }
+      }
+    }
+
+    return true
+  }
+
+  // Kiểm tra xem có thay đổi so với dữ liệu gốc không
+  const hasChanges = () => {
+    return !isEqual(questions, originalQuestions)
+  }
+
+  const handleSaveDraft = async () => {
+    if (!validateQuestions()) return
+
+    // Kiểm tra xem có thay đổi không
+    if (!hasChanges()) {
+      toast.info('No changes to save.')
+      return
+    }
+
     console.log('Save draft - Step 2:', { questions })
-    // TODO: Call API
+    toast.promise(
+      createQuestionsInBatchAPI(quizData._id, questions),
+      {
+        pending: 'Updating...'
+      }
+    ).then(res => {
+      if (!res.error) {
+        toast.success('Draft saved successfully!')
+        dispatch(fetchQuizzDetailsAPI(id))
+      }
+    }).catch(error => {
+      toast.error('Failed to save draft. Please try again.')
+      console.error('Save draft error:', error)
+    })
   }
 
   const handlePreview = () => {
@@ -180,9 +254,10 @@ function CreateQuizStep2() {
   }
 
   const handlePublish = () => {
+    if (!validateQuestions()) return
     console.log('Publish quiz:', { ...quizData, questions })
     // TODO: Validate, call API, navigate to success page
-    alert('Quiz published successfully! (TODO: implement API)')
+    toast.success('Quiz published successfully! (TODO: implement API)')
     // navigate('/dashboard')
   }
 
@@ -313,8 +388,8 @@ function CreateQuizStep2() {
             ) : (
               /* Questions List */
               <div className="cq-questions-list">
-                {questions.map((question, qIndex) => (
-                  <div key={question?._id} className="cq-question-card">
+                {questions?.map((question, qIndex) => (
+                  <div key={question?.tempId} className="cq-question-card">
                     <div className="cq-question-header">
                       <h4 className="cq-question-number">Question {qIndex + 1}</h4>
                       <div className="cq-question-controls">
@@ -324,14 +399,14 @@ function CreateQuizStep2() {
                             type="number"
                             className="cq-meta-input"
                             value={question.points}
-                            onChange={(e) => handleQuestionChange(question._id, 'points', parseInt(e.target.value) || 0)}
+                            onChange={(e) => handleQuestionChange(question.tempId, 'points', parseInt(e.target.value) || 0)}
                             min="1"
                           />
                         </div>
                         <select
                           className="cq-question-type"
                           value={question.type}
-                          onChange={(e) => handleQuestionChange(question._id, 'type', e.target.value)}
+                          onChange={(e) => handleQuestionChange(question.tempId, 'type', e.target.value)}
                         >
                           <option value="single-choice">Single Choice</option>
                           <option value="multiple-choice">Multiple Choice</option>
@@ -341,7 +416,7 @@ function CreateQuizStep2() {
                           <button
                             type="button"
                             className="cq-btn-delete"
-                            onClick={() => handleRemoveQuestion(question._id)}
+                            onClick={() => handleRemoveQuestion(question.tempId)}
                             title="Delete question"
                           >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -357,8 +432,8 @@ function CreateQuizStep2() {
                       <textarea
                         className="cq-textarea"
                         rows={2}
-                        value={question.text}
-                        onChange={(e) => handleQuestionChange(question._id, 'text', e.target.value)}
+                        value={question.content}
+                        onChange={(e) => handleQuestionChange(question.tempId, 'content', e.target.value)}
                         placeholder="Enter your question here..."
                       />
                     </div>
@@ -367,29 +442,29 @@ function CreateQuizStep2() {
                       <div className="cq-form-group">
                         <label className="cq-label">Answer Options (Select one correct answer)</label>
                         <div className="cq-options-list">
-                          {question.options.map((option, oIndex) => (
-                            <div key={option._id} className="cq-option-row">
+                          {question?.options?.map((option, oIndex) => (
+                            <div key={option.tempId} className="cq-option-row">
                               <div className="cq-option-radio">
                                 <input
                                   type="radio"
-                                  name={`correct-${question._id}`}
+                                  name={`correct-${question.tempId}`}
                                   checked={option.isCorrect}
-                                  onChange={() => handleCorrectAnswerChange(question._id, option._id)}
+                                  onChange={() => handleCorrectAnswerChange(question.tempId, option.tempId)}
                                   title="Mark as correct answer"
                                 />
                               </div>
                               <input
                                 type="text"
                                 className="cq-option-input"
-                                value={option.text}
-                                onChange={(e) => handleOptionChange(question._id, option._id, 'text', e.target.value)}
+                                value={option.content}
+                                onChange={(e) => handleOptionChange(question.tempId, option.tempId, 'content', e.target.value)}
                                 placeholder={`Option ${oIndex + 1}`}
                               />
                               {question.options.length > 2 && (
                                 <button
                                   type="button"
                                   className="cq-btn-remove-option"
-                                  onClick={() => handleRemoveOption(question._id, option._id)}
+                                  onClick={() => handleRemoveOption(question.tempId, option.tempId)}
                                   title="Remove option"
                                 >
                                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -402,7 +477,7 @@ function CreateQuizStep2() {
                           <button
                             type="button"
                             className="cq-btn-add-option"
-                            onClick={() => handleAddOption(question._id)}
+                            onClick={() => handleAddOption(question.tempId)}
                           >
                             + Add Option
                           </button>
@@ -415,27 +490,27 @@ function CreateQuizStep2() {
                         <label className="cq-label">Answer Options (Select all correct answers)</label>
                         <div className="cq-options-list">
                           {question.options.map((option, oIndex) => (
-                            <div key={option._id} className="cq-option-row">
+                            <div key={option.tempId} className="cq-option-row">
                               <div className="cq-option-checkbox">
                                 <input
                                   type="checkbox"
                                   checked={option.isCorrect}
-                                  onChange={() => handleCorrectAnswerChange(question._id, option._id)}
+                                  onChange={() => handleCorrectAnswerChange(question.tempId, option.tempId)}
                                   title="Mark as correct answer"
                                 />
                               </div>
                               <input
                                 type="text"
                                 className="cq-option-input"
-                                value={option.text}
-                                onChange={(e) => handleOptionChange(question._id, option._id, 'text', e.target.value)}
+                                value={option.content}
+                                onChange={(e) => handleOptionChange(question.tempId, option.tempId, 'content', e.target.value)}
                                 placeholder={`Option ${oIndex + 1}`}
                               />
                               {question.options.length > 2 && (
                                 <button
                                   type="button"
                                   className="cq-btn-remove-option"
-                                  onClick={() => handleRemoveOption(question._id, option._id)}
+                                  onClick={() => handleRemoveOption(question.tempId, option.tempId)}
                                   title="Remove option"
                                 >
                                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -448,7 +523,7 @@ function CreateQuizStep2() {
                           <button
                             type="button"
                             className="cq-btn-add-option"
-                            onClick={() => handleAddOption(question._id)}
+                            onClick={() => handleAddOption(question.tempId)}
                           >
                             + Add Option
                           </button>
@@ -461,20 +536,20 @@ function CreateQuizStep2() {
                         <label className="cq-label">Correct Answer</label>
                         <div className="cq-options-list">
                           {question.options.map((option) => (
-                            <div key={option._id} className="cq-option-row cq-option-row-readonly">
+                            <div key={option.tempId} className="cq-option-row cq-option-row-readonly">
                               <div className="cq-option-radio">
                                 <input
                                   type="radio"
-                                  name={`correct-${question._id}`}
+                                  name={`correct-${question.tempId}`}
                                   checked={option.isCorrect}
-                                  onChange={() => handleCorrectAnswerChange(question._id, option._id)}
+                                  onChange={() => handleCorrectAnswerChange(question.tempId, option.tempId)}
                                   title="Mark as correct answer"
                                 />
                               </div>
                               <input
                                 type="text"
                                 className="cq-option-input"
-                                value={option.text}
+                                value={option.content}
                                 readOnly
                                 disabled
                               />

@@ -103,7 +103,7 @@ export default function PreviewQuiz() {
 
 
   const getQuestionStatus = (questionIndex) => {
-    const questionId = questions[questionIndex]._id
+    const questionId = questions[questionIndex].tempId
     if (answers[questionId]) return 'answered'
     return 'unanswered'
   }
@@ -222,7 +222,7 @@ export default function PreviewQuiz() {
 
                 return (
                   <Button
-                    key={question._id}
+                    key={question.tempId}
                     onClick={() => handleNavigateToQuestion(index)}
                     sx={{
                       minWidth: 'auto',
@@ -427,7 +427,7 @@ export default function PreviewQuiz() {
             ) : (
               <>
                 {questions.map((question, index) => (
-                  <Box key={question._id} id={`question-${index}`}>
+                  <Box key={question.tempId} id={`question-${index}`}>
                     <QuestionCard question={question} index={index} viewMode={viewMode} answers={answers} setAnswers={setAnswers}/>
                   </Box>
                 ))}

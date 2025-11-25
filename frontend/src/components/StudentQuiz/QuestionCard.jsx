@@ -67,19 +67,19 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
       </Box>
 
       <Typography variant="body1" sx={{ marginBottom: '1.5rem', fontSize: { xs: '1rem', sm: '1.1rem' } }}>
-        {question?.text}
+        {question?.content}
       </Typography>
 
       {['single-choice', 'true-false'].includes(question?.type) ? (
         <RadioGroup
-          value={answers[question._id]?.toString() || ''}
-          onChange={(e) => handleAnswerChange(question._id, parseInt(e.target.value))}
+          value={answers[question.tempId]?.toString() || ''}
+          onChange={(e) => handleAnswerChange(question.tempId, parseInt(e.target.value))}
         >
           {question?.options.map((option) => {
-            const isSelected = answers[question._id] === option._id
+            const isSelected = answers[question.tempId] === option.tempId
             return (
               <Box
-                key={option._id}
+                key={option.tempId}
                 sx={{
                   marginBottom: '0.75rem',
                   padding: { xs: '0.75rem', sm: '1rem' },
@@ -95,11 +95,11 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
                     backgroundColor: '#faf5ff'
                   }
                 }}
-                onClick={() => handleAnswerChange(question._id, option._id)}
+                onClick={() => handleAnswerChange(question.tempId, option.tempId)}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <FormControlLabel
-                    value={option?._id.toString()}
+                    value={option?.tempId.toString()}
                     control={
                       <Radio
                         checked={isSelected}
@@ -111,7 +111,7 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
                         }}
                       />
                     }
-                    label={option.text}
+                    label={option.content}
                     sx={{ width: '100%', margin: 0, cursor: 'pointer' }}
                   />
                   {isSelected && (
@@ -129,10 +129,10 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
       ) : (
         <Box>
           {question?.options.map((option) => {
-            const isSelected = Boolean((answers[question._id])?.includes(option._id))
+            const isSelected = Boolean((answers[question.tempId])?.includes(option.tempId))
             return (
               <Box
-                key={option._id}
+                key={option.tempId}
                 sx={{
                   marginBottom: '0.75rem',
                   padding: { xs: '0.75rem', sm: '1rem' },
@@ -148,11 +148,11 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
                     backgroundColor: '#faf5ff'
                   }
                 }}
-                onClick={() => handleMultipleAnswerChange(question._id, option._id)}
+                onClick={() => handleMultipleAnswerChange(question.tempId, option.tempId)}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <FormControlLabel
-                    value={option._id.toString()}
+                    value={option.tempId.toString()}
                     control={
                       <Checkbox
                         checked={isSelected}
@@ -164,7 +164,7 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
                         }}
                       />
                     }
-                    label={option.text}
+                    label={option.content}
                     sx={{ width: '100%', margin: 0, cursor: 'pointer', pointerEvents: 'none' }}
                   />
                   {isSelected && (
