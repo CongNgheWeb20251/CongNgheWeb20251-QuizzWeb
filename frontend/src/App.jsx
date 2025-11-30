@@ -12,6 +12,10 @@ import AccountVerification from './pages/Auth/AccountVerification'
 import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { Navigate, Outlet } from 'react-router-dom'
+import EditQuizInfo from '~/pages/EditQuizz/EditQuizInfo.jsx'
+import QuizResult from './pages/StudentQuiz/QuizResult'
+import StudentQuizPage from './pages/StudentQuiz/StudentQuizPage'
+import PreviewQuiz from './pages/PreviewQuiz/PreviewQuiz'
 
 const ProtectedRoute = ({ user }) => {
   if (!user) {
@@ -21,8 +25,11 @@ const ProtectedRoute = ({ user }) => {
 }
 
 const LoginedRedirect = ({ user }) => {
-  if (user) {
+  if (user?.role === 'student') {
     return <Navigate to="/dashboard" replace={true} />
+  }
+  else if (user?.role === 'teacher') {
+    return <Navigate to="/teacher/dashboard" replace={true} />
   }
   else return <Outlet />
 }
@@ -39,12 +46,15 @@ function App() {
         <Route path='/account/verification' element={<AccountVerification />} />
       </Route>
       <Route element={<ProtectedRoute user={currUser} />}>
-        <Route path='/create/step1' element={<CreateQuizStep1 />} />
-        <Route path='/create-quiz/step1' element={<CreateQuizStep1 />} />
-        <Route path='/create-quiz/step2' element={<CreateQuizStep2 />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/quizzes" element={<Quizzes />} />
-        <Route path="/quizzes/:id" element={<QuizDetail />} />
+        <Route path='teacher/create-quiz' element={<CreateQuizStep1 />} />
+        <Route path='teacher/edit/:id/step1' element={<EditQuizInfo />} />
+        <Route path='teacher/edit/:id/step2' element={<CreateQuizStep2 />} />
+        <Route path="/teacher/dashboard" element={<Dashboard />} />
+        <Route path="/teacher/quizzes" element={<Quizzes />} />
+        <Route path="/teacher/quizzes/:id" element={<QuizDetail />} />
+        <Route path="/teacher/quizzes/:id/preview" element={<PreviewQuiz />} />
+        <Route path="/quizz/:id" element={<StudentQuizPage />} />
+        <Route path="/quizz/:id/result" element={<QuizResult />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>

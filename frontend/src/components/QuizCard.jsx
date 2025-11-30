@@ -6,11 +6,11 @@ const QuizCard = ({ quiz }) => {
   const navigate = useNavigate()
 
   const handleViewClick = () => {
-    navigate(`/quizzes/${quiz.id}`)
+    navigate(`/teacher/quizzes/${quiz._id}`)
   }
 
   const handleMoreClick = () => {
-    console.log('More options for quiz:', quiz.id)
+    console.log('More options for quiz:', quiz._id)
     // TODO: Implement more options menu (edit, delete, share, etc)
   }
 
@@ -24,7 +24,7 @@ const QuizCard = ({ quiz }) => {
           <div className="qc-meta">
             <span className="qc-meta-item">{quiz.questionsCount} questions</span>
             <span className="qc-meta-item">•</span>
-            <span className="qc-meta-item">{quiz.duration} min</span>
+            <span className="qc-meta-item">{quiz.timeLimit} min</span>
             <span className="qc-meta-item">•</span>
             <span className="qc-meta-item">{quiz.completions} completions</span>
           </div>

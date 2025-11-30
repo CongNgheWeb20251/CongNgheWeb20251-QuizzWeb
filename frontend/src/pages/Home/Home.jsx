@@ -5,7 +5,7 @@ function Home() {
   const navigate = useNavigate()
 
   const handleStarted = () => {
-    navigate('/create/step1')
+    navigate('/signin')
   }
 
   const handleSignIn = () => {
@@ -55,16 +55,6 @@ function Home() {
             <div className="hero-buttons">
               <button className="btn-primary" onClick={handleStarted}>Get Started</button>
               <button className="btn-outline">Explore Quizzes</button>
-            </div>
-            <div className="social-proof">
-              <div className="avatar-group">
-                <div className="avatar"></div>
-                <div className="avatar"></div>
-                <div className="avatar"></div>
-                <div className="avatar"></div>
-                <div className="avatar"></div>
-              </div>
-              <p>5,000+ students joined this week</p>
             </div>
           </div>
         </div>
@@ -159,24 +149,6 @@ function Home() {
         </div>
       </section>
 
-      <section className="cta-section" id="rewards">
-        <div className="container">
-          <div className="cta-wrapper">
-            <div className="cta-content">
-              <h2>Ready to Start Your Quiz Journey?</h2>
-              <p>Join thousands of students and teachers. Sign up today and get access to all features.</p>
-              <div className="cta-buttons">
-                <button className="btn-white">Create Account</button>
-                <button className="btn-outline-white">Explore Quizzes</button>
-              </div>
-            </div>
-            <div className="cta-image">
-              <div className="image-placeholder"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <footer className="footer">
         <div className="container">
           <div className="footer-grid">
@@ -196,7 +168,6 @@ function Home() {
                 <li><a href="#">Home</a></li>
                 <li><a href="#">About Us</a></li>
                 <li><a href="#">Features</a></li>
-                <li><a href="#">Pricing</a></li>
                 <li><a href="#">Contact</a></li>
               </ul>
             </div>
@@ -213,9 +184,9 @@ function Home() {
             <div className="footer-column">
               <h4>Contact Us</h4>
               <ul className="contact-info">
-                <li>📧 contact@company.com</li>
-                <li>📞 (414) 687-5892</li>
-                <li>📍 794 Mcallister St,<br/>San Francisco, 94102</li>
+                <li>📧 example@sis.hust.edu.vn</li>
+                <li>📞 0123456789</li>
+                <li>📍 Số 1 Đại Cồ Việt,<br/>Hà Nội, 100000</li>
               </ul>
             </div>
           </div>

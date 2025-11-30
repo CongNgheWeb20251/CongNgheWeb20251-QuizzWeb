@@ -33,13 +33,14 @@ function QuizDetail() {
   const handleEdit = () => {
     console.log('Edit quiz:', id)
     // TODO: Implement edit redirect to /create-quiz/step1?id=...
+    navigate(`/teacher/edit/${id}/step1`)
   }
 
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this quiz?')) {
       console.log('Delete quiz:', id)
       // TODO: Implement API call to delete quiz
-      navigate('/quizzes')
+      navigate('/teacher/quizzes')
     }
   }
 
@@ -65,7 +66,7 @@ function QuizDetail() {
       <div className="qd-page">
         <div className="error-container">
           <h2>Quiz not found</h2>
-          <button className="cq-btn cq-btn-primary" onClick={() => navigate('/quizzes')}>
+          <button className="cq-btn cq-btn-primary" onClick={() => navigate('/teacher/quizzes')}>
             Back to Quizzes
           </button>
         </div>
@@ -77,7 +78,7 @@ function QuizDetail() {
     <div className="qd-page">
       <div className="qd-header">
         <div className="qd-header-left">
-          <button className="back-link" onClick={() => navigate('/quizzes')}>
+          <button className="back-link" onClick={() => navigate('/teacher/quizzes')}>
             ← Quizzes
           </button>
           <div className="qd-header-title">

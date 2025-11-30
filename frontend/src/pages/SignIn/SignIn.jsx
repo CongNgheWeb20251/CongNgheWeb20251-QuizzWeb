@@ -34,7 +34,11 @@ function SignIn() {
       { pending: 'Logging in...' }
     ).then((res) => {
       if (!res.error) {
-        navigate('/dashboard', { replace: true })
+        if (res.payload?.role === 'teacher') {
+          navigate('/teacher/dashboard', { replace: true })
+        } else {
+          navigate('/dashboard', { replace: true })
+        }
       }
     })
   }

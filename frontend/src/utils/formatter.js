@@ -1,7 +1,7 @@
 export const capitalizeFirstLetter = (val) => {
-  if (!val) return "";
-  return `${val.charAt(0).toUpperCase()}${val.slice(1)}`;
-};
+  if (!val) return ''
+  return `${val.charAt(0).toUpperCase()}${val.slice(1)}`
+}
 
 
 // Kỹ thuật dùng css pointer-event để chặn user spam click tại bất kỳ chỗ nào có hành động click gọi api

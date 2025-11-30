@@ -92,9 +92,19 @@ const refreshToken = async (req, res, next) => {
 }
 
 const update = async (req, res, next) => {
-  //
+  try {
+    // Biến jwtDecoded chứa thông tin người dùng đã xác thực sau khi đi qua authMiddleware.isAuthorized
+    const userId = req.jwtDecoded._id
+    const userAvatarFile = req.file
+    // console.log('userAvatarFile:', userAvatarFile)
+    // console.log("data", req.body)
+    const updatedUser = await userService.update(userId, userAvatarFile, req.body)
+    res.status(StatusCodes.OK).json(updatedUser)
+  }
+  catch (error) {
+    next(error)
+  }
 }
-
 
 
 export const userController = {
@@ -104,5 +114,5 @@ export const userController = {
   loginGoogle,
   logout,
   refreshToken,
-  update,
+  update
 }

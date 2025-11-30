@@ -1,6 +1,8 @@
 import { StatusCodes } from 'http-status-codes'
 import express from 'express'
 import { userRoute } from './userRoute.js'
+import { dashboardRoute } from './dashboardRoute.js'
+import { quizRoute } from './quizRoute.js'
 
 const Router = express.Router()
 
@@ -12,5 +14,7 @@ Router.get('/status', (req, res) => {
 })
 
 Router.use('/users', userRoute)
+Router.use('/dashboard', dashboardRoute)
+Router.use('/quizzes', quizRoute)
 
 export const Router_V1 = Router
