@@ -51,8 +51,7 @@ const findOneById = async (id) => {
 const findByQuestionId = async (questionId) => {
   try {
     const answerOptions = await DB_GET().collection(ANSWER_OPTION_COLLECTION_NAME)
-      .find({ questionId: questionId })
-      .sort({ order: 1 })
+      .find({ questionId: new ObjectId(questionId) })
       .toArray()
     return answerOptions
   } catch (error) {
@@ -95,7 +94,7 @@ const deleteOne = async (answerOptionId) => {
 const deleteByQuestionId = async (questionId) => {
   try {
     const deleteResult = await DB_GET().collection(ANSWER_OPTION_COLLECTION_NAME).deleteMany({
-      questionId: questionId
+      questionId: new ObjectId(questionId)
     })
     return deleteResult
   } catch (error) {
