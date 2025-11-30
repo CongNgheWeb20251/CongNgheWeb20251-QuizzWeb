@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import Switch from '@mui/material/Switch';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
-import Divider from '@mui/material/Divider';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContentText from '@mui/material/DialogContentText';
+import React, { useState } from 'react'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import Switch from '@mui/material/Switch'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemText from '@mui/material/ListItemText'
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
+import Divider from '@mui/material/Divider'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContentText from '@mui/material/DialogContentText'
 
 import { styled } from '@mui/material/styles'
 import LogoutIcon from '@mui/icons-material/Logout'
@@ -28,7 +28,7 @@ import { useDispatch } from 'react-redux'
 import { updateUserAPI, logoutUserAPI } from '~/redux/user/userSlice'
 
 const StyledSection = styled(Box)(({ theme }) => ({
-  marginBottom: theme.spacing(4),
+  marginBottom: theme.spacing(4)
 }))
 
 const DangerButton = styled(Button)(({ theme }) => ({
@@ -36,7 +36,7 @@ const DangerButton = styled(Button)(({ theme }) => ({
   borderColor: theme.palette.error.main,
   '&:hover': {
     backgroundColor: theme.palette.error.light,
-    borderColor: theme.palette.error.main,
+    borderColor: theme.palette.error.main
   }
 }))
 
@@ -82,14 +82,14 @@ const AccountTab = () => {
   }
 
   const handleTwoFactorToggle = () => {
-    setTwoFactorEnabled(!twoFactorEnabled);
-  };
+    setTwoFactorEnabled(!twoFactorEnabled)
+  }
 
   const handleDeleteAccount = () => {
     // Handle account deletion
-    console.log('Account deletion requested')
+    // console.log('Account deletion requested')
     setDeleteDialogOpen(false)
-  };
+  }
 
   return (
     <Box>
@@ -246,7 +246,7 @@ const AccountTab = () => {
         </DialogActions>
       </Dialog>
     </Box>
-  );
-};
+  )
+}
 
-export default AccountTab;
+export default AccountTab
