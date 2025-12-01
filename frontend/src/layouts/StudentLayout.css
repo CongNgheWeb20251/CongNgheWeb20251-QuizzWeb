@@ -1,0 +1,81 @@
+.student-layout {
+  min-height: 100vh;
+  background-color: #f8f9fa; /* Light background */
+  color: #333;
+  font-family: 'Inter', sans-serif;
+}
+
+.student-header {
+  height: 70px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.student-logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-badge {
+  font-size: 0.75rem;
+  background-color: #e0e7ff;
+  color: #4f46e5;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.student-nav {
+  display: flex;
+  gap: 32px;
+}
+
+.student-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.student-nav-item:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+}
+
+.student-nav-item.active {
+  background-color: #e0e7ff;
+  color: #4f46e5;
+}
+
+.student-user {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.notification-bell {
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.student-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}

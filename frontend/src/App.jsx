@@ -8,6 +8,12 @@ import Dashboard from '~/pages/Dashboard/Dashboard.jsx'
 import Quizzes from '~/pages/Quizzes/Quizzes.jsx'
 import QuizDetail from '~/pages/Quizzes/QuizDetail.jsx'
 import Settings from '~/pages/Settings/Settings.jsx'
+import Students from '~/pages/Students/Students.jsx'
+import MainLayout from '~/layouts/MainLayout.jsx'
+import StudentLayout from '~/layouts/StudentLayout.jsx'
+import StudentDashboard from '~/pages/Student/Dashboard/StudentDashboard.jsx'
+import StudentHistory from '~/pages/Student/History/StudentHistory.jsx'
+import StudentProfile from '~/pages/Student/Profile/StudentProfile.jsx'
 import AccountVerification from './pages/Auth/AccountVerification'
 import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
@@ -39,13 +45,30 @@ function App() {
         <Route path='/account/verification' element={<AccountVerification />} />
       </Route>
       <Route element={<ProtectedRoute user={currUser} />}>
-        <Route path='/create/step1' element={<CreateQuizStep1 />} />
-        <Route path='/create-quiz/step1' element={<CreateQuizStep1 />} />
-        <Route path='/create-quiz/step2' element={<CreateQuizStep2 />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/quizzes" element={<Quizzes />} />
-        <Route path="/quizzes/:id" element={<QuizDetail />} />
-        <Route path="/settings" element={<Settings />} />
+        {/* Teacher Routes */}
+        {(!currUser?.role || currUser?.role === 'teacher') && (
+          <>
+            <Route path='/create/step1' element={<CreateQuizStep1 />} />
+            <Route path='/create-quiz/step1' element={<CreateQuizStep1 />} />
+            <Route path='/create-quiz/step2' element={<CreateQuizStep2 />} />
+            <Route element={<MainLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/quizzes" element={<Quizzes />} />
+              <Route path="/quizzes/:id" element={<QuizDetail />} />
+              <Route path="/students" element={<Students />} />
+              <Route path="/settings" element={<Settings />} />
+            </Route>
+          </>
+        )}
+
+        {/* Student Routes */}
+        {currUser?.role === 'student' && (
+          <Route element={<StudentLayout />}>
+            <Route path="/dashboard" element={<StudentDashboard />} />
+            <Route path="/history" element={<StudentHistory />} />
+            <Route path="/profile" element={<StudentProfile />} />
+          </Route>
+        )}
       </Route>
     </Routes>
   )

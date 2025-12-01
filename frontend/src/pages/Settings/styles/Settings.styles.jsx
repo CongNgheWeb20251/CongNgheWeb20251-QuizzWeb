@@ -2,10 +2,10 @@ import { styled } from '@mui/material/styles';
 import { Box, Paper } from '@mui/material';
 
 export const StyledSettings = styled(Box)(() => ({
-  padding: '24px',
+  /* padding: '24px', */
   maxWidth: '1200px',
   margin: '0 auto',
-  minHeight: '100vh',
+  /* minHeight: '100vh', */
   background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)',
   '& .MuiTabs-root': {
     backgroundColor: 'transparent',

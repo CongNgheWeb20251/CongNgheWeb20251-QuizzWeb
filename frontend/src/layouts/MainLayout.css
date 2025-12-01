@@ -1,0 +1,212 @@
+/* Layout */
+.main-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #1a1a1a;
+  color: white;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 280px;
+  background-color: #242424;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.logo-qui {
+  background: linear-gradient(45deg, #9333EA, #7C3AED);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-zzy {
+  background: linear-gradient(45deg, #E879F9, #D946EF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.search-box .MuiOutlinedInput-root {
+  background-color: #2f2f2f;
+  border-radius: 8px;
+}
+
+.search-box .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #404040;
+}
+
+.search-box .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #9333EA;
+}
+
+.search-box .MuiInputBase-input {
+  color: white;
+}
+
+.search-box .MuiSvgIcon-root {
+  color: #666;
+}
+
+/* Sidebar Navigation */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-section-title {
+  color: #666;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 8px 12px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #999;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: #2f2f2f;
+  color: white;
+}
+
+.nav-item.active {
+  background-color: #9333EA;
+  color: white;
+}
+
+.nav-item .MuiSvgIcon-root {
+  font-size: 1.25rem;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 24px 32px;
+  background-color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+/* Top Bar */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.search-field {
+  width: 300px;
+}
+
+.search-field .MuiOutlinedInput-root {
+  background-color: #242424;
+  border-radius: 8px;
+}
+
+.search-field .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: #333;
+}
+
+.search-field .MuiInputBase-input {
+  color: white;
+}
+
+.search-field .MuiSvgIcon-root {
+  color: #666;
+}
+
+/* Content Header */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.page-title {
+  color: white;
+  margin-bottom: 8px;
+}
+
+.welcome-text {
+  color: #9ca3af;
+}
+
+.create-btn {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border-radius: 8px;
+  padding: 12px 24px;
+  text-transform: none;
+  font-weight: 600;
+}
+
+.create-btn:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+/* Students Table */
+.students-table {
+  background-color: #242424;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.students-table .MuiTableContainer-root {
+  background-color: #242424;
+  border-radius: 8px;
+}
+
+.students-table .MuiTableHead-root .MuiTableCell-root {
+  background-color: #333;
+  color: white;
+  font-weight: 600;
+  border-bottom: 1px solid #444;
+}
+
+.students-table .MuiTableBody-root .MuiTableCell-root {
+  color: white;
+  border-bottom: 1px solid #333;
+}
+
+.students-table .MuiTableRow-root:hover {
+  background-color: #2f2f2f;
+}

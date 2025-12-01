@@ -12,8 +12,8 @@ import authorizedAxiosInstance from '~/utils/authorizeAxios'
  */
 export async function getQuizzes() {
   // TODO: Replace with real API call
-  // const { data } = await api.get('/quizzes')
-  // return data
+  // const response = await authorizedAxiosInstance.get('/v1/quizzes')
+  // return response.data
   
   // Mock data
   return [
@@ -124,8 +124,8 @@ export async function getQuizzes() {
  */
 export async function getQuiz(id) {
   // TODO: Replace with real API call
-  // const { data } = await api.get(`/quizzes/${id}`)
-  // return data
+  // const response = await authorizedAxiosInstance.get(`/v1/quizzes/${id}`)
+  // return response.data
   
   // Mock data - find quiz or return default
   const allQuizzes = await getQuizzes()
@@ -159,8 +159,8 @@ export async function getQuiz(id) {
  */
 export async function createQuiz(quizData) {
   // TODO: Replace with real API call
-  // const { data } = await api.post('/quizzes', quizData)
-  // return data
+  // const response = await authorizedAxiosInstance.post('/v1/quizzes', quizData)
+  // return response.data
 
   console.log('Creating quiz:', quizData)
   return {
@@ -184,8 +184,8 @@ export async function createQuiz(quizData) {
  */
 export async function updateQuiz(id, updateData) {
   // TODO: Replace with real API call
-  // const { data } = await api.put(`/quizzes/${id}`, updateData)
-  // return data
+  // const response = await authorizedAxiosInstance.put(`/v1/quizzes/${id}`, updateData)
+  // return response.data
   
   console.log('Updating quiz:', id, updateData)
   return { id, ...updateData }
@@ -198,8 +198,8 @@ export async function updateQuiz(id, updateData) {
  */
 export async function deleteQuiz(id) {
   // TODO: Replace with real API call
-  // const { data } = await api.delete(`/quizzes/${id}`)
-  // return data
+  // const response = await authorizedAxiosInstance.delete(`/v1/quizzes/${id}`)
+  // return response.data
   
   console.log('Deleting quiz:', id)
   return { success: true, message: 'Quiz deleted' }
@@ -212,8 +212,8 @@ export async function deleteQuiz(id) {
  */
 export async function publishQuiz(id) {
   // TODO: Replace with real API call
-  // const { data } = await api.post(`/quizzes/${id}/publish`)
-  // return data
+  // const response = await authorizedAxiosInstance.post(`/v1/quizzes/${id}/publish`)
+  // return response.data
   
   console.log('Publishing quiz:', id)
   return { id, status: 'published' }
@@ -226,8 +226,8 @@ export async function publishQuiz(id) {
  */
 export async function getQuizResponses(quizId) {
   // TODO: Replace with real API call
-  // const { data } = await api.get(`/quizzes/${quizId}/responses`)
-  // return data
+  // const response = await authorizedAxiosInstance.get(`/v1/quizzes/${quizId}/responses`)
+  // return response.data
   
   console.log('Fetching responses for quiz:', quizId)
   return []
@@ -241,10 +241,10 @@ export async function getQuizResponses(quizId) {
  */
 export async function exportQuiz(id, format = 'pdf') {
   // TODO: Replace with real API call
-  // const { data } = await api.get(`/quizzes/${id}/export?format=${format}`, {
+  // const response = await authorizedAxiosInstance.get(`/v1/quizzes/${id}/export?format=${format}`, {
   //   responseType: 'blob'
   // })
-  // return data
+  // return response.data
   
   console.log('Exporting quiz:', id, 'format:', format)
   return new Blob(['Quiz export content'], { type: 'application/octet-stream' })

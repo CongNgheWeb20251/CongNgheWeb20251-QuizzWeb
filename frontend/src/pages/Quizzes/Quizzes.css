@@ -1,7 +1,7 @@
 .quizzes-page {
-  min-height: 100vh;
+  /* min-height: 100vh; */
   background: linear-gradient(135deg, #0f1724 0%, #1a1f3a 100%);
-  padding: 2rem;
+  /* padding: 2rem; */
 }
 
 .quizzes-header {
