@@ -12,9 +12,9 @@ import authorizedAxiosInstance from '~/utils/authorizeAxios'
  */
 export async function getQuizzes() {
   // TODO: Replace with real API call
-  // const response = await authorizedAxiosInstance.get('/v1/quizzes')
-  // return response.data
-  
+  // const { data } = await api.get('/quizzes')
+  // return data
+
   // Mock data
   return [
     {
@@ -117,139 +117,6 @@ export async function getQuizzes() {
   ]
 }
 
-/**
- * Get a single quiz by ID
- * @param {string} id - Quiz ID
- * @returns {Promise<Object>} Quiz object
- */
-export async function getQuiz(id) {
-  // TODO: Replace with real API call
-  // const response = await authorizedAxiosInstance.get(`/v1/quizzes/${id}`)
-  // return response.data
-  
-  // Mock data - find quiz or return default
-  const allQuizzes = await getQuizzes()
-  const quiz = allQuizzes.find(q => q.id === id)
-  
-  if (quiz) {
-    return quiz
-  }
-  
-  // Default if not found
-  return {
-    id,
-    title: 'Sample Quiz',
-    subtitle: 'Default quiz for demo',
-    questionsCount: 5,
-    duration: 10,
-    completions: 0,
-    status: 'draft',
-    avgScore: 0,
-    topScore: 0,
-    avgTime: '-',
-    recent: [],
-    questionPerf: []
-  }
-}
-
-/**
- * Create a new quiz
- * @param {Object} quizData - Quiz data (title, description, questions, etc)
- * @returns {Promise<Object>} Created quiz object
- */
-export async function createQuiz(quizData) {
-  // TODO: Replace with real API call
-  // const response = await authorizedAxiosInstance.post('/v1/quizzes', quizData)
-  // return response.data
-
-  console.log('Creating quiz:', quizData)
-  return {
-    id: `q${Date.now()}`,
-    ...quizData,
-    completions: 0,
-    status: 'draft',
-    avgScore: 0,
-    topScore: 0,
-    avgTime: '-',
-    recent: [],
-    questionPerf: []
-  }
-}
-
-/**
- * Update quiz
- * @param {string} id - Quiz ID
- * @param {Object} updateData - Data to update
- * @returns {Promise<Object>} Updated quiz object
- */
-export async function updateQuiz(id, updateData) {
-  // TODO: Replace with real API call
-  // const response = await authorizedAxiosInstance.put(`/v1/quizzes/${id}`, updateData)
-  // return response.data
-  
-  console.log('Updating quiz:', id, updateData)
-  return { id, ...updateData }
-}
-
-/**
- * Delete a quiz
- * @param {string} id - Quiz ID
- * @returns {Promise<Object>} Response object
- */
-export async function deleteQuiz(id) {
-  // TODO: Replace with real API call
-  // const response = await authorizedAxiosInstance.delete(`/v1/quizzes/${id}`)
-  // return response.data
-  
-  console.log('Deleting quiz:', id)
-  return { success: true, message: 'Quiz deleted' }
-}
-
-/**
- * Publish a quiz (change status from draft to published)
- * @param {string} id - Quiz ID
- * @returns {Promise<Object>} Updated quiz object
- */
-export async function publishQuiz(id) {
-  // TODO: Replace with real API call
-  // const response = await authorizedAxiosInstance.post(`/v1/quizzes/${id}/publish`)
-  // return response.data
-  
-  console.log('Publishing quiz:', id)
-  return { id, status: 'published' }
-}
-
-/**
- * Get quiz responses/completions
- * @param {string} quizId - Quiz ID
- * @returns {Promise<Array>} Array of student responses
- */
-export async function getQuizResponses(quizId) {
-  // TODO: Replace with real API call
-  // const response = await authorizedAxiosInstance.get(`/v1/quizzes/${quizId}/responses`)
-  // return response.data
-  
-  console.log('Fetching responses for quiz:', quizId)
-  return []
-}
-
-/**
- * Export quiz (download as PDF, CSV, etc)
- * @param {string} id - Quiz ID
- * @param {string} format - Export format (pdf, csv, etc)
- * @returns {Promise<Blob>} File blob
- */
-export async function exportQuiz(id, format = 'pdf') {
-  // TODO: Replace with real API call
-  // const response = await authorizedAxiosInstance.get(`/v1/quizzes/${id}/export?format=${format}`, {
-  //   responseType: 'blob'
-  // })
-  // return response.data
-  
-  console.log('Exporting quiz:', id, 'format:', format)
-  return new Blob(['Quiz export content'], { type: 'application/octet-stream' })
-}
-
 export const verifyUserAPI = async (data) => {
   const response = await authorizedAxiosInstance.put('/v1/users/verify', data)
   toast.success('Your account has been verified successfully!', { theme:'colored' })
@@ -292,6 +159,60 @@ export const getTopStudentsAPI = async (limit = 5) => {
 export const getRecentQuizzesAPI = async (limit = 3) => {
   const response = await authorizedAxiosInstance.get(`/v1/dashboard/recent-quizzes?limit=${limit}`)
   return response.data
+}
+
+
+// createQuiz
+export const createQuizStep1API = async (data) => {
+  const response = await authorizedAxiosInstance.post('/v1/quizzes', data)
+  return response.data
+}
+
+export const fetchQuizzesAPI = async (searchPath) => {
+  const res = await authorizedAxiosInstance.get(`/v1/quizzes${searchPath}`)
+  return res.data
+}
+
+// update QuizInfo
+export async function updateQuizInfo(id, updateData) {
+  const res = await authorizedAxiosInstance.put(`/v1/quizzes/${id}`, updateData)
+  return res.data
+}
+
+// create Quesions in batch
+export const createQuestionsInBatchAPI = async (quizId, questions) => {
+  const res = await authorizedAxiosInstance.post(`/v1/quizzes/${quizId}/questions/batch`, { questions })
+  return res.data
+}
+//
+export async function getQuiz(id) {
+  // TODO: Replace with real API call
+  // const { data } = await api.get(`/quizzes/${id}`)
+  // return data
+
+  // Mock data - find quiz or return default
+  const allQuizzes = await getQuizzes()
+  const quiz = allQuizzes.find(q => q.id === id)
+
+  if (quiz) {
+    return quiz
+  }
+
+  // Default if not found
+  return {
+    id,
+    title: 'Sample Quiz',
+    subtitle: 'Default quiz for demo',
+    questionsCount: 5,
+    duration: 10,
+    completions: 0,
+    status: 'draft',
+    avgScore: 0,
+    topScore: 0,
+    avgTime: '-',
+    recent: [],
+    questionPerf: []
+  }
 }
 
 

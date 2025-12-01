@@ -1,17 +1,21 @@
 import Joi from 'joi'
 import { DB_GET } from '~/config/mongodb'
 import { ObjectId } from 'mongodb'
+import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
 const QUESTION_COLLECTION_NAME = 'questions'
 const QUESTION_COLLECTION_SCHEMA = Joi.object({
   content: Joi.string().required().trim().strict(),
-  options: Joi.object().required(),
-  correctAnswer: Joi.string().required().trim().strict(),
-  level: Joi.string().required().trim().strict(),
-  examId: Joi.string().required(),
-  answerIds: Joi.array().items(Joi.string()).default([]),
-
-  createdBy: Joi.string().optional(),
+  // options: Joi.object().required(),
+  correctAnswerIds: Joi.array().items(Joi.string()).default([]),
+  // level: Joi.string().required().trim().strict(),
+  type: Joi.string().required().trim().strict(),
+  tempId: Joi.number().required(),
+  quizId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+  optionOrderIds: Joi.array().items(
+    Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+  ).default([]),
+  points: Joi.number().required().min(10).default(10),
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null)
 })
@@ -25,8 +29,12 @@ const validBeforeCreate = async (data) => {
 const createNew = async (data) => {
   try {
     const validData = await validBeforeCreate(data)
+    const insertData = {
+      ...validData,
+      quizId: new ObjectId(data.quizId)
+    }
 
-    const createdQuestion = await DB_GET().collection(QUESTION_COLLECTION_NAME).insertOne(validData)
+    const createdQuestion = await DB_GET().collection(QUESTION_COLLECTION_NAME).insertOne(insertData)
     return createdQuestion
   } catch (error) {
     // Handle error
@@ -84,6 +92,34 @@ const deleteOne = async (questionId) => {
   }
 }
 
+// Thêm optionId vào mảng optionOrderIds của câu hỏi
+const pushOptionIds = async (option) => {
+  try {
+    const updateResult = await DB_GET().collection(QUESTION_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(option.questionId) },
+      { $push: { optionOrderIds: new ObjectId(option._id) } },
+      { returnDocument: 'after' }
+    )
+    return updateResult
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+// Xóa optionId khỏi mảng optionOrderIds của câu hỏi
+const pullOptionIds = async (option) => {
+  try {
+    const updateResult = await DB_GET().collection(QUESTION_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(option.questionId) },
+      { $pull: { optionOrderIds: new ObjectId(option._id) } },
+      { returnDocument: 'after' }
+    )
+    return updateResult
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const questionModel = {
   QUESTION_COLLECTION_NAME,
   QUESTION_COLLECTION_SCHEMA,
@@ -91,5 +127,7 @@ export const questionModel = {
   findOneById,
   findByExamId,
   update,
-  deleteOne
+  deleteOne,
+  pushOptionIds,
+  pullOptionIds
 }

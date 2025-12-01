@@ -1,13 +1,16 @@
-import React, { useState } from 'react'
+/* eslint-disable no-console */
+import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './CreateQuizStep1.css'
+import { createQuizStep1API } from '~/apis'
+import Button from '@mui/material/Button'
 
 function CreateQuizStep1() {
   const navigate = useNavigate()
-  
+
   const [quizData, setQuizData] = useState({
-    title: 'Introduction to Environmental Science',
-    description: 'Test your knowledge about environmental science topics including renewable energy, ecosystems, and sustainability.',
+    title: '',
+    description: '',
     category: 'science',
     difficulty: 'medium',
     timeLimit: 15,
@@ -24,20 +27,38 @@ function CreateQuizStep1() {
     })
   }
 
-  const handleNext = (e) => {
+  const handleNext = async (e) => {
     e.preventDefault()
     // TODO: Validate and save to context/localStorage
     console.log('Step 1 data:', quizData)
-    navigate('/create-quiz/step2', { state: { quizData } })
+    const result = await createQuizStep1API({ ...quizData, status: 'draft' })
+    console.log('Step 1 API result:', result)
+    navigate(`/teacher/edit/${result.insertedId}/step2`)
   }
 
   const handleBack = () => {
-    navigate('/dashboard')
+    navigate('/teacher/dashboard')
   }
 
-  const handleSaveDraft = () => {
-    console.log('Save draft:', quizData)
-    // TODO: Call API to save draft
+  const formRef = useRef(null)
+
+  const handleSaveDraft = async (e) => {
+    // Prevent default if called from a button
+    if (e && typeof e.preventDefault === 'function') e.preventDefault()
+
+    // Use HTML5 constraint validation — reportValidity shows messages and returns false if invalid
+    if (formRef.current && !formRef.current.reportValidity()) {
+      return
+    }
+
+    try {
+      const result = await createQuizStep1API({ ...quizData, status: 'draft' })
+      console.log('Saved draft:', result)
+      // Navigate to edit step2 (same as Next) so user can continue editing the quiz
+      navigate(`/teacher/edit/${result.insertedId}/step1`)
+    } catch (err) {
+      console.error('Failed to save draft', err)
+    }
   }
 
   const handlePreview = () => {
@@ -61,10 +82,21 @@ function CreateQuizStep1() {
           </div>
         </div>
         <div className="cq-header-right">
-          <button type="button" className="cq-btn cq-btn-secondary" onClick={handleSaveDraft}>
+          <Button
+            variant="outlined"
+            sx={{
+              color: '#64748b',
+              borderColor: '#cbd5e1',
+              '&:hover': {
+                borderColor: '#94a3b8',
+                backgroundColor: '#f8fafc'
+              }
+            }}
+            onClick={handleSaveDraft}
+          >
             Save Draft
-          </button>
-          <button type="button" className="cq-btn cq-btn-primary" onClick={handlePreview}>
+          </Button>
+          <button type="button" className="cq-btn-1 cq-btn-primary" onClick={handlePreview}>
             Preview
           </button>
         </div>
@@ -77,7 +109,7 @@ function CreateQuizStep1() {
             <h2 className="cq-card-title">Create New Quiz</h2>
           </div>
 
-          <form className="cq-form" onSubmit={handleNext}>
+          <form className="cq-form" onSubmit={handleNext} ref={formRef}>
             <div className="cq-form-grid">
               {/* Left Column - Quiz Details */}
               <div className="cq-form-section">
@@ -248,10 +280,10 @@ function CreateQuizStep1() {
 
             {/* Footer Buttons */}
             <div className="cq-form-footer">
-              <button type="button" className="cq-btn cq-btn-primary" onClick={handleBack}>
+              <button type="button" className="cq-btn-1 cq-btn-primary" onClick={handleBack}>
                 Prev
               </button>
-              <button type="submit" className="cq-btn cq-btn-primary">
+              <button type="submit" className="cq-btn-1 cq-btn-primary">
                 Next
               </button>
             </div>

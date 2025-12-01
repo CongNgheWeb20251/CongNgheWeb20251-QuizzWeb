@@ -27,7 +27,6 @@ function Dashboard() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true)
-        
         // Fetch all data in parallel
         const [statsData, studentsData, quizzesData] = await Promise.all([
           getDashboardStatsAPI(),
@@ -79,8 +78,34 @@ function Dashboard() {
   }, [])
 
   const handleCreateQuiz = () => {
-    navigate('/create-quiz/step1')
+    navigate('/teacher/create-quiz')
   }
+
+  const handleMenuClick = (menuId) => {
+    setSelectedMenu(menuId)
+    if (menuId === 'quizzes') {
+      navigate('/teacher/quizzes')
+    } else if (menuId === 'dashboard') {
+      navigate('/teacher/dashboard')
+    }
+  }
+
+  const handleManageClick = (manageId) => {
+    setSelectedManage(manageId)
+    if (manageId === 'settings') {
+      navigate('/settings')
+    }
+  }
+
+  const menuItems = [
+    { id: 'dashboard', icon: <DashboardIcon />, label: 'Dashboard' },
+    { id: 'quizzes', icon: <Quiz />, label: 'Quizzes' },
+    { id: 'students', icon: <People />, label: 'Students' }
+  ]
+
+  const manageItems = [
+    { id: 'settings', icon: <Settings />, label: 'Settings' }
+  ]
 
   // Show loading spinner while fetching data
   if (loading) {

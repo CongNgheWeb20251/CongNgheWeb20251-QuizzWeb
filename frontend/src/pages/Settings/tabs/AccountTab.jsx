@@ -1,68 +1,95 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Switch,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
+import React, { useState } from 'react'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import Switch from '@mui/material/Switch'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemText from '@mui/material/ListItemText'
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
+import Divider from '@mui/material/Divider'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContentText from '@mui/material/DialogContentText'
+
+import { styled } from '@mui/material/styles'
+import LogoutIcon from '@mui/icons-material/Logout'
+
+
+import { FIELD_REQUIRED_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from '~/utils/validators'
+import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
+import { useForm } from 'react-hook-form'
+import { useConfirm } from 'material-ui-confirm'
+import { toast } from 'react-toastify'
+import { useDispatch } from 'react-redux'
+import { updateUserAPI, logoutUserAPI } from '~/redux/user/userSlice'
 
 const StyledSection = styled(Box)(({ theme }) => ({
-  marginBottom: theme.spacing(4),
-}));
+  marginBottom: theme.spacing(4)
+}))
 
 const DangerButton = styled(Button)(({ theme }) => ({
   color: theme.palette.error.main,
   borderColor: theme.palette.error.main,
   '&:hover': {
     backgroundColor: theme.palette.error.light,
-    borderColor: theme.palette.error.main,
-  },
-}));
+    borderColor: theme.palette.error.main
+  }
+}))
 
 const AccountTab = () => {
-  const [passwords, setPasswords] = useState({
-    current: '',
-    new: '',
-    confirm: '',
-  });
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const handlePasswordChange = (event) => {
-    const { name, value } = event.target;
-    setPasswords((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const { register, handleSubmit, watch, formState: { errors } } = useForm()
+  const dispatch = useDispatch()
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
-  const handlePasswordUpdate = (event) => {
-    event.preventDefault();
-    // Handle password update
-    console.log('Password update:', passwords);
-  };
+  const confirmChangePassword = useConfirm()
+
+  const submitChangePassword = async (data) => {
+    const { confirmed } = await confirmChangePassword({
+      title: <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <LogoutIcon sx={{ color: 'warning.dark' }} /> Change Password
+      </Box>,
+      description: 'You have to login again after successfully changing your password. Continue?',
+      confirmationText: 'Confirm',
+      confirmationButtonProps: { color:'success', variant: 'contained' },
+      cancellationText: 'Cancel'
+    })
+    if (confirmed) {
+      const { current_password, new_password } = data
+
+      // Gọi API...
+      toast.promise(
+        dispatch(updateUserAPI({ current_password, new_password })),
+        {
+          pending: 'Updating...'
+        }
+      ).then(res => {
+        // console.log('res: ', res)
+        if (!res.error) {
+          toast.success('Change password successfully!', { theme: 'colored' })
+          dispatch(logoutUserAPI(false)) // Logout user after changing password
+        }
+      })
+    } else {
+      // Handle cancellation
+      () => {}
+    }
+  }
 
   const handleTwoFactorToggle = () => {
-    setTwoFactorEnabled(!twoFactorEnabled);
-  };
+    setTwoFactorEnabled(!twoFactorEnabled)
+  }
 
   const handleDeleteAccount = () => {
     // Handle account deletion
-    console.log('Account deletion requested');
-    setDeleteDialogOpen(false);
-  };
+    // console.log('Account deletion requested')
+    setDeleteDialogOpen(false)
+  }
 
   return (
     <Box>
@@ -70,34 +97,60 @@ const AccountTab = () => {
         <Typography variant="h6" gutterBottom>
           Account Security
         </Typography>
-        <Box component="form" onSubmit={handlePasswordUpdate} noValidate>
-          <TextField
-            fullWidth
-            margin="normal"
-            type="password"
-            label="Current Password"
-            name="current"
-            value={passwords.current}
-            onChange={handlePasswordChange}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            type="password"
-            label="New Password"
-            name="new"
-            value={passwords.new}
-            onChange={handlePasswordChange}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            type="password"
-            label="Confirm New Password"
-            name="confirm"
-            value={passwords.confirm}
-            onChange={handlePasswordChange}
-          />
+        <form onSubmit={handleSubmit(submitChangePassword)}>
+          <Box>
+            <TextField
+              fullWidth
+              margin="normal"
+              type="password"
+              label="Current Password"
+              name="current_password"
+              {...register('current_password', {
+                required: FIELD_REQUIRED_MESSAGE,
+                pattern: {
+                  value: PASSWORD_RULE,
+                  message: PASSWORD_RULE_MESSAGE
+                }
+              })}
+              error={!!errors['current_password']}
+            />
+            <FieldErrorAlert errors={errors} fieldName={'current_password'} />
+          </Box>
+          <Box>
+            <TextField
+              fullWidth
+              margin="normal"
+              type="password"
+              label="New Password"
+              name="new_password"
+              {...register('new_password', {
+                required: FIELD_REQUIRED_MESSAGE,
+                pattern: {
+                  value: PASSWORD_RULE,
+                  message: PASSWORD_RULE_MESSAGE
+                }
+              })}
+              error={!!errors['new_password']}
+            />
+            <FieldErrorAlert errors={errors} fieldName={'new_password'} />
+          </Box>
+          <Box>
+            <TextField
+              fullWidth
+              margin="normal"
+              type="password"
+              label="Confirm New Password"
+              name="new_password_confirmation"
+              {...register('new_password_confirmation', {
+                validate: (value) => {
+                  if (value === watch('new_password')) return true
+                  return 'Password confirmation does not match.'
+                }
+              })}
+              error={!!errors['new_password_confirmation']}
+            />
+            <FieldErrorAlert errors={errors} fieldName={'new_password_confirmation'} />
+          </Box>
           <Button
             type="submit"
             variant="contained"
@@ -106,7 +159,7 @@ const AccountTab = () => {
           >
             Update Password
           </Button>
-        </Box>
+        </form>
       </StyledSection>
 
       <StyledSection>
@@ -193,7 +246,7 @@ const AccountTab = () => {
         </DialogActions>
       </Dialog>
     </Box>
-  );
-};
+  )
+}
 
-export default AccountTab;
+export default AccountTab
