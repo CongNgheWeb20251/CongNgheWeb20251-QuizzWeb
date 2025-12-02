@@ -17,6 +17,7 @@ import { loginUserAPI } from '~/redux/user/userSlice'
 import { FIELD_REQUIRED_MESSAGE, EMAIL_RULE, EMAIL_RULE_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from '~/utils/validators'
 import { useForm } from 'react-hook-form'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
+import { API_ROOT } from '~/utils/constants'
 
 function SignIn() {
   const navigate = useNavigate()
@@ -41,6 +42,10 @@ function SignIn() {
         }
       }
     })
+  }
+
+  const loginWithGoogle = () => {
+    window.location.href = `${API_ROOT}/v1/users/google`
   }
 
 
@@ -88,7 +93,7 @@ function SignIn() {
 
             {/* Nút đăng nhập mạng xã hội */}
             <div className="social-buttons">
-              <button className="social-btn">
+              <button className="social-btn" onClick={loginWithGoogle}>
                 <Google className="social-icon" />
                 Google
               </button>

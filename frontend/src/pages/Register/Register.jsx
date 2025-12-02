@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import { useForm } from 'react-hook-form'
 import { FIELD_REQUIRED_MESSAGE, EMAIL_RULE, EMAIL_RULE_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE, PASSWORD_CONFIRMATION_MESSAGE } from '~/utils/validators'
+import { API_ROOT } from '~/utils/constants'
 
 function Register() {
   const navigate = useNavigate()
@@ -32,6 +33,10 @@ function Register() {
     ).then((user) => {
       navigate(`/signin?registeredEmail=${user.email}`)
     })
+  }
+
+  const loginWithGoogle = () => {
+    window.location.href = `${API_ROOT}/v1/users/google`
   }
 
   return (
@@ -78,7 +83,7 @@ function Register() {
 
             {/* Social Buttons */}
             <div className="social-buttons">
-              <button className="social-btn">
+              <button className="social-btn" onClick={loginWithGoogle}>
                 <Google className="social-icon" />
                 Google
               </button>
