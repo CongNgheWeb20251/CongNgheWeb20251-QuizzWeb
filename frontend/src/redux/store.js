@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { userReducer } from './user/userSlice'
+import { activeQuizzReducer } from './activeQuizz/activeQuizzSlice'
 
 // https://stackoverflow.com/questions/61704805/getting-an-error-a-non-serializable-value-was-detected-in-the-state-when-using/63244831#63244831
 // https://edvins.io/how-to-use-redux-persist-with-redux-toolkit
@@ -14,11 +15,12 @@ import storage from 'redux-persist/lib/storage'
 const rootPersistConfig = {
   key: 'root',
   storage : storage,
-  whitelist: ['user'] // choose which reducers to persist (user or activeBoard)
+  whitelist: ['user', 'activeQuizz'] // choose which reducers to persist (user)
 }
 
 const reducers = combineReducers({
   user: userReducer,
+  activeQuizz: activeQuizzReducer
 })
 
 const persistedReducer = persistReducer(rootPersistConfig, reducers)

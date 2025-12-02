@@ -33,7 +33,6 @@ function Dashboard() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true)
-        
         // Fetch all data in parallel
         const [statsData, studentsData, quizzesData] = await Promise.all([
           getDashboardStatsAPI(),
@@ -85,15 +84,15 @@ function Dashboard() {
   }, [])
 
   const handleCreateQuiz = () => {
-    navigate('/create-quiz/step1')
+    navigate('/teacher/create-quiz')
   }
 
   const handleMenuClick = (menuId) => {
     setSelectedMenu(menuId)
     if (menuId === 'quizzes') {
-      navigate('/quizzes')
+      navigate('/teacher/quizzes')
     } else if (menuId === 'dashboard') {
-      navigate('/dashboard')
+      navigate('/teacher/dashboard')
     }
   }
 

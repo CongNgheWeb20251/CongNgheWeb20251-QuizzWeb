@@ -1,15 +1,16 @@
 import Joi from 'joi'
 import { DB_GET } from '~/config/mongodb'
 import { ObjectId } from 'mongodb'
+import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
 const ANSWER_OPTION_COLLECTION_NAME = 'answerOptions'
 const ANSWER_OPTION_COLLECTION_SCHEMA = Joi.object({
-  questionId: Joi.string().required(),
-  quizId: Joi.string().required(),
+  questionId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+  quizId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
   content: Joi.string().required().trim().strict(),
   isCorrect: Joi.boolean().default(false),
   // thứ tự hiển thị đap án
-  order: Joi.number().optional(),
+  tempId: Joi.number().required(), // tempId FE
 
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null)
@@ -24,8 +25,13 @@ const validBeforeCreate = async (data) => {
 const createNew = async (data) => {
   try {
     const validData = await validBeforeCreate(data)
+    const insertData = {
+      ...validData,
+      questionId: new ObjectId(data.questionId),
+      quizId: new ObjectId(data.quizId)
+    }
 
-    const createdAnswerOption = await DB_GET().collection(ANSWER_OPTION_COLLECTION_NAME).insertOne(validData)
+    const createdAnswerOption = await DB_GET().collection(ANSWER_OPTION_COLLECTION_NAME).insertOne(insertData)
     return createdAnswerOption
   } catch (error) {
     // Handle error
@@ -45,8 +51,7 @@ const findOneById = async (id) => {
 const findByQuestionId = async (questionId) => {
   try {
     const answerOptions = await DB_GET().collection(ANSWER_OPTION_COLLECTION_NAME)
-      .find({ questionId: questionId })
-      .sort({ order: 1 })
+      .find({ questionId: new ObjectId(questionId) })
       .toArray()
     return answerOptions
   } catch (error) {
@@ -89,7 +94,7 @@ const deleteOne = async (answerOptionId) => {
 const deleteByQuestionId = async (questionId) => {
   try {
     const deleteResult = await DB_GET().collection(ANSWER_OPTION_COLLECTION_NAME).deleteMany({
-      questionId: questionId
+      questionId: new ObjectId(questionId)
     })
     return deleteResult
   } catch (error) {

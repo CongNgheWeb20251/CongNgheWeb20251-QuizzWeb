@@ -1,40 +1,78 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getQuizzes } from '~/apis'
+import Button from '@mui/material/Button'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import QuizCard from '~/components/QuizCard'
 import UserAvatar from '~/components/UserAvatar/UserAvatar'
 import './Quizzes.css'
+import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
+import { Link, useLocation } from 'react-router-dom'
+import Pagination from '@mui/material/Pagination'
+import PaginationItem from '@mui/material/PaginationItem'
+import Box from '@mui/material/Box'
+import { fetchQuizzesAPI } from '~/apis'
+
 
 function Quizzes() {
   const navigate = useNavigate()
   const [quizzes, setQuizzes] = useState([])
+  const [totalQuizzes, setTotalQuizzes] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all') // all, published, drafts
+  const location = useLocation()
+  const query = new URLSearchParams(location.search)
+  const page = parseInt(query.get('page') || '1', 10)
 
+  // khởi tạo filter từ query param
+  const initialFilter = query.get('filter') || 'all'
+  const [filter, setFilter] = useState(initialFilter) // all, published, drafts
+
+  // từ filter và page xây dựng URL chuẩn
+  const buildUrl = (pageParam, filterParam) => {
+    const params = new URLSearchParams()
+    if (pageParam && Number(pageParam) !== DEFAULT_PAGE) params.set('page', pageParam)
+    if (filterParam && filterParam !== 'all') params.set('filter', filterParam)
+    const qs = params.toString()
+    return `/teacher/quizzes${qs ? `?${qs}` : ''}`
+  }
+
+  // fetch quizzes khi filter hoặc page thay đổi
   useEffect(() => {
-    let mounted = true
+    const q = new URLSearchParams(location.search)
+    const urlFilter = q.get('filter') || 'all'
+    setFilter(urlFilter)
+    // console.log('Location search :', location.search)
+    setLoading(true)
+    fetchQuizzesAPI(location.search).then(res => {
+      setQuizzes(res.quizzes || [])
+      setTotalQuizzes(res.totalQuizzes || 0)
+      setLoading(false)
+    })
+  }, [location.search])
 
-    async function loadQuizzes() {
-      setLoading(true)
-      try {
-        const data = await getQuizzes()
-        if (mounted) {
-          setQuizzes(data)
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error loading quizzes:', error)
-      } finally {
-        if (mounted) setLoading(false)
-      }
-    }
+  // useEffect(() => {
+  //   let mounted = true
 
-    loadQuizzes()
-    return () => { mounted = false }
-  }, [])
+  //   async function loadQuizzes() {
+  //     setLoading(true)
+  //     try {
+  //       const data = await getQuizzes()
+  //       if (mounted) {
+  //         setQuizzes(data)
+  //       }
+  //     } catch (error) {
+  //       // eslint-disable-next-line no-console
+  //       console.error('Error loading quizzes:', error)
+  //     } finally {
+  //       if (mounted) setLoading(false)
+  //     }
+  //   }
+
+  //   loadQuizzes()
+  //   return () => { mounted = false }
+  // }, [])
 
   const handleCreateNew = () => {
-    navigate('/create-quiz/step1')
+    navigate('/teacher/create-quiz')
   }
 
   const filteredQuizzes = quizzes.filter(q => {
@@ -45,6 +83,32 @@ function Quizzes() {
 
   return (
     <div className="quizzes-page">
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon fontSize="small" />}
+          onClick={() => navigate('/teacher/dashboard')}
+          sx={{
+            color: 'rgba(255,255,255,0.9)',
+            borderColor: 'rgba(255,255,255,0.06)',
+            textTransform: 'none',
+            px: 2,
+            py: 1,
+            backgroundColor: 'transparent',
+            transition: 'background-color 160ms, transform 200ms, box-shadow 160ms',
+            '& .MuiButton-startIcon': { transition: 'transform 200ms' },
+            '&:hover': {
+              backgroundColor: 'rgba(139,92,246,0.12)',
+              borderColor: 'rgba(139,92,246,0.35)',
+              boxShadow: '0 6px 18px rgba(2,6,23,0.6)',
+              '& .MuiButton-startIcon': { transform: 'translateX(-6px)' }
+            }
+          }}
+        >
+            Dashboard
+        </Button>
+        <UserAvatar />
+      </Box>
       <div className="quizzes-header">
         <div className="quizzes-title-section">
           <h2 className="quizzes-title">Quizzes</h2>
@@ -54,28 +118,37 @@ function Quizzes() {
           <button className="cq-btn cq-btn-primary" onClick={handleCreateNew}>
             + Create New Quiz
           </button>
-          <UserAvatar />
         </div>
       </div>
 
       <div className="quizzes-container">
         <div className="quizzes-main">
           <div className="quizzes-filter">
-            <button 
+            <button
               className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-              onClick={() => setFilter('all')}
+              onClick={() => {
+                // Mỗi khi chuyển filter thì reset về page = 1
+                setFilter('all')
+                navigate(buildUrl(1, 'all'))
+              }}
             >
               All Quizzes
             </button>
-            <button 
+            <button
               className={`filter-btn ${filter === 'published' ? 'active' : ''}`}
-              onClick={() => setFilter('published')}
+              onClick={() => {
+                setFilter('published')
+                navigate(buildUrl(1, 'published'))
+              }}
             >
               Published
             </button>
-            <button 
+            <button
               className={`filter-btn ${filter === 'drafts' ? 'active' : ''}`}
-              onClick={() => setFilter('drafts')}
+              onClick={() => {
+                setFilter('drafts')
+                navigate(buildUrl(1, 'drafts'))
+              }}
             >
               Drafts
             </button>
@@ -98,10 +171,63 @@ function Quizzes() {
               </div>
             ) : (
               filteredQuizzes.map(quiz => (
-                <QuizCard key={quiz.id} quiz={quiz} />
+                <QuizCard key={quiz._id} quiz={quiz} />
               ))
             )}
           </div>
+          {(totalQuizzes > 0) &&
+              <Box sx={{ my: 3, pr: 5, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                <Pagination
+                  size="large"
+                  showFirstButton
+                  showLastButton
+                  count={Math.ceil(totalQuizzes / DEFAULT_ITEMS_PER_PAGE)}
+                  page={page}
+                  sx={{
+                    '& .MuiPaginationItem-root': {
+                      color: 'rgba(255,255,255,0.9)',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                      width: 44,
+                      height: 44,
+                      minWidth: 'auto',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'background-color 150ms, box-shadow 150ms, transform 120ms',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.06)',
+                        transform: 'translateY(-2px)'
+                      }
+                    },
+                    '& .MuiPaginationItem-root.Mui-selected': {
+                      backgroundColor: 'rgba(25,118,210,0.95) !important',
+                      color: '#fff !important',
+                      boxShadow: '0 8px 24px rgba(2,6,23,0.65)',
+                      transform: 'scale(1.05)'
+                    },
+                    '& .MuiPaginationItem-ellipsis': {
+                      color: 'rgba(255,255,255,0.6)',
+                      border: 'none',
+                      backgroundColor: 'transparent'
+                    },
+                    '& .MuiPaginationItem-text': {
+                      color: 'rgba(255,255,255,0.9)'
+                    }
+                  }}
+                  renderItem={(item) => (
+                    <PaginationItem
+                      component={Link}
+                      to={buildUrl(item.page, filter)}
+                      {...item}
+                      // đảm bảo từng item duy trì kích thước tròn
+                      sx={{ width: 44, height: 44, minWidth: 'auto' }}
+                    />
+                  )}
+                />
+              </Box>
+          }
         </div>
 
         <aside className="quizzes-sidebar">

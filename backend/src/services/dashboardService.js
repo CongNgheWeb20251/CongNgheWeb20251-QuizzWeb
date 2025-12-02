@@ -22,9 +22,9 @@ const getDashboardStats = async (userId) => {
       .collection(quizModel.QUIZ_COLLECTION_NAME)
       .find({ createdBy: userId })
       .toArray()
-    
+
     const quizIds = userQuizzes.map(q => q._id.toString())
-    
+
     // Calculate average completion rate
     let avgCompletion = 0
     if (quizIds.length > 0) {
@@ -32,7 +32,7 @@ const getDashboardStats = async (userId) => {
         .collection(quizResultModel.QUIZ_RESULT_COLLECTION_NAME)
         .find({ quizId: { $in: quizIds } })
         .toArray()
-      
+
       if (results.length > 0) {
         const totalScore = results.reduce((sum, result) => sum + result.score, 0)
         avgCompletion = Math.round(totalScore / results.length)

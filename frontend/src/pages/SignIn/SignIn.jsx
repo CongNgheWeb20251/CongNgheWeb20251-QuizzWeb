@@ -34,7 +34,11 @@ function SignIn() {
       { pending: 'Logging in...' }
     ).then((res) => {
       if (!res.error) {
-        navigate('/dashboard', { replace: true })
+        if (res.payload?.role === 'teacher') {
+          navigate('/teacher/dashboard', { replace: true })
+        } else {
+          navigate('/dashboard', { replace: true })
+        }
       }
     })
   }
@@ -147,6 +151,19 @@ function SignIn() {
                   }}
                 />
                 <FieldErrorAlert errors={errors} fieldName="password" />
+                <div style={{ textAlign: 'right', marginTop: '8px' }}>
+                  <Link 
+                    to="/forgot-password" 
+                    style={{ 
+                      color: '#6366f1', 
+                      textDecoration: 'none',
+                      fontSize: '0.875rem',
+                      fontWeight: 500
+                    }}
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
 
               <button type="submit" className="signin-btn">
