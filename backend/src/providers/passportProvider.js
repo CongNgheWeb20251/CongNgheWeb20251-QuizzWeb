@@ -1,0 +1,53 @@
+import passport from 'passport'
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
+import { userModel } from '~/models/userModel.js'
+import { env } from '~/config/environment'
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+      callbackURL: env.GOOGLE_CALLBACK_URL,
+      passReqToCallback: true
+    },
+    async (request, accessToken, refreshToken, profile, done) => {
+      try {
+        // Tìm user theo googleId
+        let user = await userModel.findOneByGoogleId(profile.id)
+        // chưa có user thì tạo mới
+        if (!user) {
+          // Tìm theo email xem có user chưa (trường hợp đăng ký bằng email/password rồi sau đó đăng nhập google)
+          const localUser = await userModel.findOneByEmail(profile.emails[0].value)
+          if (!localUser) {
+            const newUserData = {
+              email: profile.emails[0].value,
+              username: profile.displayName,
+              fullName: profile.displayName,
+              authProvider: 'google',
+              googleId: profile.id,
+              avatar: profile?.photos[0]?.value || null,
+              isActive: true
+            }
+            const newUser = await userModel.createNew(newUserData)
+            user = await userModel.findOneById(newUser.insertedId)
+          }
+          else {
+            // đã có user thì cập nhật thêm googleId và chuyển authProvider thành hybrid
+            const updatedData = {
+              googleId: profile.id,
+              authProvider: 'hybrid',
+              avatar: profile?.photos[0]?.value || null,
+              isActive: true
+            }
+            user = await userModel.update(localUser._id, updatedData)
+          }
+        }
+        done(null, user)
+      } catch (error) {
+        // Handle error
+        done(error, null)
+      }
+    }
+  )
+)

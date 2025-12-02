@@ -13,7 +13,7 @@ const USER_ROLES = {
 const USER_COLLECTION_NAME = 'users'
 const USER_COLLECTION_SCHEMA = Joi.object({
   email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
-  password: Joi.string().required(),
+  password: Joi.string().min(6).max(160),
   //
   username: Joi.string().required().trim().strict(),
   fullName: Joi.string().required().trim().strict(),
@@ -22,8 +22,8 @@ const USER_COLLECTION_SCHEMA = Joi.object({
 
   isActive: Joi.boolean().default(false),
   verifyToken: Joi.string(),
-  authProvider: Joi.string().valid('local').default('local'),
-
+  authProvider: Joi.string().valid('local', 'google', 'facebook', 'hybrid').default('local'),
+  googleId: Joi.string().optional().allow(null),
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false),
@@ -52,6 +52,15 @@ const createNew = async (data) => {
 const findOneById = async (id) => {
   try {
     const user = await DB_GET().collection(USER_COLLECTION_NAME).findOne({ _id: new ObjectId(id) })
+    return user
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const findOneByGoogleId = async (googleId) => {
+  try {
+    const user = await DB_GET().collection(USER_COLLECTION_NAME).findOne({ googleId: googleId })
     return user
   } catch (error) {
     throw new Error(error)
@@ -93,5 +102,6 @@ export const userModel = {
   createNew,
   findOneById,
   findOneByEmail,
-  update
+  update,
+  findOneByGoogleId
 }

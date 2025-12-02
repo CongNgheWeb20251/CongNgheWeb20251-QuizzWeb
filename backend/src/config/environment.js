@@ -5,6 +5,7 @@ export const env = {
   DATABASE_NAME: process.env.DATABASE_NAME,
   PORT: process.env.APP_PORT,
   HOSTNAME: process.env.APP_HOST,
+  APP_DOMAIN: process.env.APP_DOMAIN,
   AUTHOR: process.env.AUTHOR,
   BUILD_MODE: process.env.BUILD_MODE,
   WEBSITE_DOMAIN_DEV: process.env.WEBSITE_DOMAIN_DEV,
@@ -23,5 +24,12 @@ export const env = {
   // Cloudinary
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
-  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
+
+  // Google OAuth
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL
+
+  // Facebook OAuth
 }

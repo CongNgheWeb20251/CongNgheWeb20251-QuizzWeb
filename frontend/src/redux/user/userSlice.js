@@ -24,12 +24,10 @@ export const loginUserAPI = createAsyncThunk(
 
 export const loginAuth0API = createAsyncThunk(
   'user/loginAuth0',
-  async (auth0UserData) => {
-    const response = await authorizedAxiosInstance.post('/v1/users/login_google', auth0UserData)
-    // Tương tự như loginUserAPI, chỉ trả về userInfo (không có tokens)
-    // eslint-disable-next-line no-unused-vars
-    const { accessToken, refreshToken, ...userInfo } = response.data
-    return userInfo
+  async () => {
+    const response = await authorizedAxiosInstance.get('/v1/users/me')
+    // trả về dữ liệu user
+    return response.data
   }
 )
 

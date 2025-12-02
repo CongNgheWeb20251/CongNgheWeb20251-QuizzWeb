@@ -3,6 +3,8 @@ import { userValidation } from '~/validations/userValidation'
 import { userController } from '~/controllers/userController'
 import { authMiddleware } from '~/middlewares/authMiddleware'
 import { multerUploadMiddleware } from '~/middlewares/multerUploadMiddleware'
+import passport from 'passport'
+import { googleMiddleware } from '~/middlewares/googleMiddleware'
 
 const Router = express.Router()
 
@@ -15,8 +17,14 @@ Router.route('/verify')
 Router.route('/login')
   .post(userValidation.login, userController.login)
 
-Router.route('/login_google')
-  .post(userController.loginGoogle)
+Router.route('/google')
+  .get(passport.authenticate('google', { scope: ['profile', 'email'] }))
+
+Router.route('/google/callback')
+  .get(
+    googleMiddleware,
+    userController.googleOAuthCallback
+  )
 
 Router.route('/logout')
   .delete(userController.logout)
@@ -32,5 +40,7 @@ Router.route('/update')
     userController.update
   )
 
+Router.route('/me')
+  .get(authMiddleware.isAuthorized, userController.getCurrentUser)
 
 export const userRoute = Router

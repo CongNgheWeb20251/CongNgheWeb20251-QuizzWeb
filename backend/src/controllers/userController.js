@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { userService } from '~/services/userService'
 import ms from 'ms'
 import ApiError from '~/utils/ApiError'
+import { env } from '~/config/environment'
 
 const createNew = async (req, res, next) => {
   try {
@@ -57,8 +58,30 @@ const login = async (req, res, next) => {
   }
 }
 
-const loginGoogle = async (req, res, next) => {
-  //
+const googleOAuthCallback = async (req, res, next) => {
+  try {
+    const user = req.user
+    const result = await userService.loginWithGoogle(user)
+
+    res.cookie('accessToken', result.accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: ms('14 days')
+    })
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: ms('14 days')
+    })
+
+    // Redirect về frontend
+    res.redirect(`${env.WEBSITE_DOMAIN_DEV}/auth-successful`)
+  } catch (error) {
+    next(error)
+  }
 }
 
 const logout = async (req, res, next) => {
@@ -106,13 +129,25 @@ const update = async (req, res, next) => {
   }
 }
 
+const getCurrentUser = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const user = await userService.getCurrentUser(userId)
+    res.status(StatusCodes.OK).json(user)
+  }
+  catch (error) {
+    next(error)
+  }
+}
+
 
 export const userController = {
   createNew,
   verifyAccount,
   login,
-  loginGoogle,
+  googleOAuthCallback,
   logout,
   refreshToken,
-  update
+  update,
+  getCurrentUser
 }

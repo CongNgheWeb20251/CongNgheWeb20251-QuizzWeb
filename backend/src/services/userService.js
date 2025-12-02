@@ -144,8 +144,35 @@ const login = async (resBody, device) => {
   }
 }
 
-const loginGoogle = async (resBody) => {
-  //
+const loginWithGoogle = async (user) => {
+  try {
+    // User đã được tạo hoặc cập nhật trong passportProvider
+    // Tạo token để trả về cho frontend
+    const userInfo = {
+      _id: user._id,
+      email: user.email,
+      role: user.role
+    }
+
+    const accessToken = await JwtProvider.generateToken(
+      userInfo,
+      env.ACCESS_TOKEN_SECRET,
+      env.ACCESS_TOKEN_LIFE
+    )
+    const refreshToken = await JwtProvider.generateToken(
+      userInfo,
+      env.REFRESH_TOKEN_SECRET,
+      env.REFRESH_TOKEN_LIFE
+    )
+
+    return {
+      accessToken,
+      refreshToken,
+      ...pickUser(user)
+    }
+  } catch (error) {
+    throw error
+  }
 }
 
 const refreshToken = async (clientRefreshToken) => {
@@ -202,9 +229,9 @@ const update = async (userId, userAvatarFile, updateData) => {
 
     } else if (userAvatarFile) {
       // upload lên cloundinary
-      const userAvatar = await cloudinaryProvider.streamUploadWithOverwrite(userAvatarFile.buffer, 'avatars', `user_${userId}`)
+      const userAvatar = await cloudinaryProvider.streamUploadAvatarWithOverwrite(userAvatarFile.buffer, 'avatars', `user_${userId}_avatar`)
       // Lưu lại url avatar vào database
-      updatedUser = await userModel.update(userId, { avatar: userAvatar.secure_url })
+      updatedUser = await userModel.update(userId, { avatar: userAvatar.avatar_url })
     } else {
       // update các thông tin khác
       updatedUser = await userModel.update(userId, updateData)
@@ -217,11 +244,24 @@ const update = async (userId, userAvatarFile, updateData) => {
   }
 }
 
+const getCurrentUser = async (userId) => {
+  try {
+    const existingUser = await userModel.findOneById(userId)
+    if (!existingUser) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
+    }
+    return pickUser(existingUser)
+  } catch (error) {
+    throw error
+  }
+}
+
 export const userService = {
   createNew,
   verifyAccount,
   login,
-  loginGoogle,
+  loginWithGoogle,
   refreshToken,
-  update
+  update,
+  getCurrentUser
 }

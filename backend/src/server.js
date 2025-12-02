@@ -11,6 +11,7 @@ import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware'
 import cookieParser from 'cookie-parser'
 import socketIo from 'socket.io'
 import http from 'http'
+import './providers/passportProvider.js'
 
 const START_SERVER = () => {
   const app = express()

@@ -16,6 +16,8 @@ import EditQuizInfo from '~/pages/EditQuizz/EditQuizInfo.jsx'
 import QuizResult from './pages/StudentQuiz/QuizResult'
 import StudentQuizPage from './pages/StudentQuiz/StudentQuizPage'
 import PreviewQuiz from './pages/PreviewQuiz/PreviewQuiz'
+import AuthCallBack from './components/0AuthCallBack/AuthCallBack'
+import NotFound from './pages/404/NotFound'
 
 const ProtectedRoute = ({ user }) => {
   if (!user) {
@@ -57,6 +59,8 @@ function App() {
         <Route path="/quizz/:id/result" element={<QuizResult />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
+      <Route path="/auth-successful" element={<AuthCallBack />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
