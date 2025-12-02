@@ -186,7 +186,7 @@ function Home() {
               <ul className="contact-info">
                 <li>📧 example@sis.hust.edu.vn</li>
                 <li>📞 0123456789</li>
-                <li>📍 Số 1 Đại Cồ Việt,<br/>Hà Nội, 100000</li>
+                <li>📍 Số 1 Đại Cồ Việt,<br/>Hà Nội</li>
               </ul>
             </div>
           </div>
