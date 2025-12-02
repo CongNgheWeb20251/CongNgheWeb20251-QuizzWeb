@@ -151,6 +151,19 @@ function SignIn() {
                   }}
                 />
                 <FieldErrorAlert errors={errors} fieldName="password" />
+                <div style={{ textAlign: 'right', marginTop: '8px' }}>
+                  <Link 
+                    to="/forgot-password" 
+                    style={{ 
+                      color: '#6366f1', 
+                      textDecoration: 'none',
+                      fontSize: '0.875rem',
+                      fontWeight: 500
+                    }}
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
 
               <button type="submit" className="signin-btn">

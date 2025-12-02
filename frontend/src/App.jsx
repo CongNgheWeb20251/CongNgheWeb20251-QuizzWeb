@@ -16,6 +16,8 @@ import EditQuizInfo from '~/pages/EditQuizz/EditQuizInfo.jsx'
 import QuizResult from './pages/StudentQuiz/QuizResult'
 import StudentQuizPage from './pages/StudentQuiz/StudentQuizPage'
 import PreviewQuiz from './pages/PreviewQuiz/PreviewQuiz'
+import ForgotPassword from '~/pages/ForgotPassword/ForgotPassword.jsx'
+import ResetPassword from '~/pages/ForgotPassword/ResetPassword.jsx'
 
 const ProtectedRoute = ({ user }) => {
   if (!user) {
@@ -44,11 +46,14 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<Register />} />
         <Route path='/account/verification' element={<AccountVerification />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
+        <Route path='/reset-password' element={<ResetPassword />} />
       </Route>
       <Route element={<ProtectedRoute user={currUser} />}>
         <Route path='teacher/create-quiz' element={<CreateQuizStep1 />} />
         <Route path='teacher/edit/:id/step1' element={<EditQuizInfo />} />
         <Route path='teacher/edit/:id/step2' element={<CreateQuizStep2 />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/teacher/dashboard" element={<Dashboard />} />
         <Route path="/teacher/quizzes" element={<Quizzes />} />
         <Route path="/teacher/quizzes/:id" element={<QuizDetail />} />
