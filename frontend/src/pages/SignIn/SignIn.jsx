@@ -48,6 +48,10 @@ function SignIn() {
     window.location.href = `${API_ROOT}/v1/users/google`
   }
 
+  const loginWithFacebook = () => {
+    window.location.href = `${API_ROOT}/v1/users/facebook`
+  }
+
 
   return (
     <div className="signin-layout">
@@ -97,7 +101,7 @@ function SignIn() {
                 <Google className="social-icon" />
                 Google
               </button>
-              <button className="social-btn">
+              <button className="social-btn" onClick={loginWithFacebook}>
                 <Facebook className="social-icon" />
                 Facebook
               </button>
@@ -157,10 +161,10 @@ function SignIn() {
                 />
                 <FieldErrorAlert errors={errors} fieldName="password" />
                 <div style={{ textAlign: 'right', marginTop: '8px' }}>
-                  <Link 
-                    to="/forgot-password" 
-                    style={{ 
-                      color: '#6366f1', 
+                  <Link
+                    to="/forgot-password"
+                    style={{
+                      color: '#6366f1',
                       textDecoration: 'none',
                       fontSize: '0.875rem',
                       fontWeight: 500

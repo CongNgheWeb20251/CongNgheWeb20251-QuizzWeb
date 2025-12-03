@@ -12,7 +12,7 @@ const USER_ROLES = {
 // Define Collection (name & schema)
 const USER_COLLECTION_NAME = 'users'
 const USER_COLLECTION_SCHEMA = Joi.object({
-  email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
+  email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE).allow(null),
   password: Joi.string().min(6).max(160),
   //
   username: Joi.string().required().trim().strict(),
@@ -23,7 +23,10 @@ const USER_COLLECTION_SCHEMA = Joi.object({
   isActive: Joi.boolean().default(false),
   verifyToken: Joi.string(),
   authProvider: Joi.string().valid('local', 'google', 'facebook', 'hybrid').default('local'),
+
   googleId: Joi.string().optional().allow(null),
+  facebookId: Joi.string().optional().allow(null),
+
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false),
@@ -67,6 +70,15 @@ const findOneByGoogleId = async (googleId) => {
   }
 }
 
+const findOneByFacebookId = async (facebookId) => {
+  try {
+    const user = await DB_GET().collection(USER_COLLECTION_NAME).findOne({ facebookId: facebookId })
+    return user
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 const findOneByEmail = async (email) => {
   try {
     const user = await DB_GET().collection(USER_COLLECTION_NAME).findOne({ email: email })
@@ -103,5 +115,6 @@ export const userModel = {
   findOneById,
   findOneByEmail,
   update,
-  findOneByGoogleId
+  findOneByGoogleId,
+  findOneByFacebookId
 }

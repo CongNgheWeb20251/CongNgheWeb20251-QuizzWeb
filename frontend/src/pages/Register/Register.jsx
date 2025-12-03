@@ -39,6 +39,11 @@ function Register() {
     window.location.href = `${API_ROOT}/v1/users/google`
   }
 
+  const loginWithFacebook = () => {
+    window.location.href = `${API_ROOT}/v1/users/facebook`
+  }
+
+
   return (
     <div className="register-layout">
       {/* Cột trái với lưới 3D và logo */}
@@ -87,7 +92,7 @@ function Register() {
                 <Google className="social-icon" />
                 Google
               </button>
-              <button className="social-btn">
+              <button className="social-btn" onClick={loginWithFacebook}>
                 <Facebook className="social-icon" />
                 Facebook
               </button>
