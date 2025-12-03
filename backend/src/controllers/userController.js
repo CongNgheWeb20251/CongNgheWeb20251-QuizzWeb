@@ -78,7 +78,7 @@ const googleOAuthCallback = async (req, res, next) => {
     })
 
     // Redirect về frontend
-    res.redirect(`${env.WEBSITE_DOMAIN_DEV}/auth-successful`)
+    return res.redirect(`${env.WEBSITE_DOMAIN_DEV}/auth-successful`)
   } catch (error) {
     next(error)
   }
