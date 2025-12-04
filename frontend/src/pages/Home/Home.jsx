@@ -42,7 +42,7 @@ function Home() {
           <div className="glow-effect glow-purple"></div>
           <div className="glow-effect glow-orange"></div>
         </div>
-        <div className="container">
+        <div className="">
           <div className="hero-content">
             <p className="tagline">The ultimate quiz experience</p>
             <h1 className="hero-heading">
