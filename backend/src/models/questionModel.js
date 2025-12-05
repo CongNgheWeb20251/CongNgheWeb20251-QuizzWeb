@@ -10,7 +10,6 @@ const QUESTION_COLLECTION_SCHEMA = Joi.object({
   correctAnswerIds: Joi.array().items(Joi.string()).default([]),
   // level: Joi.string().required().trim().strict(),
   type: Joi.string().required().trim().strict(),
-  tempId: Joi.number().required(),
   quizId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
   optionOrderIds: Joi.array().items(
     Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
