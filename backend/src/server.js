@@ -47,7 +47,7 @@ const START_SERVER = () => {
     </head>
     <body>
       <div class="container">
-        <h1>🚀 Quizz API Server</h1>
+        <h1>Quizz API Server</h1>
         <div class="status">
           <h2>Status: Running (${mode})</h2>
         </div>
