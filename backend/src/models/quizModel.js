@@ -161,20 +161,19 @@ const getQuizzes = async (userId, page, itemsPerPage, filter) => {
         // 1 query quizzes
         'queryQuizzes': [
           { $skip: pagingSkipValue(page, itemsPerPage) }, // bỏ qua số lượng bản ghi của những page trước đó
-          { $limit: itemsPerPage }, // giới hạn tối đa số lượng bản ghi trả về trên 1 page
-          // Lookup questions để đếm số câu hỏi
-          { $lookup: {
-            from: questionModel.QUESTION_COLLECTION_NAME,
-            localField: '_id',
-            foreignField: 'quizId',
-            as: 'questions'
-          } },
-          // Thêm field questionsCount
-          { $addFields: {
-            questionsCount: { $size: '$questions' }
-          } },
-          // Loại bỏ array questions để giảm data trả về
-          { $project: { questions: 0 } }
+          { $limit: itemsPerPage } // giới hạn tối đa số lượng bản ghi trả về trên 1 page
+          // { $lookup: {
+          //   from: questionModel.QUESTION_COLLECTION_NAME,
+          //   localField: '_id',
+          //   foreignField: 'quizId',
+          //   as: 'questions'
+          // } },
+          // // Thêm field questionsCount
+          // { $addFields: {
+          //   questionsCount: { $size: '$questions' }
+          // } },
+          // // Loại bỏ array questions để giảm data trả về
+          // { $project: { questions: 0 } }
         ],
         // 2 query total count
         'queryCountTotalQuizzes': [
@@ -221,6 +220,42 @@ const pullQuestionIds = async (question) => {
   }
 }
 
+const getQuizzesStats = async (userId) => {
+  try {
+    const queryConditions = [
+      { $or: [
+        { createdBy: new ObjectId(userId) }
+      ] }
+    ]
+
+    const stats = await DB_GET().collection(QUIZ_COLLECTION_NAME).aggregate([
+      { $match: { $and: queryConditions } },
+      { $facet: {
+        'totalQuizzes': [
+          { $count: 'count' }
+        ],
+        'publishedQuizzes': [
+          { $match: { status: 'published' } },
+          { $count: 'count' }
+        ],
+        'draftQuizzes': [
+          { $match: { status: 'draft' } },
+          { $count: 'count' }
+        ]
+      } }
+    ]).toArray()
+
+    const result = stats[0]
+    return {
+      totalQuizzes: result.totalQuizzes[0]?.count || 0,
+      publishedQuizzes: result.publishedQuizzes[0]?.count || 0,
+      draftQuizzes: result.draftQuizzes[0]?.count || 0
+    }
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const quizModel = {
   QUIZ_COLLECTION_NAME,
   QUIZ_COLLECTION_SCHEMA,
@@ -233,5 +268,6 @@ export const quizModel = {
   getDetails,
   getQuizzes,
   pushQuestionIds,
-  pullQuestionIds
+  pullQuestionIds,
+  getQuizzesStats
 }

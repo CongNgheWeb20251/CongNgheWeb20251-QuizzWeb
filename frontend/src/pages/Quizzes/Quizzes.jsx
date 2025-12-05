@@ -10,7 +10,7 @@ import { Link, useLocation } from 'react-router-dom'
 import Pagination from '@mui/material/Pagination'
 import PaginationItem from '@mui/material/PaginationItem'
 import Box from '@mui/material/Box'
-import { fetchQuizzesAPI } from '~/apis'
+import { fetchQuizzesAPI, fetchQuizzesStatsAPI } from '~/apis'
 
 
 function Quizzes() {
@@ -21,6 +21,12 @@ function Quizzes() {
   const location = useLocation()
   const query = new URLSearchParams(location.search)
   const page = parseInt(query.get('page') || '1', 10)
+
+  const [quizzesStats, setQuizzesStats] = useState({
+    totalQuizzes: 0,
+    publishedQuizzes: 0,
+    draftQuizzes: 0
+  })
 
   // khởi tạo filter từ query param
   const initialFilter = query.get('filter') || 'all'
@@ -34,6 +40,15 @@ function Quizzes() {
     const qs = params.toString()
     return `/teacher/quizzes${qs ? `?${qs}` : ''}`
   }
+
+  // fetch Quick Stats chỉ một lần khi component mount
+  useEffect(() => {
+    fetchQuizzesStatsAPI().then(res => {
+      setQuizzesStats(res)
+    }).catch(() => {
+      // handle error
+    })
+  }, [])
 
   // fetch quizzes khi filter hoặc page thay đổi
   useEffect(() => {
@@ -235,15 +250,15 @@ function Quizzes() {
             <h4 className="side-card-title">Quick Stats</h4>
             <div className="stat-item">
               <span className="stat-label">Total Quizzes</span>
-              <div className="stat-value">{quizzes.length}</div>
+              <div className="stat-value">{quizzesStats.totalQuizzes}</div>
             </div>
             <div className="stat-item">
               <span className="stat-label">Published</span>
-              <div className="stat-value">{quizzes.filter(q => q.status === 'published').length}</div>
+              <div className="stat-value">{quizzesStats.publishedQuizzes}</div>
             </div>
             <div className="stat-item">
               <span className="stat-label">Drafts</span>
-              <div className="stat-value">{quizzes.filter(q => q.status === 'draft').length}</div>
+              <div className="stat-value">{quizzesStats.draftQuizzes}</div>
             </div>
           </div>
 

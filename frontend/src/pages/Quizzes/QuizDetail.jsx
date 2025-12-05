@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getQuiz } from '~/apis'
@@ -31,7 +32,7 @@ function QuizDetail() {
   }, [id])
 
   const handleEdit = () => {
-    console.log('Edit quiz:', id)
+    // console.log('Edit quiz:', id)
     // TODO: Implement edit redirect to /create-quiz/step1?id=...
     navigate(`/teacher/edit/${id}/step1`)
   }
@@ -45,9 +46,9 @@ function QuizDetail() {
   }
 
   const handleShare = () => {
-    console.log('Share quiz:', id)
+    // console.log('Share quiz:', id)
     // TODO: Show share modal or copy link to clipboard
-    alert('Share link copied to clipboard!')
+    // alert('Share link copied to clipboard!')
   }
 
   if (loading) {

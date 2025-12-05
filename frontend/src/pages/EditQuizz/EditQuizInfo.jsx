@@ -44,7 +44,7 @@ export default function EditQuizInfo() {
     allowRetake: quizData?.allowRetake
   }
 
-  const { control, handleSubmit, formState: { errors } } = useForm({
+  const { control, handleSubmit, formState: { errors }, reset } = useForm({
     defaultValues: initialFormData
   })
 
@@ -60,6 +60,22 @@ export default function EditQuizInfo() {
     setIsLoading(true)
     dispatch(fetchQuizzDetailsAPI(id)).finally(() => setIsLoading(false))
   }, [dispatch, id])
+
+  // Reset form when quizData changes
+  useEffect(() => {
+    if (quizData) {
+      reset({
+        title: quizData.title,
+        description: quizData.description,
+        category: quizData.category,
+        level: quizData.level,
+        timeLimit: quizData.timeLimit,
+        passingScore: quizData.passingScore,
+        showResults: quizData.showResults,
+        allowRetake: quizData.allowRetake
+      })
+    }
+  }, [quizData, reset])
 
   const handleNext = () => {
     navigate(`/teacher/edit/${quizData._id}/step2`)
