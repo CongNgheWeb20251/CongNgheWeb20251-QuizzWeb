@@ -68,10 +68,20 @@ const updateInfo = async (quizId, updateData) => {
   }
 }
 
+const getQuizzesStats = async (userId) => {
+  try {
+    const stats = await quizModel.getQuizzesStats(userId)
+    return stats
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 
 export const quizService = {
   createNew,
   getDetails,
   getQuizzes,
-  updateInfo
+  updateInfo,
+  getQuizzesStats
 }

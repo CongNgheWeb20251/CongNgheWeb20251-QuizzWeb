@@ -10,7 +10,7 @@ const QuizCard = ({ quiz }) => {
   }
 
   const handleMoreClick = () => {
-    console.log('More options for quiz:', quiz._id)
+    // console.log('More options for quiz:', quiz._id)
     // TODO: Implement more options menu (edit, delete, share, etc)
   }
 
@@ -22,11 +22,11 @@ const QuizCard = ({ quiz }) => {
           <h4 className="qc-title">{quiz.title}</h4>
           <p className="qc-subtitle">{quiz.subtitle}</p>
           <div className="qc-meta">
-            <span className="qc-meta-item">{quiz.questionsCount} questions</span>
+            <span className="qc-meta-item">{quiz?.questionOrderIds?.length} questions</span>
             <span className="qc-meta-item">•</span>
             <span className="qc-meta-item">{quiz.timeLimit} min</span>
             <span className="qc-meta-item">•</span>
-            <span className="qc-meta-item">{quiz.completions} completions</span>
+            <span className="qc-meta-item">{quiz?.completions} completions</span>
           </div>
         </div>
       </div>

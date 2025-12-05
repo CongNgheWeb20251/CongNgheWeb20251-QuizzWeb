@@ -13,6 +13,9 @@ Router.route('')
   .get(quizController.getQuizzes)
   .post(quizValidation.createNew, quizController.createNew)
 
+Router.route('/stats')
+  .get(quizController.getQuizzesStats)
+
 Router.route('/:id')
   .get(quizController.getDetails)
   .put(quizValidation.updateInfo, quizController.updateInfo)

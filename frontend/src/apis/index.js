@@ -173,6 +173,11 @@ export const fetchQuizzesAPI = async (searchPath) => {
   return res.data
 }
 
+export const fetchQuizzesStatsAPI = async () => {
+  const res = await authorizedAxiosInstance.get('/v1/quizzes/stats')
+  return res.data
+}
+
 // update QuizInfo
 export async function updateQuizInfo(id, updateData) {
   const res = await authorizedAxiosInstance.put(`/v1/quizzes/${id}`, updateData)

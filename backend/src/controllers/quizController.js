@@ -49,10 +49,21 @@ const updateInfo = async (req, res, next) => {
   }
 }
 
+const getQuizzesStats = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const stats = await quizService.getQuizzesStats(userId)
+    res.status(StatusCodes.OK).json(stats)
+  } catch (error) {
+    next(error)
+  }
+}
+
 
 export const quizController = {
   createNew,
   getDetails,
   getQuizzes,
-  updateInfo
+  updateInfo,
+  getQuizzesStats
 }
