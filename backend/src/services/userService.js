@@ -11,6 +11,8 @@ import { WEBSITE_DOMAIN } from '~/utils/constants'
 import { JwtProvider } from '~/providers/JwtProvider'
 import { BrevoProvider } from '~/providers/BrevoProvider'
 import { cloudinaryProvider } from '~/providers/cloudinaryProvider'
+import { otpModel } from '~/models/otpModel'
+import { generateVerifyEmailTemplate } from '~/utils/generateTemplate'
 
 
 const createNew = async (userData) => {
@@ -31,23 +33,35 @@ const createNew = async (userData) => {
       username: userData.username || nameFromEmail,
       fullName: userData.fullName || nameFromEmail,
       role: userData.accountType || 'student',
-      authProvider: 'local',
-      verifyToken: uuidv4()
+      authProvider: 'local'
+      // verifyToken: uuidv4()
+    }
+    const token = uuidv4()
+    const otpData = {
+      email: userData.email,
+      token: token,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 phút hết hạn
     }
 
-    const createdUser = await userModel.createNew(newUser)
+    // const createdUser = await userModel.createNew(newUser)
+    const [createdUser] = await Promise.all([
+      userModel.createNew(newUser),
+      otpModel.createNew(otpData)
+    ])
+
     const result = await userModel.findOneById(createdUser.insertedId)
 
     // Gửi email cho người dùng xác thực tài khoản
-    const verificationLink = `${WEBSITE_DOMAIN}/account/verification?email=${result.email}&token=${result.verifyToken}`
+    const verificationLink = `${WEBSITE_DOMAIN}/account/verification?email=${result.email}&token=${token}`
     const to = result.email
-    const html = `
-    <h1>Welcome!</h1>
-    <h2>Thank you for joining us.</h2>
-    <h3>Here is your verification link:</h3>
-    <h3>${verificationLink}</h3>
-    <h3>Sincerely!</h3>
-    `
+    // const html = `
+    // <h1>Welcome!</h1>
+    // <h2>Thank you for joining us.</h2>
+    // <h3>Here is your verification link:</h3>
+    // <h3>${verificationLink}</h3>
+    // <h3>Sincerely!</h3>
+    // `
+    const html = generateVerifyEmailTemplate(verificationLink)
     // await ResendProvider.sendEmail({ to, subject, html })
     // Sử dụng Brevo để gửi email
     const customSubject = 'Quizzy: Please verify your email before using our services!'
@@ -56,6 +70,7 @@ const createNew = async (userData) => {
       await BrevoProvider.sendEmail(to, customSubject, html)
     } catch (emailError) {
       // Log lỗi nhưng không throw để user vẫn được tạo
+      // eslint-disable-next-line no-console
       console.error('Failed to send verification email:', emailError.message)
     }
 
@@ -79,15 +94,22 @@ const verifyAccount = async (resBody) => {
       // Nếu đã active rồi thì trả về thông tin luôn, không cần update
       return pickUser(existingUser)
     }
-    if (resBody.token !== existingUser.verifyToken) {
-      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Invalid verification token!')
+
+    // if (resBody.token !== existingUser.verifyToken) {
+    //   throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Invalid verification token!')
+    // }
+
+    // Tìm token trong db
+    const existingOtp = await otpModel.findOneByEmailToken({ email: resBody.email, token: resBody.token })
+    if (!existingOtp) {
+      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Invalid or expired verification token!')
     }
 
     // Ok
     const updateData = {
-      isActive: true,
-      verifyToken: null
+      isActive: true
     }
+
     const updatedUser = await userModel.update(existingUser._id, updateData)
     return pickUser(updatedUser)
 

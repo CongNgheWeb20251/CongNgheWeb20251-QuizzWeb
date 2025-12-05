@@ -14,6 +14,11 @@ const mongoClient = new MongoClient(env.MONGODB_URI, {
 export const DB_CONNECT = async () => {
     await mongoClient.connect()
     dbInstance = mongoClient.db(env.DATABASE_NAME)
+    // tạo index hết hạn otp thì db sẽ tự động xóa
+    await dbInstance.collection('otps').createIndex(
+      { 'expiresAt': 1 },
+      { expireAfterSeconds: 0 }
+    )
 }
 
 export const DB_GET = () => {

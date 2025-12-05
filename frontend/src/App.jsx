@@ -20,7 +20,7 @@ import AuthCallBack from './components/0AuthCallBack/AuthCallBack'
 import NotFound from './pages/404/NotFound'
 import ForgotPassword from '~/pages/ForgotPassword/ForgotPassword.jsx'
 import ResetPassword from '~/pages/ForgotPassword/ResetPassword.jsx'
-import StudentDashboard from './pages/Student/StudentDashboard'
+// import StudentDashboard from './pages/Student/StudentDashboard'
 
 const ProtectedRoute = ({ user }) => {
   if (!user) {
@@ -67,7 +67,7 @@ function App() {
       </Route>
       <Route path="/auth-successful" element={<AuthCallBack />} />
       <Route path="*" element={<NotFound />} />
-      <Route path="/quizzes" element={<StudentDashboard />} />
+      {/* <Route path="/quizzes" element={<StudentDashboard />} /> */}
     </Routes>
   )
 }
