@@ -54,7 +54,7 @@ export default function StudentQuizPage() {
     passingScore: 70
   }
 
-  const questions = [
+  const rawQuestions = [
     {
       id: 1,
       text: 'What is the output of: typeof null?',
@@ -176,6 +176,30 @@ export default function StudentQuizPage() {
       points: 10
     }
   ]
+
+  const questions = rawQuestions.map((question, questionIndex) => {
+    const tempId = question.tempId ?? question.id ?? questionIndex + 1
+    const normalizedType = question.type === 'single'
+      ? 'single-choice'
+      : question.type === 'multiple'
+        ? 'multiple-choice'
+        : question.type
+
+    return {
+      ...question,
+      tempId,
+      content: question.content ?? question.text,
+      type: normalizedType,
+      options: (question.options || []).map((option, optionIndex) => {
+        const optionTempId = option.tempId ?? (tempId * 10 + optionIndex + 1)
+        return {
+          ...option,
+          tempId: optionTempId,
+          content: option.content ?? option.text
+        }
+      })
+    }
+  })
 
   // Timer countdown
   useEffect(() => {
