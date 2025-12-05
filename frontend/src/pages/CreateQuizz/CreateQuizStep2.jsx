@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -26,18 +27,23 @@ import { toast } from 'react-toastify'
 import { createQuestionsInBatchAPI } from '~/apis'
 import { isEqual, cloneDeep } from 'lodash'
 
+const addTempIds = (rawQuestions = []) => rawQuestions.map((question, index) => {
+  const tempId = question.tempId ?? index + 1
+  const options = (question.options || []).map((option, optIndex) => ({
+    ...option,
+    tempId: option.tempId ?? tempId * 10 + optIndex + 1
+  }))
+  return { ...question, tempId, options }
+})
+
 function CreateQuizStep2() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const quizData = useSelector(selectCurrentActiveQuizz)
   const [isLoading, setIsLoading] = useState(false)
 
-  const [questions, setQuestions] = useState(
-    (quizData?.questions && quizData.questions.length > 0)
-      ? quizData.questions
-      : []
-  )
-  const [originalQuestions, setOriginalQuestions] = useState([]) // Lưu dữ liệu gốc từ server
+  const [questions, setQuestions] = useState(() => addTempIds(quizData?.questions || []))
+  const [originalQuestions, setOriginalQuestions] = useState(() => cloneDeep(addTempIds(quizData?.questions || [])))
   const { id } = useParams()
 
   useEffect(() => {
@@ -45,15 +51,16 @@ function CreateQuizStep2() {
     dispatch(fetchQuizzDetailsAPI(id)).finally(() => setIsLoading(false))
   }, [id, dispatch])
 
-  // Đồng bộ questions từ quizData khi có dữ liệu mới từ Redux
   useEffect(() => {
-    if (quizData?.questions && quizData.questions.length > 0) {
-      const questionsData = cloneDeep(quizData.questions) // Deep clone
+    if (quizData?.questions?.length) {
+      const questionsData = addTempIds(quizData.questions)
       setQuestions(questionsData)
-      setOriginalQuestions(questionsData) // Lưu snapshot gốc
+      setOriginalQuestions(cloneDeep(questionsData))
+    } else {
+      setQuestions([])
+      setOriginalQuestions([])
     }
-  }, [quizData])
-
+  }, [quizData?.questions])
 
   const handleQuestionChange = (questionId, field, value) => {
     setQuestions(questions.map(q => {
@@ -233,8 +240,18 @@ function CreateQuizStep2() {
     }
 
     console.log('Save draft - Step 2:', { questions })
+    // 2. Trước khi gửi lên server, loại bỏ tempId khỏi questions và options
+    const questionsToSave = questions.map(q => {
+      const { tempId, ...questionData } = q
+      questionData.options = questionData.options.map(opt => {
+        const { tempId, ...optionData } = opt
+        return optionData
+      })
+      return questionData
+    })
+    console.log('Questions to save:', questionsToSave)
     toast.promise(
-      createQuestionsInBatchAPI(quizData._id, questions),
+      createQuestionsInBatchAPI(quizData._id, questionsToSave),
       {
         pending: 'Updating...'
       }
@@ -244,7 +261,7 @@ function CreateQuizStep2() {
         dispatch(fetchQuizzDetailsAPI(id))
       }
     }).catch(error => {
-      toast.error('Failed to save draft. Please try again.')
+      // toast.error('Failed to save draft. Please try again.')
       console.error('Save draft error:', error)
     })
   }

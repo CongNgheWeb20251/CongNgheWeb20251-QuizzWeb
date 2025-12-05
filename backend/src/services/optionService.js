@@ -12,7 +12,6 @@ const createNew = async (data) => {
       quizId: data.quizId,
       content: data.content,
       isCorrect: data.isCorrect,
-      tempId: data.tempId,
       createdAt: new Date()
     })
     const option = await answerOptionModel.findOneById(result.insertedId)

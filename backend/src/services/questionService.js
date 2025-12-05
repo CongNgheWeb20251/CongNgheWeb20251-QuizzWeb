@@ -46,7 +46,7 @@ const updateQuestionsInBatch = async (quizId, questions) => {
         // câu hỏi đã có, update
         await questionModel.update(
           q._id,
-          { content: q.content, type: q.type, points: q.points, tempId: q.tempId }
+          { content: q.content, type: q.type, points: q.points }
         )
 
         // Lấy danh sách option IDs hiện tại của question này
@@ -75,7 +75,7 @@ const updateQuestionsInBatch = async (quizId, questions) => {
             // option đã có, update
             await answerOptionModel.update(
               opt._id,
-              { content: opt.content, isCorrect: opt.isCorrect, tempId: opt.tempId }
+              { content: opt.content, isCorrect: opt.isCorrect }
             )
           } else {
             // option mới, tạo mới
@@ -83,8 +83,7 @@ const updateQuestionsInBatch = async (quizId, questions) => {
               questionId: q._id.toString(),
               quizId,
               content: opt.content,
-              isCorrect: opt.isCorrect,
-              tempId: opt.tempId
+              isCorrect: opt.isCorrect
             })
           }
         }
@@ -95,7 +94,6 @@ const updateQuestionsInBatch = async (quizId, questions) => {
           content: q.content,
           type: q.type,
           points: q.points,
-          tempId: q.tempId, // tempId FE
           createdAt: new Date()
         })
         const question = await questionModel.findOneById(createdQuestion.insertedId)
@@ -105,8 +103,7 @@ const updateQuestionsInBatch = async (quizId, questions) => {
             questionId: createdQuestion.insertedId.toString(),
             quizId,
             content: opt.content,
-            isCorrect: opt.isCorrect,
-            tempId: opt.tempId // tempId FE
+            isCorrect: opt.isCorrect
           })
         }))
       }
@@ -122,8 +119,7 @@ const createNew = async (quizId, data) => {
       quizId: quizId,
       content: data.content,
       type: data.type,
-      points: data.points,
-      tempId: data.tempId // tempId FE
+      points: data.points
     })
     const question = await questionModel.findOneById(result.insertedId)
     await quizModel.pushQuestionIds(question)
@@ -132,9 +128,7 @@ const createNew = async (quizId, data) => {
         questionId: question._id.toString(),
         quizId,
         content: opt.content,
-        isCorrect: opt.isCorrect,
-        tempId: opt.tempId // tempId FE
-
+        isCorrect: opt.isCorrect
       })
     }))
     return result
