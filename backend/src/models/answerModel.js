@@ -9,8 +9,6 @@ const ANSWER_OPTION_COLLECTION_SCHEMA = Joi.object({
   quizId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
   content: Joi.string().required().trim().strict(),
   isCorrect: Joi.boolean().default(false),
-  // thứ tự hiển thị đap án
-  tempId: Joi.number().required(), // tempId FE
 
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null)
