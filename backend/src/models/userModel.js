@@ -21,7 +21,7 @@ const USER_COLLECTION_SCHEMA = Joi.object({
   role: Joi.string().valid(USER_ROLES.ADMIN, USER_ROLES.TEACHER, USER_ROLES.STUDENT).optional(),
 
   isActive: Joi.boolean().default(false),
-  verifyToken: Joi.string(),
+  // verifyToken: Joi.string(),
   authProvider: Joi.string().valid('local', 'google', 'facebook', 'hybrid').default('local'),
 
   googleId: Joi.string().optional().allow(null),
