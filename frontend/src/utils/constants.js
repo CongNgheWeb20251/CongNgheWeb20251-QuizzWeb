@@ -8,11 +8,11 @@
 //   apiRoot = 'https://trello-api-express.onrender.com'
 // }
 
-// const apiRoot = import.meta.env.DEV
-//   ? 'http://localhost:8017' // Development
-//   : '' // Production
+const apiRoot = import.meta.env.DEV
+  ? 'http://localhost:8017' // Development
+  : 'https://congngheweb20251-quizzweb.onrender.com/' // Production
 
-export const API_ROOT = 'http://localhost:8017'
+export const API_ROOT = apiRoot
 
 export const DEFAULT_PAGE = 1
 export const DEFAULT_ITEMS_PER_PAGE = 4

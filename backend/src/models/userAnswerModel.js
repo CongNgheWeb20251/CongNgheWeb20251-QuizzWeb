@@ -1,15 +1,17 @@
 import Joi from 'joi'
 import { DB_GET } from '~/config/mongodb'
 import { ObjectId } from 'mongodb'
+import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
 const USER_ANSWER_COLLECTION_NAME = 'userAnswers'
 const USER_ANSWER_COLLECTION_SCHEMA = Joi.object({
   userId: Joi.string().required(),
   quizId: Joi.string().required(),
+  sessionId: Joi.string().required(),
   questionId: Joi.string().required(),
-  selectedAnswerId: Joi.string().required(),
-  isCorrect: Joi.boolean().required(),
-  timeSpent: Joi.number().optional(), // thời gian làm câu hỏi này (giây)
+  selectedAnswerIds: Joi.array().items(
+    Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+  ).default([]),
 
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null)

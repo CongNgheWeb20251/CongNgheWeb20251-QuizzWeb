@@ -16,8 +16,8 @@ const QUIZ_RESULT_COLLECTION_SCHEMA = Joi.object({
 
   // Thời gian
   timeSpent: Joi.number().required(), // tổng thời gian làm bài (giây)
-  startTime: Joi.date().timestamp('javascript').required(),
-  endTime: Joi.date().timestamp('javascript').required(),
+  // startTime: Joi.date().timestamp('javascript').required(),
+  // endTime: Joi.date().timestamp('javascript').required(),
 
   // Trạng thái
   // status: Joi.string().valid('completed', 'in-progress', 'abandoned').default('completed'),

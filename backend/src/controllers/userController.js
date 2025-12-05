@@ -2,7 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { userService } from '~/services/userService'
 import ms from 'ms'
 import ApiError from '~/utils/ApiError'
-import { env } from '~/config/environment'
+import { SERVER_DOMAIN, WEBSITE_DOMAIN } from '~/utils/constants'
 
 const createNew = async (req, res, next) => {
   try {
@@ -78,7 +78,7 @@ const googleOAuthCallback = async (req, res, next) => {
     })
 
     // Redirect về frontend
-    return res.redirect(`${env.WEBSITE_DOMAIN_DEV}/auth-successful`)
+    return res.redirect(`${WEBSITE_DOMAIN}/auth-successful`)
   } catch (error) {
     next(error)
   }
