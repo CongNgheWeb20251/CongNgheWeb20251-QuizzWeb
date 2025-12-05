@@ -10,7 +10,7 @@
 
 const apiRoot = import.meta.env.DEV
   ? 'http://localhost:8017' // Development
-  : 'https://congngheweb20251-quizzweb.onrender.com/' // Production
+  : 'https://congngheweb20251-quizzweb.onrender.com' // Production
 
 export const API_ROOT = apiRoot
 
