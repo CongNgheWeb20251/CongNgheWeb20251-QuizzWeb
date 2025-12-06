@@ -10,10 +10,6 @@ import { useNavigate } from 'react-router-dom'
 // Import tab components
 import ProfileTab from './tabs/ProfileTab'
 import AccountTab from './tabs/AccountTab'
-import NotificationsTab from './tabs/NotificationsTab'
-import AppearanceTab from './tabs/AppearanceTab'
-import PrivacyTab from './tabs/PrivacyTab'
-import BillingTab from './tabs/BillingTab'
 
 // Import styles
 import { StyledSettings, TabPanelContent } from './styles/Settings.styles'
@@ -51,17 +47,6 @@ const Settings = () => {
 
   return (
     <StyledSettings>
-      {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-        <Box>
-          <Typography variant="h4" component="h1">
-            Settings
-          </Typography>
-          <Typography variant="subtitle1" sx={{ color: 'rgba(255,255,255,0.7)', marginBottom: 3 }}>
-            Manage your account settings and preferences
-          </Typography>
-        </Box>
-        <UserAvatar />
-      </Box> */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Button
@@ -113,10 +98,6 @@ const Settings = () => {
       >
         <Tab label="Profile" />
         <Tab label="Account" />
-        <Tab label="Notifications" />
-        <Tab label="Appearance" />
-        <Tab label="Privacy" />
-        <Tab label="Billing" />
       </Tabs>
 
       <TabPanel value={activeTab} index={0}>
@@ -127,26 +108,6 @@ const Settings = () => {
       <TabPanel value={activeTab} index={1}>
         <TabPanelContent>
           <AccountTab />
-        </TabPanelContent>
-      </TabPanel>
-      <TabPanel value={activeTab} index={2}>
-        <TabPanelContent>
-          <NotificationsTab />
-        </TabPanelContent>
-      </TabPanel>
-      <TabPanel value={activeTab} index={3}>
-        <TabPanelContent>
-          <AppearanceTab />
-        </TabPanelContent>
-      </TabPanel>
-      <TabPanel value={activeTab} index={4}>
-        <TabPanelContent>
-          <PrivacyTab />
-        </TabPanelContent>
-      </TabPanel>
-      <TabPanel value={activeTab} index={5}>
-        <TabPanelContent>
-          <BillingTab />
         </TabPanelContent>
       </TabPanel>
     </StyledSettings>
