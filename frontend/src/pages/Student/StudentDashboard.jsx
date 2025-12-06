@@ -19,11 +19,13 @@ import {
   TrendingUp,
   Award
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import QuizCard from '~/components/StudentQuiz/QuizCard'
 import SkeletonCard from '~/components/Skeleton/QuizCardSkeleton'
 import UserAvatar from '~/components/UserAvatar/UserAvatar'
 import StartQuizModal from '~/components/StudentQuiz/StartQuizModal'
+import { startAttemptQuizAPI, fetchQuizzesByStudentAPI } from '~/apis/index'
 
 export default function StudentDashboard() {
   const [quizzes, setQuizzes] = useState([])
@@ -34,143 +36,18 @@ export default function StudentDashboard() {
     quiz: null,
     isRetake: false
   })
+  const navigate = useNavigate()
   // Simulate data loading
   useEffect(() => {
-    setTimeout(() => {
-      setQuizzes([
-        {
-          _id: '1',
-          title: 'JavaScript Fundamentals',
-          subject: 'JavaScript',
-          subjectIcon: 'JavaScript',
-          dateTaken: '2025-12-01',
-          status: 'completed',
-          score: 85,
-          maxScore: 100,
-          timeSpent: 18,
-          duration: 20,
-          progress: 100,
-          description: 'Test your understanding of core JavaScript concepts including variables, functions, and control flow.',
-          questionCount: 15,
-          difficulty: 'medium',
-          attemptNumber: 1,
-          allowRetake: true
-        },
-        {
-          _id: '2',
-          title: 'React Hooks Deep Dive',
-          subject: 'React',
-          subjectIcon: 'React',
-          dateTaken: '2025-11-28',
-          status: 'in-progress',
-          score: 45,
-          maxScore: 100,
-          timeSpent: 12,
-          duration: 30,
-          progress: 60,
-          description: 'Master React Hooks including useState, useEffect, useContext, and custom hooks.',
-          questionCount: 20,
-          difficulty: 'hard'
-        },
-        {
-          _id: '3',
-          title: 'CSS Grid & Flexbox',
-          subject: 'CSS',
-          subjectIcon: 'CSS',
-          dateTaken: '2025-11-25',
-          status: 'completed',
-          score: 92,
-          maxScore: 100,
-          timeSpent: 15,
-          duration: 20,
-          progress: 100,
-          description: 'Learn modern CSS layout techniques with Grid and Flexbox for responsive designs.',
-          questionCount: 12,
-          difficulty: 'medium',
-          attemptNumber: 1,
-          allowRetake: true
-        },
-        {
-          _id: '4',
-          title: 'Database Design Principles',
-          subject: 'Database',
-          subjectIcon: 'Database',
-          dateTaken: '2025-11-20',
-          status: 'missed',
-          duration: 25,
-          description: 'Understand database normalization, relationships, and schema design best practices.',
-          questionCount: 18,
-          difficulty: 'hard'
-        },
-        {
-          _id: '5',
-          title: 'Modern Web Development',
-          subject: 'Web Dev',
-          subjectIcon: 'Web Dev',
-          dateTaken: '2025-11-15',
-          status: 'completed',
-          score: 78,
-          maxScore: 100,
-          timeSpent: 25,
-          duration: 30,
-          progress: 100,
-          description: 'Explore modern web development tools, frameworks, and best practices.',
-          questionCount: 22,
-          difficulty: 'medium',
-          attemptNumber: 1,
-          allowRetake: true
-        },
-        {
-          _id: '6',
-          title: 'TypeScript Essentials',
-          subject: 'JavaScript',
-          subjectIcon: 'JavaScript',
-          dateTaken: '2025-11-10',
-          status: 'completed',
-          score: 88,
-          maxScore: 100,
-          timeSpent: 22,
-          duration: 25,
-          progress: 100,
-          description: 'Learn TypeScript fundamentals including types, interfaces, and generics.',
-          questionCount: 16,
-          difficulty: 'medium',
-          attemptNumber: 1,
-          allowRetake: true
-        },
-        {
-          _id: '7',
-          title: 'Advanced React Patterns',
-          subject: 'React',
-          subjectIcon: 'React',
-          dateTaken: '2025-11-05',
-          status: 'completed',
-          score: 95,
-          maxScore: 100,
-          timeSpent: 28,
-          duration: 30,
-          progress: 100,
-          description: 'Master advanced React patterns like render props, HOCs, and compound components.',
-          questionCount: 20,
-          difficulty: 'hard',
-          attemptNumber: 1,
-          allowRetake: true
-        },
-        {
-          _id: '8',
-          title: 'Responsive Design',
-          subject: 'CSS',
-          subjectIcon: 'CSS',
-          dateTaken: '2025-11-01',
-          status: 'available',
-          duration: 20,
-          description: 'Create responsive web layouts that work seamlessly across all devices and screen sizes.',
-          questionCount: 14,
-          difficulty: 'easy'
-        }
-      ])
+    setIsLoading(true)
+    fetchQuizzesByStudentAPI('?page=1').then((data) => {
+      setQuizzes(data.quizzes || [])
       setIsLoading(false)
-    }, 1500)
+    // eslint-disable-next-line no-unused-vars
+    }).catch((error) => {
+      // console.error('Error fetching quizzes:', error)
+      setIsLoading(false)
+    })
   }, [])
 
   const toggleMenu = (quizId) => {
@@ -195,9 +72,13 @@ export default function StudentDashboard() {
 
   const handleConfirmStart = () => {
     // Handle quiz start logic here
-    console.log('Starting quiz:', startQuizModal.quiz?._id)
     handleCloseModal()
-    // Navigate to quiz taking page or start quiz logic
+    // startAttemptQuizAPI(startQuizModal.quiz?._id).then((res) => {
+    //   const { _id: sessionId, quizId } = res
+    //   navigate(`/quizzes/${quizId}/session/${sessionId}`)
+    // })
+    navigate(`/quizzes/${startQuizModal.quiz?._id}`)
+
   }
 
 
@@ -305,14 +186,7 @@ export default function StudentDashboard() {
           isOpen={startQuizModal.isOpen}
           onClose={handleCloseModal}
           onStart={handleConfirmStart}
-          quizTitle={startQuizModal.quiz.title}
-          description={startQuizModal.quiz.description || 'Test your knowledge with this quiz.'}
-          metadata={{
-            duration: startQuizModal.quiz.duration || 20,
-            questionCount: startQuizModal.quiz.questionCount || 10,
-            difficulty: startQuizModal.quiz.difficulty,
-            attemptNumber: startQuizModal.isRetake ? (startQuizModal.quiz.attemptNumber || 1) + 1 : undefined,
-          }}
+          quiz={startQuizModal.quiz}
           isRetake={startQuizModal.isRetake}
         />
       )}
@@ -330,10 +204,10 @@ function EmptyState() {
       <p className="text-gray-600 mb-6 max-w-md mx-auto">
         You haven't participated in any quizzes yet. Start your learning journey by taking your first quiz!
       </p>
-      <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all shadow-sm hover:shadow inline-flex items-center gap-2">
+      {/* <button className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all shadow-sm hover:shadow inline-flex items-center gap-2">
         <Play className="w-5 h-5" />
         Browse Available Quizzes
-      </button>
+      </button> */}
     </div>
   )
 }

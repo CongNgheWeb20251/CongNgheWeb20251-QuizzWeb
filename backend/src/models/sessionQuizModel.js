@@ -1,11 +1,12 @@
 import Joi from 'joi'
 import { DB_GET } from '~/config/mongodb'
 import { ObjectId } from 'mongodb'
+import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
 const SESSION_QUIZ_COLLECTION_NAME = 'sessionQuizzes'
 const SESSION_QUIZ_COLLECTION_SCHEMA = Joi.object({
-  userId: Joi.string().required(),
-  quizId: Joi.string().required(),
+  userId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+  quizId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
 
   // Thời gian
   timeSpent: Joi.number().required(), // tổng thời gian làm bài (giây)
@@ -54,7 +55,7 @@ const findOneById = async (id) => {
 const findByUserId = async (userId) => {
   try {
     const results = await DB_GET().collection(SESSION_QUIZ_COLLECTION_NAME)
-      .find({ userId: userId })
+      .find({ userId: new ObjectId(userId) })
       .sort({ createdAt: -1 })
       .toArray()
     return results
@@ -66,7 +67,7 @@ const findByUserId = async (userId) => {
 const findByQuizId = async (quizId) => {
   try {
     const results = await DB_GET().collection(SESSION_QUIZ_COLLECTION_NAME)
-      .find({ quizId: quizId })
+      .find({ quizId: new ObjectId(quizId) })
       .sort({ createdAt: -1 })
       .toArray()
     return results
@@ -78,7 +79,7 @@ const findByQuizId = async (quizId) => {
 const findByUserAndQuiz = async (userId, quizId) => {
   try {
     const results = await DB_GET().collection(SESSION_QUIZ_COLLECTION_NAME)
-      .find({ userId: userId, quizId: quizId })
+      .find({ userId: new ObjectId(userId), quizId: new ObjectId(quizId) })
       .sort({ createdAt: -1 })
       .toArray()
     return results

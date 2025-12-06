@@ -25,7 +25,7 @@ const createNew = async ({ userId, data }) => {
     throw error
   }
 }
-const getDetails = async (userId, quizzId) => {
+const getDetails = async (userId, quizzId, userRole) => {
   // eslint-disable-next-line no-useless-catch
   try {
     const quiz = await quizModel.getDetails(userId, quizzId)
@@ -35,8 +35,27 @@ const getDetails = async (userId, quizzId) => {
     const quizClone = cloneDeep(quiz)
     quizClone.questions.forEach(question => {
       question.options = quizClone.options.filter(option => option.questionId.toString() === question._id.toString())
+
+      // Nếu user là student, xóa trường isCorrect khỏi các options
+      if (userRole === 'student') {
+        question.options.forEach(option => {
+          delete option.isCorrect
+        })
+      }
     })
     delete quizClone.options
+
+    // Nếu user là student, xóa các trường nhạy cảm khỏi quiz
+    if (userRole === 'student') {
+      delete quizClone.level
+      delete quizClone.status
+      delete quizClone.category
+      delete quizClone.createdBy
+      delete quizClone.passingScore
+      delete quizClone.updatedAt
+      delete quizClone.createdAt
+      delete quizClone.allowRetake
+    }
 
     return quizClone
   } catch (error) {
@@ -77,11 +96,24 @@ const getQuizzesStats = async (userId) => {
   }
 }
 
+const getQuizzesByStudent = async (userId, page, itemsPerPage) => {
+  try {
+    if (!page) page = DEFAULT_PAGE
+    if (!itemsPerPage) itemsPerPage = DEFAULT_ITEMS_PER_PAGE
+
+    const result = await quizModel.getQuizzesByStudent(userId, parseInt(page, 10), parseInt(itemsPerPage, 10))
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 
 export const quizService = {
   createNew,
   getDetails,
   getQuizzes,
   updateInfo,
-  getQuizzesStats
+  getQuizzesStats,
+  getQuizzesByStudent
 }

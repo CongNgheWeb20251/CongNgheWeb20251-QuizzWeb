@@ -26,6 +26,9 @@ import {
 } from 'lucide-react'
 
 import QuestionCard from '~/components/StudentQuiz/QuestionCard'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchQuizzDetailsAPI, selectCurrentActiveQuizz } from '~/redux/activeQuizz/activeQuizzSlice'
+import { useParams } from 'react-router-dom'
 
 
 export default function StudentQuizPage() {
@@ -33,6 +36,10 @@ export default function StudentQuizPage() {
   const [answers, setAnswers] = useState({})
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [timeRemaining, setTimeRemaining] = useState(900) // 15 minutes
+  const quiz = useSelector(selectCurrentActiveQuizz)
+  const dispatch = useDispatch()
+  const { id } = useParams()
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleNavigateToQuestion = (index) => {
     setCurrentQuestion(index)
@@ -44,138 +51,143 @@ export default function StudentQuizPage() {
       }
     }
   }
+  useEffect(() => {
+    setIsLoading(true)
+    dispatch(fetchQuizzDetailsAPI(id)).finally(() => setIsLoading(false))
+
+  }, [dispatch, id])
 
   // Sample quiz data
-  const quizData = {
-    title: 'JavaScript Fundamentals Quiz',
-    description: 'Test your knowledge of JavaScript basics',
-    totalQuestions: 10,
-    timeLimit: 15,
-    passingScore: 70
-  }
+  // const quizData = {
+  //   title: 'JavaScript Fundamentals Quiz',
+  //   description: 'Test your knowledge of JavaScript basics',
+  //   totalQuestions: 10,
+  //   timeLimit: 15,
+  //   passingScore: 70
+  // }
 
-  const questions = [
-    {
-      _id: 'q_8f21a9b2',
-      content: 'What is the output of: typeof null?',
-      type: 'single-choice',
-      options: [
-        { _id: 'o_c1a91f11', content: '"null"' },
-        { _id: 'o_94bc2a3f', content: '"object"' },
-        { _id: 'o_233fbb62', content: '"undefined"' },
-        { _id: 'o_d120ef7a', content: '"number"' }
-      ],
-      points: 10
-    },
-    {
-      _id: 'q_a92b1e73',
-      content: 'Which methods can be used to manipulate arrays? (Select all that apply)',
-      type: 'multiple',
-      options: [
-        { _id: 'o_51ab9e62', content: 'push()' },
-        { _id: 'o_b83cd271', content: 'pop()' },
-        { _id: 'o_149dbfee', content: 'shift()' },
-        { _id: 'o_92cc741a', content: 'unshift()' }
-      ],
-      points: 15
-    },
-    {
-      _id: 'q_5b21e9c0',
-      content: 'What does "DOM" stand for?',
-      type: 'single-choice',
-      options: [
-        { _id: 'o_34fda892', content: 'Document Object Model' },
-        { _id: 'o_56cb917c', content: 'Data Object Model' },
-        { _id: 'o_70bcf51a', content: 'Document Oriented Model' },
-        { _id: 'o_e1cf28b4', content: 'Digital Object Management' }
-      ],
-      points: 10
-    },
-    {
-      _id: 'q_7e3d0c15',
-      content: 'Which are valid ways to declare variables in JavaScript? (Select all that apply)',
-      type: 'multiple',
-      options: [
-        { _id: 'o_8ff1a634', content: 'var' },
-        { _id: 'o_41ab55e7', content: 'let' },
-        { _id: 'o_d0e3a17c', content: 'const' },
-        { _id: 'o_1cf97d20', content: 'variable' }
-      ],
-      points: 15
-    },
-    {
-      _id: 'q_8a4d991f',
-      content: 'What is the correct syntax for a for loop?',
-      type: 'single-choice',
-      options: [
-        { _id: 'o_72fe1d34', content: 'for (i = 0; i < 5)' },
-        { _id: 'o_5acb23d1', content: 'for (i = 0; i < 5; i++)' },
-        { _id: 'o_bcd8f612', content: 'for i = 0 to 5' },
-        { _id: 'o_4d2739aa', content: 'for (i <= 5; i++)' }
-      ],
-      points: 10
-    },
-    {
-      _id: 'q_f51a72bb',
-      content: 'Which company developed JavaScript?',
-      type: 'single-choice',
-      options: [
-        { _id: 'o_3fbac711', content: 'Microsoft' },
-        { _id: 'o_b238dd89', content: 'Netscape' },
-        { _id: 'o_914c2fa1', content: 'Oracle' },
-        { _id: 'o_c92bd7aa', content: 'Google' }
-      ],
-      points: 10
-    },
-    {
-      _id: 'q_9de21b56',
-      content: 'What is the result of: 2 + "2"?',
-      type: 'single-choice',
-      options: [
-        { _id: 'o_80ff1ab2', content: '4' },
-        { _id: 'o_14bd9c71', content: '"22"' },
-        { _id: 'o_6adf0e13', content: 'NaN' },
-        { _id: 'o_2dcb71af', content: 'undefined' }
-      ],
-      points: 10
-    },
-    {
-      _id: 'q_c0e781d2',
-      content: 'Which methods work with JSON? (Select all that apply)',
-      type: 'multiple',
-      options: [
-        { _id: 'o_1a2bfa01', content: 'JSON.parse()' },
-        { _id: 'o_b39ced1e', content: 'JSON.stringify()' },
-        { _id: 'o_e24afc81', content: 'JSON.convert()' },
-        { _id: 'o_77bc2a9f', content: 'JSON.toObject()' }
-      ],
-      points: 15
-    },
-    {
-      _id: 'q_4ce1bd88',
-      content: 'What is a closure in JavaScript?',
-      type: 'single-choice',
-      options: [
-        { _id: 'o_1aef92d7', content: 'A function with access to its outer scope' },
-        { _id: 'o_39fbab22', content: 'A way to close the browser' },
-        { _id: 'o_77da4cd1', content: 'A method to end a loop' },
-        { _id: 'o_0df12be4', content: 'A type of variable' }
-      ],
-      points: 10
-    },
-    {
-      _id: 'q_b812d4e1',
-      content: 'Which operator is used for strict equality?',
-      type: 'single-choice',
-      options: [
-        { _id: 'o_2af0bc52', content: '==' },
-        { _id: 'o_b11cf371', content: '===' },
-        { _id: 'o_51cb7aea', content: '=' },
-        { _id: 'o_93dd2472', content: '!=' }
-      ],
-      points: 10
-    }
-  ]
+  // const questions = [
+  //   {
+  //     _id: 'q_8f21a9b2',
+  //     content: 'What is the output of: typeof null?',
+  //     type: 'single-choice',
+  //     options: [
+  //       { _id: 'o_c1a91f11', content: '"null"' },
+  //       { _id: 'o_94bc2a3f', content: '"object"' },
+  //       { _id: 'o_233fbb62', content: '"undefined"' },
+  //       { _id: 'o_d120ef7a', content: '"number"' }
+  //     ],
+  //     points: 10
+  //   },
+  //   {
+  //     _id: 'q_a92b1e73',
+  //     content: 'Which methods can be used to manipulate arrays? (Select all that apply)',
+  //     type: 'multiple',
+  //     options: [
+  //       { _id: 'o_51ab9e62', content: 'push()' },
+  //       { _id: 'o_b83cd271', content: 'pop()' },
+  //       { _id: 'o_149dbfee', content: 'shift()' },
+  //       { _id: 'o_92cc741a', content: 'unshift()' }
+  //     ],
+  //     points: 15
+  //   },
+  //   {
+  //     _id: 'q_5b21e9c0',
+  //     content: 'What does "DOM" stand for?',
+  //     type: 'single-choice',
+  //     options: [
+  //       { _id: 'o_34fda892', content: 'Document Object Model' },
+  //       { _id: 'o_56cb917c', content: 'Data Object Model' },
+  //       { _id: 'o_70bcf51a', content: 'Document Oriented Model' },
+  //       { _id: 'o_e1cf28b4', content: 'Digital Object Management' }
+  //     ],
+  //     points: 10
+  //   },
+  //   {
+  //     _id: 'q_7e3d0c15',
+  //     content: 'Which are valid ways to declare variables in JavaScript? (Select all that apply)',
+  //     type: 'multiple',
+  //     options: [
+  //       { _id: 'o_8ff1a634', content: 'var' },
+  //       { _id: 'o_41ab55e7', content: 'let' },
+  //       { _id: 'o_d0e3a17c', content: 'const' },
+  //       { _id: 'o_1cf97d20', content: 'variable' }
+  //     ],
+  //     points: 15
+  //   },
+  //   {
+  //     _id: 'q_8a4d991f',
+  //     content: 'What is the correct syntax for a for loop?',
+  //     type: 'single-choice',
+  //     options: [
+  //       { _id: 'o_72fe1d34', content: 'for (i = 0; i < 5)' },
+  //       { _id: 'o_5acb23d1', content: 'for (i = 0; i < 5; i++)' },
+  //       { _id: 'o_bcd8f612', content: 'for i = 0 to 5' },
+  //       { _id: 'o_4d2739aa', content: 'for (i <= 5; i++)' }
+  //     ],
+  //     points: 10
+  //   },
+  //   {
+  //     _id: 'q_f51a72bb',
+  //     content: 'Which company developed JavaScript?',
+  //     type: 'single-choice',
+  //     options: [
+  //       { _id: 'o_3fbac711', content: 'Microsoft' },
+  //       { _id: 'o_b238dd89', content: 'Netscape' },
+  //       { _id: 'o_914c2fa1', content: 'Oracle' },
+  //       { _id: 'o_c92bd7aa', content: 'Google' }
+  //     ],
+  //     points: 10
+  //   },
+  //   {
+  //     _id: 'q_9de21b56',
+  //     content: 'What is the result of: 2 + "2"?',
+  //     type: 'single-choice',
+  //     options: [
+  //       { _id: 'o_80ff1ab2', content: '4' },
+  //       { _id: 'o_14bd9c71', content: '"22"' },
+  //       { _id: 'o_6adf0e13', content: 'NaN' },
+  //       { _id: 'o_2dcb71af', content: 'undefined' }
+  //     ],
+  //     points: 10
+  //   },
+  //   {
+  //     _id: 'q_c0e781d2',
+  //     content: 'Which methods work with JSON? (Select all that apply)',
+  //     type: 'multiple',
+  //     options: [
+  //       { _id: 'o_1a2bfa01', content: 'JSON.parse()' },
+  //       { _id: 'o_b39ced1e', content: 'JSON.stringify()' },
+  //       { _id: 'o_e24afc81', content: 'JSON.convert()' },
+  //       { _id: 'o_77bc2a9f', content: 'JSON.toObject()' }
+  //     ],
+  //     points: 15
+  //   },
+  //   {
+  //     _id: 'q_4ce1bd88',
+  //     content: 'What is a closure in JavaScript?',
+  //     type: 'single-choice',
+  //     options: [
+  //       { _id: 'o_1aef92d7', content: 'A function with access to its outer scope' },
+  //       { _id: 'o_39fbab22', content: 'A way to close the browser' },
+  //       { _id: 'o_77da4cd1', content: 'A method to end a loop' },
+  //       { _id: 'o_0df12be4', content: 'A type of variable' }
+  //     ],
+  //     points: 10
+  //   },
+  //   {
+  //     _id: 'q_b812d4e1',
+  //     content: 'Which operator is used for strict equality?',
+  //     type: 'single-choice',
+  //     options: [
+  //       { _id: 'o_2af0bc52', content: '==' },
+  //       { _id: 'o_b11cf371', content: '===' },
+  //       { _id: 'o_51cb7aea', content: '=' },
+  //       { _id: 'o_93dd2472', content: '!=' }
+  //     ],
+  //     points: 10
+  //   }
+  // ]
 
 
   // Timer countdown
@@ -201,14 +213,15 @@ export default function StudentQuizPage() {
 
 
   const getQuestionStatus = (questionIndex) => {
-    const questionId = questions[questionIndex]._id
+    const questionId = quiz.questions[questionIndex]._id
     if (answers[questionId]) return 'answered'
     return 'unanswered'
   }
 
   const answeredCount = Object.keys(answers).length
-  const progress = (answeredCount / questions.length) * 100
+  const progress = (answeredCount / quiz?.questions.length) * 100
 
+  if (isLoading) return <div>Loading...</div>
 
   return (
     <Box
@@ -233,10 +246,10 @@ export default function StudentQuizPage() {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 600, marginBottom: '0.25rem', fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
-                {quizData.title}
+                {quiz.title}
               </Typography>
               <Typography variant="body2" sx={{ color: '#64748b', fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-                {quizData.description}
+                {quiz.description}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: { xs: '1rem', sm: '2rem' }, alignItems: 'center' }}>
@@ -260,7 +273,7 @@ export default function StudentQuizPage() {
               </Box>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
-                  {answeredCount}/{questions.length}
+                  {answeredCount}/{quiz.questions.length}
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#64748b', display: { xs: 'none', sm: 'block' } }}>
                   Answered
@@ -314,7 +327,7 @@ export default function StudentQuizPage() {
                 gap: '0.5rem'
               }}
             >
-              {questions.map((question, index) => {
+              {quiz.questions.map((question, index) => {
                 const status = getQuestionStatus(index)
                 const isActive = currentQuestion === index
 
@@ -386,7 +399,7 @@ export default function StudentQuizPage() {
                   }}
                 />
                 <Typography variant="body2" sx={{ color: '#64748b' }}>
-                  Unanswered ({questions.length - answeredCount})
+                  Unanswered ({quiz.questions.length - answeredCount})
                 </Typography>
               </Box>
             </Box>
@@ -398,16 +411,16 @@ export default function StudentQuizPage() {
             <Box
               sx={{
                 display: 'flex',
-                justifyContent: 'space-between',
+                justifyContent: 'end',
                 alignItems: 'center',
                 marginBottom: '1.5rem',
                 flexWrap: 'wrap',
                 gap: '1rem'
               }}
             >
-              <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+              {/* <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                 {viewMode === 'single' ? `Question ${currentQuestion + 1}` : 'All Questions'}
-              </Typography>
+              </Typography> */}
               <ToggleButtonGroup
                 value={viewMode}
                 exclusive
@@ -450,7 +463,7 @@ export default function StudentQuizPage() {
             {/* Questions Display */}
             {viewMode === 'single' ? (
               <>
-                <QuestionCard question={questions[currentQuestion]} index={currentQuestion} viewMode={viewMode} answers={answers} setAnswers={setAnswers}/>
+                <QuestionCard question={quiz.questions[currentQuestion]} index={currentQuestion} viewMode={viewMode} answers={answers} setAnswers={setAnswers}/>
 
                 {/* Navigation Buttons */}
                 <Box
@@ -485,7 +498,7 @@ export default function StudentQuizPage() {
                     <span style={{ display: window.innerWidth >= 640 ? 'none' : 'inline' }}>Prev</span>
                   </Button>
 
-                  {currentQuestion === questions.length - 1 ? (
+                  {currentQuestion === quiz.questions.length - 1 ? (
                     <Button
                       variant="contained"
                       sx={{
@@ -505,7 +518,7 @@ export default function StudentQuizPage() {
                       variant="contained"
                       endIcon={<ChevronRight size={20} />}
                       onClick={() =>
-                        setCurrentQuestion(Math.min(questions.length - 1, currentQuestion + 1))
+                        setCurrentQuestion(Math.min(quiz.questions.length - 1, currentQuestion + 1))
                       }
                       sx={{
                         backgroundColor: '#8b5cf6',
@@ -524,7 +537,7 @@ export default function StudentQuizPage() {
               </>
             ) : (
               <>
-                {questions.map((question, index) => (
+                {quiz.questions.map((question, index) => (
                   <Box key={question._id} _id={`question-${index}`}>
                     <QuestionCard question={question} index={index} viewMode={viewMode} answers={answers} setAnswers={setAnswers}/>
                   </Box>

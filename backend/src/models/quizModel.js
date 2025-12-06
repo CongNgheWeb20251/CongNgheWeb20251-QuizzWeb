@@ -5,6 +5,7 @@ import { questionModel } from './questionModel'
 import { answerOptionModel } from './answerModel'
 import { pagingSkipValue } from '~/utils/algorithms'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
+import { sessionQuizModel } from './sessionQuizModel'
 
 const QUIZ_COLLECTION_NAME = 'quizzes'
 const QUIZ_COLLECTION_SCHEMA = Joi.object({
@@ -16,7 +17,9 @@ const QUIZ_COLLECTION_SCHEMA = Joi.object({
     Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
   ).default([]),
   status: Joi.string().valid('draft', 'published').default('draft'),
-
+  memberIds: Joi.array().items(
+    Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+  ).default([]),
   createdBy: Joi.string().required(),
   totalQuestions: Joi.number(),
   totalPoints: Joi.number(),
@@ -111,13 +114,19 @@ const getDetails = async (userId, quizId) => {
         from: questionModel.QUESTION_COLLECTION_NAME,
         localField: '_id',
         foreignField: 'quizId',
-        as: 'questions'
+        as: 'questions',
+        pipeline: [
+          { $project: { createdAt: 0, updatedAt: 0, quizId: 0, correctAnswerIds: 0 } }
+        ]
       } },
       { $lookup: {
         from: answerOptionModel.ANSWER_OPTION_COLLECTION_NAME,
         localField: '_id',
         foreignField: 'quizId',
-        as: 'options'
+        as: 'options',
+        pipeline: [
+          { $project: { createdAt: 0, updatedAt: 0, quizId: 0 } }
+        ]
       } }
     ]).toArray()
     return quizz[0] || null
@@ -162,18 +171,6 @@ const getQuizzes = async (userId, page, itemsPerPage, filter) => {
         'queryQuizzes': [
           { $skip: pagingSkipValue(page, itemsPerPage) }, // bỏ qua số lượng bản ghi của những page trước đó
           { $limit: itemsPerPage } // giới hạn tối đa số lượng bản ghi trả về trên 1 page
-          // { $lookup: {
-          //   from: questionModel.QUESTION_COLLECTION_NAME,
-          //   localField: '_id',
-          //   foreignField: 'quizId',
-          //   as: 'questions'
-          // } },
-          // // Thêm field questionsCount
-          // { $addFields: {
-          //   questionsCount: { $size: '$questions' }
-          // } },
-          // // Loại bỏ array questions để giảm data trả về
-          // { $project: { questions: 0 } }
         ],
         // 2 query total count
         'queryCountTotalQuizzes': [
@@ -256,6 +253,69 @@ const getQuizzesStats = async (userId) => {
   }
 }
 
+const getQuizzesByStudent = async (userId, page, itemsPerPage) => {
+  try {
+    const queryConditions = [
+      { memberIds: { $all: [new ObjectId(userId)] } }
+    ]
+
+    const query = await DB_GET().collection(QUIZ_COLLECTION_NAME).aggregate([
+      { $match: { $and: queryConditions } },
+      { $sort: { title : 1 } },
+      // Xử lí nhiều luồng
+      { $facet: {
+        // 1 query quizzes
+        'queryQuizzes': [
+          { $skip: pagingSkipValue(page, itemsPerPage) }, // bỏ qua số lượng bản ghi của những page trước đó
+          { $limit: itemsPerPage }, // giới hạn tối đa số lượng bản ghi trả về trên 1 page
+          { $lookup: {
+            from: sessionQuizModel.SESSION_QUIZ_COLLECTION_NAME,
+            localField: '_id',
+            foreignField: 'quizId',
+            as: 'sessions',
+            pipeline: [
+              { $project: { createdAt: 0, updatedAt: 0, quizId: 0 } },
+              { $match: { studentId: new ObjectId(userId) } },
+              {
+                $addFields: {
+                  statusPriority: {
+                    $switch: {
+                      branches: [
+                        { case: { $eq: ['$status', 'doing'] }, then: 3 },
+                        { case: { $eq: ['$status', 'completed'] }, then: 2 }
+                      ],
+                      default: 0
+                    }
+                  }
+                }
+              },
+              { $sort: { statusPriority: -1, score: -1, timeSpent: 1 } }
+            ]
+          } },
+          // Thêm field sessionsCount
+          { $addFields: {
+            sessionsCount: { $size: '$sessions' }
+          } },
+          // Loại bỏ array sessions để giảm data trả về
+          { $project: { status: 0 } }
+        ],
+        // 2 query total count
+        'queryCountTotalQuizzes': [
+          { $count: 'totalQuizzes' }
+        ]
+
+      } }
+    ]).toArray()
+    const res = query[0]
+    return {
+      quizzes: res.queryQuizzes || [],
+      totalQuizzes: res.queryCountTotalQuizzes[0]?.totalQuizzes || 0
+    }
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const quizModel = {
   QUIZ_COLLECTION_NAME,
   QUIZ_COLLECTION_SCHEMA,
@@ -269,5 +329,6 @@ export const quizModel = {
   getQuizzes,
   pushQuestionIds,
   pullQuestionIds,
-  getQuizzesStats
+  getQuizzesStats,
+  getQuizzesByStudent
 }
