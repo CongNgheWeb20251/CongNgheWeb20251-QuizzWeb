@@ -23,12 +23,17 @@ import {
 import QuizCard from '~/components/StudentQuiz/QuizCard'
 import SkeletonCard from '~/components/Skeleton/QuizCardSkeleton'
 import UserAvatar from '~/components/UserAvatar/UserAvatar'
+import StartQuizModal from '~/components/StudentQuiz/StartQuizModal'
 
 export default function StudentDashboard() {
   const [quizzes, setQuizzes] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [openMenuId, setOpenMenuId] = useState(null)
-
+  const [startQuizModal, setStartQuizModal] = useState({
+    isOpen: false,
+    quiz: null,
+    isRetake: false
+  })
   // Simulate data loading
   useEffect(() => {
     setTimeout(() => {
@@ -36,97 +41,132 @@ export default function StudentDashboard() {
         {
           _id: '1',
           title: 'JavaScript Fundamentals',
-          category: 'JavaScript',
-          categoryIcon: 'JavaScript',
+          subject: 'JavaScript',
+          subjectIcon: 'JavaScript',
           dateTaken: '2025-12-01',
           status: 'completed',
           score: 85,
           maxScore: 100,
           timeSpent: 18,
-          timeLimit: 20,
-          progress: 100
+          duration: 20,
+          progress: 100,
+          description: 'Test your understanding of core JavaScript concepts including variables, functions, and control flow.',
+          questionCount: 15,
+          difficulty: 'medium',
+          attemptNumber: 1,
+          allowRetake: true
         },
         {
           _id: '2',
           title: 'React Hooks Deep Dive',
-          category: 'React',
-          categoryIcon: 'React',
+          subject: 'React',
+          subjectIcon: 'React',
           dateTaken: '2025-11-28',
           status: 'in-progress',
           score: 45,
           maxScore: 100,
           timeSpent: 12,
-          timeLimit: 30,
-          progress: 60
+          duration: 30,
+          progress: 60,
+          description: 'Master React Hooks including useState, useEffect, useContext, and custom hooks.',
+          questionCount: 20,
+          difficulty: 'hard'
         },
         {
           _id: '3',
           title: 'CSS Grid & Flexbox',
-          category: 'CSS',
-          categoryIcon: 'CSS',
+          subject: 'CSS',
+          subjectIcon: 'CSS',
           dateTaken: '2025-11-25',
           status: 'completed',
           score: 92,
           maxScore: 100,
           timeSpent: 15,
-          timeLimit: 20,
-          progress: 100
+          duration: 20,
+          progress: 100,
+          description: 'Learn modern CSS layout techniques with Grid and Flexbox for responsive designs.',
+          questionCount: 12,
+          difficulty: 'medium',
+          attemptNumber: 1,
+          allowRetake: true
         },
         {
           _id: '4',
           title: 'Database Design Principles',
-          category: 'Database',
-          categoryIcon: 'Database',
+          subject: 'Database',
+          subjectIcon: 'Database',
           dateTaken: '2025-11-20',
-          status: 'missed'
+          status: 'missed',
+          duration: 25,
+          description: 'Understand database normalization, relationships, and schema design best practices.',
+          questionCount: 18,
+          difficulty: 'hard'
         },
         {
           _id: '5',
           title: 'Modern Web Development',
-          category: 'Web Dev',
-          categoryIcon: 'Web Dev',
+          subject: 'Web Dev',
+          subjectIcon: 'Web Dev',
           dateTaken: '2025-11-15',
           status: 'completed',
           score: 78,
           maxScore: 100,
           timeSpent: 25,
-          timeLimit: 30,
-          progress: 100
+          duration: 30,
+          progress: 100,
+          description: 'Explore modern web development tools, frameworks, and best practices.',
+          questionCount: 22,
+          difficulty: 'medium',
+          attemptNumber: 1,
+          allowRetake: true
         },
         {
           _id: '6',
           title: 'TypeScript Essentials',
-          category: 'JavaScript',
-          categoryIcon: 'JavaScript',
+          subject: 'JavaScript',
+          subjectIcon: 'JavaScript',
           dateTaken: '2025-11-10',
           status: 'completed',
           score: 88,
           maxScore: 100,
           timeSpent: 22,
-          timeLimit: 25,
-          progress: 100
+          duration: 25,
+          progress: 100,
+          description: 'Learn TypeScript fundamentals including types, interfaces, and generics.',
+          questionCount: 16,
+          difficulty: 'medium',
+          attemptNumber: 1,
+          allowRetake: true
         },
         {
           _id: '7',
           title: 'Advanced React Patterns',
-          category: 'React',
-          categoryIcon: 'React',
+          subject: 'React',
+          subjectIcon: 'React',
           dateTaken: '2025-11-05',
           status: 'completed',
           score: 95,
           maxScore: 100,
           timeSpent: 28,
-          timeLimit: 30,
-          progress: 100
+          duration: 30,
+          progress: 100,
+          description: 'Master advanced React patterns like render props, HOCs, and compound components.',
+          questionCount: 20,
+          difficulty: 'hard',
+          attemptNumber: 1,
+          allowRetake: true
         },
         {
           _id: '8',
           title: 'Responsive Design',
-          category: 'CSS',
-          categoryIcon: 'CSS',
+          subject: 'CSS',
+          subjectIcon: 'CSS',
           dateTaken: '2025-11-01',
           status: 'available',
-          timeLimit: 20
+          duration: 20,
+          description: 'Create responsive web layouts that work seamlessly across all devices and screen sizes.',
+          questionCount: 14,
+          difficulty: 'easy'
         }
       ])
       setIsLoading(false)
@@ -136,6 +176,30 @@ export default function StudentDashboard() {
   const toggleMenu = (quizId) => {
     setOpenMenuId(openMenuId === quizId ? null : quizId)
   }
+
+  const handleStartQuiz = (quiz, isRetake) => {
+    setStartQuizModal({
+      isOpen: true,
+      quiz,
+      isRetake
+    })
+  }
+
+  const handleCloseModal = () => {
+    setStartQuizModal({
+      isOpen: false,
+      quiz: null,
+      isRetake: false
+    })
+  }
+
+  const handleConfirmStart = () => {
+    // Handle quiz start logic here
+    console.log('Starting quiz:', startQuizModal.quiz?._id)
+    handleCloseModal()
+    // Navigate to quiz taking page or start quiz logic
+  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -230,11 +294,28 @@ export default function StudentDashboard() {
                 index={index}
                 openMenuId={openMenuId}
                 toggleMenu={toggleMenu}
+                onStartQuiz={handleStartQuiz}
               />
             ))}
           </div>
         )}
       </main>
+      {startQuizModal.quiz && (
+        <StartQuizModal
+          isOpen={startQuizModal.isOpen}
+          onClose={handleCloseModal}
+          onStart={handleConfirmStart}
+          quizTitle={startQuizModal.quiz.title}
+          description={startQuizModal.quiz.description || 'Test your knowledge with this quiz.'}
+          metadata={{
+            duration: startQuizModal.quiz.duration || 20,
+            questionCount: startQuizModal.quiz.questionCount || 10,
+            difficulty: startQuizModal.quiz.difficulty,
+            attemptNumber: startQuizModal.isRetake ? (startQuizModal.quiz.attemptNumber || 1) + 1 : undefined,
+          }}
+          isRetake={startQuizModal.isRetake}
+        />
+      )}
     </div>
   )
 }
