@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Search from '@mui/icons-material/Search'
 import Add from '@mui/icons-material/Add'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import Quiz from '@mui/icons-material/Quiz'
@@ -127,21 +126,6 @@ function Dashboard() {
             <span className="logo-qui">Qui</span>
             <span className="logo-zzy">zzy</span>
           </div>
-          <div className="search-box">
-            <TextField
-              fullWidth
-              placeholder="Search..."
-              variant="outlined"
-              size="small"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search />
-                  </InputAdornment>
-                )
-              }}
-            />
-          </div>
         </div>
 
         <nav className="sidebar-nav">
@@ -177,23 +161,8 @@ function Dashboard() {
       {/* Main Content */}
       <main className="main-content">
         {/* Top Bar */}
-        <div className="top-bar">
-          <TextField
-            placeholder="Search..."
-            variant="outlined"
-            size="small"
-            className="search-field"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              )
-            }}
-          />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <UserAvatar />
-          </div>
+        <div className="top-bar" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <UserAvatar />
         </div>
 
         {/* Header */}

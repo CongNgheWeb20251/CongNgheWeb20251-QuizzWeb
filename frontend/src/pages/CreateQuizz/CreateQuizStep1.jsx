@@ -15,6 +15,8 @@ function CreateQuizStep1() {
     difficulty: 'medium',
     timeLimit: 15,
     passingScore: 70,
+    startDate: '',
+    endDate: '',
     randomizeQuestions: true,
     immediateResults: true
   })
@@ -232,6 +234,37 @@ function CreateQuizStep1() {
                     />
                     <span className="cq-input-suffix">%</span>
                   </div>
+                </div>
+
+                <div className="cq-form-group">
+                  <label htmlFor="startDate" className="cq-label">
+                    Start Date <span className="cq-required">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    id="startDate"
+                    name="startDate"
+                    className="cq-input"
+                    value={quizData.startDate}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="cq-form-group">
+                  <label htmlFor="endDate" className="cq-label">
+                    End Date <span className="cq-required">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    id="endDate"
+                    name="endDate"
+                    className="cq-input"
+                    value={quizData.endDate}
+                    onChange={handleChange}
+                    min={quizData.startDate}
+                    required
+                  />
                 </div>
 
                 <div className="cq-form-group">
