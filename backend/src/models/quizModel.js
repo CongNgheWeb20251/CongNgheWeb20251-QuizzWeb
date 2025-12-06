@@ -25,6 +25,8 @@ const QUIZ_COLLECTION_SCHEMA = Joi.object({
   // shuffleQuestions: Joi.boolean().default(false),
   allowRetake: Joi.boolean().default(true),
   showResults: Joi.boolean().default(true),
+  startTime: Joi.date().timestamp('javascript'),
+  endTime: Joi.date().timestamp('javascript'),
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null)
 })
