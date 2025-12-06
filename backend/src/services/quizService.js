@@ -16,7 +16,9 @@ const createNew = async ({ userId, data }) => {
       status: data.status || 'draft',
       timeLimit: data.timeLimit,
       createdBy: userId,
-      passingScore: data.passingScore
+      passingScore: data.passingScore,
+      startTime: startDate,
+      endTime: endDate
     }
     const createdQuiz = await quizModel.createNew(newQuiz)
     return createdQuiz
