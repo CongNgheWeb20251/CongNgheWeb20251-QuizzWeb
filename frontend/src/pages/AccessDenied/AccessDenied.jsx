@@ -4,10 +4,9 @@ import Button from '@mui/material/Button'
 import HomeIcon from '@mui/icons-material/Home'
 import PlanetSvg from '~/assets/404/planet.svg'
 import AstronautSvg from '~/assets/404/astronaut.svg'
-import bgStar from '~/assets/404/particles.png'
 import { Link } from 'react-router-dom'
 
-function NotFound() {
+function AccessDenied() {
   return (
     <Box sx={{
       width: '100vw',
@@ -23,7 +22,7 @@ function NotFound() {
         animation: 'stars 12s linear infinite alternate',
         width: '100%',
         height: '100%',
-        backgroundImage: `url(${bgStar})`,
+        backgroundImage: 'url("src/assets/404/particles.png")',
         backgroundSize: 'contain',
         backgroundRepeat: 'repeat',
         backgroundPosition: 'center',
@@ -33,7 +32,7 @@ function NotFound() {
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        <Typography variant="h1" sx={{ fontSize: '100px', fontWeight: 800 }}>404</Typography>
+        <Typography variant="h1" sx={{ fontSize: '60px', fontWeight: 600 }}>Access Denied</Typography>
         <Typography sx={{ fontSize: '18px !important', lineHeight: '25px', fontWeight: 400, maxWidth: '350px', textAlign: 'center' }}>
           LOST IN&nbsp;
           <Typography variant="span" sx={{
@@ -49,7 +48,7 @@ function NotFound() {
           }}>
             &nbsp;SPACE&nbsp;
           </Typography>
-          &nbsp;<Typography variant="span" sx={{ color: '#fdba26', fontWeight: 500 }}>Quizzy</Typography>?<br />Hmm, looks like that page doesn&apos;t exist.
+          &nbsp;<Typography variant="span" sx={{ color: '#fdba26', fontWeight: 500 }}>Quizzy</Typography>?<br />Hmm, looks like you do not have permission to access this page.
         </Typography>
         <Box sx={{ width: '390px', height: '390px', position: 'relative' }}>
           <Box src={AstronautSvg} component='img' alt='tuandt' sx={{
@@ -82,4 +81,4 @@ function NotFound() {
   )
 }
 
-export default NotFound
+export default AccessDenied

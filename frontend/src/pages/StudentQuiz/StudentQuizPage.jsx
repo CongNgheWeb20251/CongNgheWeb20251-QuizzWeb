@@ -54,152 +54,129 @@ export default function StudentQuizPage() {
     passingScore: 70
   }
 
-  const rawQuestions = [
+  const questions = [
     {
-      id: 1,
-      text: 'What is the output of: typeof null?',
-      type: 'single',
+      _id: 'q_8f21a9b2',
+      content: 'What is the output of: typeof null?',
+      type: 'single-choice',
       options: [
-        { id: 1, text: '"null"' },
-        { id: 2, text: '"object"' },
-        { id: 3, text: '"undefined"' },
-        { id: 4, text: '"number"' }
+        { _id: 'o_c1a91f11', content: '"null"' },
+        { _id: 'o_94bc2a3f', content: '"object"' },
+        { _id: 'o_233fbb62', content: '"undefined"' },
+        { _id: 'o_d120ef7a', content: '"number"' }
       ],
       points: 10
     },
     {
-      id: 2,
-      text: 'Which methods can be used to manipulate arrays? (Select all that apply)',
+      _id: 'q_a92b1e73',
+      content: 'Which methods can be used to manipulate arrays? (Select all that apply)',
       type: 'multiple',
       options: [
-        { id: 1, text: 'push()' },
-        { id: 2, text: 'pop()' },
-        { id: 3, text: 'shift()' },
-        { id: 4, text: 'unshift()' }
+        { _id: 'o_51ab9e62', content: 'push()' },
+        { _id: 'o_b83cd271', content: 'pop()' },
+        { _id: 'o_149dbfee', content: 'shift()' },
+        { _id: 'o_92cc741a', content: 'unshift()' }
       ],
       points: 15
     },
     {
-      id: 3,
-      text: 'What does "DOM" stand for?',
-      type: 'single',
+      _id: 'q_5b21e9c0',
+      content: 'What does "DOM" stand for?',
+      type: 'single-choice',
       options: [
-        { id: 1, text: 'Document Object Model' },
-        { id: 2, text: 'Data Object Model' },
-        { id: 3, text: 'Document Oriented Model' },
-        { id: 4, text: 'Digital Object Management' }
+        { _id: 'o_34fda892', content: 'Document Object Model' },
+        { _id: 'o_56cb917c', content: 'Data Object Model' },
+        { _id: 'o_70bcf51a', content: 'Document Oriented Model' },
+        { _id: 'o_e1cf28b4', content: 'Digital Object Management' }
       ],
       points: 10
     },
     {
-      id: 4,
-      text: 'Which are valid ways to declare variables in JavaScript? (Select all that apply)',
+      _id: 'q_7e3d0c15',
+      content: 'Which are valid ways to declare variables in JavaScript? (Select all that apply)',
       type: 'multiple',
       options: [
-        { id: 1, text: 'var' },
-        { id: 2, text: 'let' },
-        { id: 3, text: 'const' },
-        { id: 4, text: 'variable' }
+        { _id: 'o_8ff1a634', content: 'var' },
+        { _id: 'o_41ab55e7', content: 'let' },
+        { _id: 'o_d0e3a17c', content: 'const' },
+        { _id: 'o_1cf97d20', content: 'variable' }
       ],
       points: 15
     },
     {
-      id: 5,
-      text: 'What is the correct syntax for a for loop?',
-      type: 'single',
+      _id: 'q_8a4d991f',
+      content: 'What is the correct syntax for a for loop?',
+      type: 'single-choice',
       options: [
-        { id: 1, text: 'for (i = 0; i < 5)' },
-        { id: 2, text: 'for (i = 0; i < 5; i++)' },
-        { id: 3, text: 'for i = 0 to 5' },
-        { id: 4, text: 'for (i <= 5; i++)' }
+        { _id: 'o_72fe1d34', content: 'for (i = 0; i < 5)' },
+        { _id: 'o_5acb23d1', content: 'for (i = 0; i < 5; i++)' },
+        { _id: 'o_bcd8f612', content: 'for i = 0 to 5' },
+        { _id: 'o_4d2739aa', content: 'for (i <= 5; i++)' }
       ],
       points: 10
     },
     {
-      id: 6,
-      text: 'Which company developed JavaScript?',
-      type: 'single',
+      _id: 'q_f51a72bb',
+      content: 'Which company developed JavaScript?',
+      type: 'single-choice',
       options: [
-        { id: 1, text: 'Microsoft' },
-        { id: 2, text: 'Netscape' },
-        { id: 3, text: 'Oracle' },
-        { id: 4, text: 'Google' }
+        { _id: 'o_3fbac711', content: 'Microsoft' },
+        { _id: 'o_b238dd89', content: 'Netscape' },
+        { _id: 'o_914c2fa1', content: 'Oracle' },
+        { _id: 'o_c92bd7aa', content: 'Google' }
       ],
       points: 10
     },
     {
-      id: 7,
-      text: 'What is the result of: 2 + "2"?',
-      type: 'single',
+      _id: 'q_9de21b56',
+      content: 'What is the result of: 2 + "2"?',
+      type: 'single-choice',
       options: [
-        { id: 1, text: '4' },
-        { id: 2, text: '"22"' },
-        { id: 3, text: 'NaN' },
-        { id: 4, text: 'undefined' }
+        { _id: 'o_80ff1ab2', content: '4' },
+        { _id: 'o_14bd9c71', content: '"22"' },
+        { _id: 'o_6adf0e13', content: 'NaN' },
+        { _id: 'o_2dcb71af', content: 'undefined' }
       ],
       points: 10
     },
     {
-      id: 8,
-      text: 'Which methods work with JSON? (Select all that apply)',
+      _id: 'q_c0e781d2',
+      content: 'Which methods work with JSON? (Select all that apply)',
       type: 'multiple',
       options: [
-        { id: 1, text: 'JSON.parse()' },
-        { id: 2, text: 'JSON.stringify()' },
-        { id: 3, text: 'JSON.convert()' },
-        { id: 4, text: 'JSON.toObject()' }
+        { _id: 'o_1a2bfa01', content: 'JSON.parse()' },
+        { _id: 'o_b39ced1e', content: 'JSON.stringify()' },
+        { _id: 'o_e24afc81', content: 'JSON.convert()' },
+        { _id: 'o_77bc2a9f', content: 'JSON.toObject()' }
       ],
       points: 15
     },
     {
-      id: 9,
-      text: 'What is a closure in JavaScript?',
-      type: 'single',
+      _id: 'q_4ce1bd88',
+      content: 'What is a closure in JavaScript?',
+      type: 'single-choice',
       options: [
-        { id: 1, text: 'A function with access to its outer scope' },
-        { id: 2, text: 'A way to close the browser' },
-        { id: 3, text: 'A method to end a loop' },
-        { id: 4, text: 'A type of variable' }
+        { _id: 'o_1aef92d7', content: 'A function with access to its outer scope' },
+        { _id: 'o_39fbab22', content: 'A way to close the browser' },
+        { _id: 'o_77da4cd1', content: 'A method to end a loop' },
+        { _id: 'o_0df12be4', content: 'A type of variable' }
       ],
       points: 10
     },
     {
-      id: 10,
-      text: 'Which operator is used for strict equality?',
-      type: 'single',
+      _id: 'q_b812d4e1',
+      content: 'Which operator is used for strict equality?',
+      type: 'single-choice',
       options: [
-        { id: 1, text: '==' },
-        { id: 2, text: '===' },
-        { id: 3, text: '=' },
-        { id: 4, text: '!=' }
+        { _id: 'o_2af0bc52', content: '==' },
+        { _id: 'o_b11cf371', content: '===' },
+        { _id: 'o_51cb7aea', content: '=' },
+        { _id: 'o_93dd2472', content: '!=' }
       ],
       points: 10
     }
   ]
 
-  const questions = rawQuestions.map((question, questionIndex) => {
-    const tempId = question.tempId ?? question.id ?? questionIndex + 1
-    const normalizedType = question.type === 'single'
-      ? 'single-choice'
-      : question.type === 'multiple'
-        ? 'multiple-choice'
-        : question.type
-
-    return {
-      ...question,
-      tempId,
-      content: question.content ?? question.text,
-      type: normalizedType,
-      options: (question.options || []).map((option, optionIndex) => {
-        const optionTempId = option.tempId ?? (tempId * 10 + optionIndex + 1)
-        return {
-          ...option,
-          tempId: optionTempId,
-          content: option.content ?? option.text
-        }
-      })
-    }
-  })
 
   // Timer countdown
   useEffect(() => {
@@ -224,7 +201,7 @@ export default function StudentQuizPage() {
 
 
   const getQuestionStatus = (questionIndex) => {
-    const questionId = questions[questionIndex].id
+    const questionId = questions[questionIndex]._id
     if (answers[questionId]) return 'answered'
     return 'unanswered'
   }
@@ -343,7 +320,7 @@ export default function StudentQuizPage() {
 
                 return (
                   <Button
-                    key={question.id}
+                    key={question._id}
                     onClick={() => handleNavigateToQuestion(index)}
                     sx={{
                       minWidth: 'auto',
@@ -548,7 +525,7 @@ export default function StudentQuizPage() {
             ) : (
               <>
                 {questions.map((question, index) => (
-                  <Box key={question.id} id={`question-${index}`}>
+                  <Box key={question._id} _id={`question-${index}`}>
                     <QuestionCard question={question} index={index} viewMode={viewMode} answers={answers} setAnswers={setAnswers}/>
                   </Box>
                 ))}

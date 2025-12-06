@@ -18,6 +18,8 @@ import BillingTab from './tabs/BillingTab'
 // Import styles
 import { StyledSettings, TabPanelContent } from './styles/Settings.styles'
 import UserAvatar from '~/components/UserAvatar/UserAvatar'
+import { useSelector } from 'react-redux'
+import { selectCurrentUser } from '~/redux/user/userSlice'
 
 const TabPanel = ({ children, value, index, ...other }) => (
   <div
@@ -34,9 +36,17 @@ const TabPanel = ({ children, value, index, ...other }) => (
 const Settings = () => {
   const [activeTab, setActiveTab] = useState(0)
   const navigate = useNavigate()
+  const currUser = useSelector(selectCurrentUser)
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue)
+  }
+  const handleBackToDashboard = () => {
+    if (currUser?.role === 'teacher') {
+      navigate('/teacher/dashboard')
+    } else {
+      navigate('/dashboard')
+    }
   }
 
   return (
@@ -57,7 +67,7 @@ const Settings = () => {
           <Button
             variant="outlined"
             startIcon={<ArrowBackIcon fontSize="small" />}
-            onClick={() => navigate('/teacher/dashboard')}
+            onClick={handleBackToDashboard}
             sx={{
               color: 'rgba(230,238,248,0.9)',
               borderColor: 'rgba(255,255,255,0.06)',

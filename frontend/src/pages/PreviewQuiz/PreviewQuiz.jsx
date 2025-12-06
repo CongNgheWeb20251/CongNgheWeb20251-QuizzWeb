@@ -25,7 +25,7 @@ import {
   Grid3x3
 } from 'lucide-react'
 
-import QuestionCard from '~/components/StudentQuiz/QuestionCard'
+import PreviewQuestionCard from './PreviewQuestionCard'
 
 
 export default function PreviewQuiz() {
@@ -352,7 +352,7 @@ export default function PreviewQuiz() {
             {/* Questions Display */}
             {viewMode === 'single' ? (
               <>
-                <QuestionCard question={questions[currentQuestion]} index={currentQuestion} viewMode={viewMode} answers={answers} setAnswers={setAnswers}/>
+                <PreviewQuestionCard question={questions[currentQuestion]} index={currentQuestion} viewMode={viewMode} answers={answers} setAnswers={setAnswers}/>
 
                 {/* Navigation Buttons */}
                 <Box
@@ -428,7 +428,7 @@ export default function PreviewQuiz() {
               <>
                 {questions.map((question, index) => (
                   <Box key={question.tempId} id={`question-${index}`}>
-                    <QuestionCard question={question} index={index} viewMode={viewMode} answers={answers} setAnswers={setAnswers}/>
+                    <PreviewQuestionCard question={question} index={index} viewMode={viewMode} answers={answers} setAnswers={setAnswers}/>
                   </Box>
                 ))}
 

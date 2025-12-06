@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 import Box from '@mui/material/Box'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
@@ -24,8 +22,7 @@ import {
   Grid3x3
 } from 'lucide-react'
 
-const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
-  const [isSaving, setIsSaving] = useState(false)
+const PreviewQuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
 
   const handleAnswerChange = (questionId, optionId) => {
     setAnswers({ ...answers, [questionId]: optionId })
@@ -41,30 +38,6 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
       }
     } else {
       setAnswers({ ...answers, [questionId]: [optionId] })
-    }
-  }
-
-  const selectedAnswer = answers[question._id]
-  const hasAnswer = Array.isArray(selectedAnswer)
-    ? selectedAnswer.length > 0
-    : selectedAnswer !== undefined && selectedAnswer !== null
-
-  const handleSave = async () => {
-    if (isSaving || !hasAnswer) return
-
-    setIsSaving(true)
-    try {
-      // await saveQuestionAnswerAPI({
-      //   questionId: question.id ?? question._id,
-      //   answer: selectedAnswer
-      // })
-      console.log({ selectedAnswer: selectedAnswer })
-    } catch (error) {
-      if (error) {
-        // TODO: Handle save error (e.g., show toast)
-      }
-    } finally {
-      setIsSaving(false)
     }
   }
 
@@ -99,14 +72,14 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
 
       {['single-choice', 'true-false'].includes(question?.type) ? (
         <RadioGroup
-          value={answers[question._id]?.toString() || ''}
-          onChange={(e) => handleAnswerChange(question._id, parseInt(e.target.value))}
+          value={answers[question.tempId]?.toString() || ''}
+          onChange={(e) => handleAnswerChange(question.tempId, parseInt(e.target.value))}
         >
           {question?.options.map((option) => {
-            const isSelected = answers[question._id] === option._id
+            const isSelected = answers[question.tempId] === option.tempId
             return (
               <Box
-                key={option._id}
+                key={option.tempId}
                 sx={{
                   marginBottom: '0.75rem',
                   padding: { xs: '0.75rem', sm: '1rem' },
@@ -122,11 +95,11 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
                     backgroundColor: '#faf5ff'
                   }
                 }}
-                onClick={() => handleAnswerChange(question._id, option._id)}
+                onClick={() => handleAnswerChange(question.tempId, option.tempId)}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <FormControlLabel
-                    value={option?._id.toString()}
+                    value={option?.tempId.toString()}
                     control={
                       <Radio
                         checked={isSelected}
@@ -156,10 +129,10 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
       ) : (
         <Box>
           {question?.options.map((option) => {
-            const isSelected = Boolean((answers[question._id])?.includes(option._id))
+            const isSelected = Boolean((answers[question.tempId])?.includes(option.tempId))
             return (
               <Box
-                key={option._id}
+                key={option.tempId}
                 sx={{
                   marginBottom: '0.75rem',
                   padding: { xs: '0.75rem', sm: '1rem' },
@@ -175,11 +148,11 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
                     backgroundColor: '#faf5ff'
                   }
                 }}
-                onClick={() => handleMultipleAnswerChange(question._id, option._id)}
+                onClick={() => handleMultipleAnswerChange(question.tempId, option.tempId)}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <FormControlLabel
-                    value={option._id.toString()}
+                    value={option.tempId.toString()}
                     control={
                       <Checkbox
                         checked={isSelected}
@@ -207,31 +180,8 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
           })}
         </Box>
       )}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={isSaving || !hasAnswer}
-          sx={{
-            backgroundColor: '#8b5cf6',
-            color: 'white',
-            fontWeight: 600,
-            fontSize: { xs: '0.875rem', sm: '1rem' },
-            padding: { xs: '0.5rem 1.25rem', sm: '0.65rem 1.75rem' },
-            '&:hover': {
-              backgroundColor: '#7c3aed'
-            },
-            '&.Mui-disabled': {
-              backgroundColor: '#cbd5e1',
-              color: '#e2e8f0'
-            }
-          }}
-        >
-          {isSaving ? 'Saving...' : 'Save'}
-        </Button>
-      </Box>
     </Paper>
   )
 }
 
-export default QuestionCard
+export default PreviewQuestionCard

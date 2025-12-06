@@ -44,7 +44,7 @@ const AuthCallBack = () => {
           // nếu có role => điều hướng ngay
           const role = fetchedUser?.role
           if (role === 'student') {
-            navigate('/dasboard')
+            navigate('/dashboard')
             return
           }
           if (role === 'teacher') {
