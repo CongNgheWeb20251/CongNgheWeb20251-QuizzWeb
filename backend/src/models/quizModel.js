@@ -100,8 +100,8 @@ const getDetails = async (userId, quizId) => {
   const queryConditions = [
     { _id: new ObjectId(quizId) },
     { $or: [
-      { createdBy: new ObjectId(userId) }
-      // { memberIds: { $all: [new ObjectId(userId)] } }
+      { createdBy: new ObjectId(userId) },
+      { memberIds: { $all: [new ObjectId(userId)] } }
     ] }
   ]
   try {
@@ -143,8 +143,8 @@ const getQuizzes = async (userId, page, itemsPerPage, filter) => {
     const queryConditions = [
       // Dk1 board thuoc ve userId (member or owner)
       { $or: [
-        { createdBy: new ObjectId(userId) }
-        // { memberIds: { $all: [new ObjectId(userId)] } }
+        { createdBy: new ObjectId(userId) },
+        { memberIds: { $all: [new ObjectId(userId)] } }
       ] }
     ]
 

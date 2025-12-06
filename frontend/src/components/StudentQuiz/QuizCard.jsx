@@ -38,7 +38,7 @@ const subjectColors= {
   'General': 'bg-blue-100 text-blue-700'
 }
 
-const QuizCard = ({ quiz, index, openMenuId, toggleMenu }) => {
+const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
   const badge = getStatusBadge(quiz.status)
   const [isHovered, setIsHovered] = useState(false)
 
@@ -214,6 +214,7 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu }) => {
               <button
                 className="flex-1 px-4 py-2.5 bg-gradient-to-r from-sky-500 to-blue-500 text-white rounded-lg hover:from-sky-600 hover:to-blue-600 transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label={`Retake ${quiz.title}`}
+                onClick={() => onStartQuiz(quiz, true)}
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="text-sm">Retake</span>
@@ -223,6 +224,7 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu }) => {
             <button
               className="w-full px-4 py-2.5 bg-gradient-to-r from-sky-500 to-blue-500 text-white rounded-lg hover:from-sky-600 hover:to-blue-600 transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
               aria-label={`Continue ${quiz.title}`}
+              onClick={() => onStartQuiz(quiz, false)}
             >
               <Play className="w-4 h-4" />
               <span className="text-sm">Continue</span>
@@ -231,6 +233,7 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu }) => {
             <button
               className="w-full px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
               aria-label={`Start ${quiz.title}`}
+              onClick={() => onStartQuiz(quiz, false)}
             >
               <Play className="w-4 h-4" />
               <span className="text-sm">Start Quiz</span>

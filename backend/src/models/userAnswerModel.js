@@ -119,6 +119,16 @@ const deleteOne = async (userAnswerId) => {
   }
 }
 
+const findBySessionAndQuestion = async (sessionId, questionId) => {
+  try {
+    const userAnswer = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME).findOne({ sessionId: sessionId, questionId: questionId })
+    return userAnswer
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+
 export const userAnswerModel = {
   USER_ANSWER_COLLECTION_NAME,
   USER_ANSWER_COLLECTION_SCHEMA,
@@ -129,7 +139,8 @@ export const userAnswerModel = {
   findByUserAndQuiz,
   findByQuestion,
   update,
-  deleteOne
+  deleteOne,
+  findBySessionAndQuestion
 }
 
 /*

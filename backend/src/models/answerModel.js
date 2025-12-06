@@ -103,8 +103,18 @@ const deleteByQuestionId = async (questionId) => {
 const findByQuizId = async (quizId) => {
   try {
     const answerOptions = await DB_GET().collection(ANSWER_OPTION_COLLECTION_NAME)
-      .find({ quizId: quizId })
-      .sort({ order: 1 })
+      .find({ quizId: new ObjectId(quizId) })
+      .toArray()
+    return answerOptions
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const findCorrectOptionsByQuestionId = async (questionId) => {
+  try {
+    const answerOptions = await DB_GET().collection(ANSWER_OPTION_COLLECTION_NAME)
+      .find({ questionId: new ObjectId(questionId), isCorrect: true }).project({ _id: 1 } )
       .toArray()
     return answerOptions
   } catch (error) {
@@ -121,5 +131,6 @@ export const answerOptionModel = {
   findByQuizId,
   update,
   deleteOne,
-  deleteByQuestionId
+  deleteByQuestionId,
+  findCorrectOptionsByQuestionId
 }
