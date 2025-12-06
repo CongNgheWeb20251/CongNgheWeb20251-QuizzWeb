@@ -173,6 +173,11 @@ export const fetchQuizzesAPI = async (searchPath) => {
   return res.data
 }
 
+export const fetchQuizzesByStudentAPI = async (searchPath) => {
+  const res = await authorizedAxiosInstance.get(`/v1/student/quizzes${searchPath}`)
+  return res.data
+}
+
 export const fetchQuizzesStatsAPI = async () => {
   const res = await authorizedAxiosInstance.get('/v1/quizzes/stats')
   return res.data
@@ -219,5 +224,14 @@ export async function getQuiz(id) {
     questionPerf: []
   }
 }
+
+// attemptQuiz------------------------------------------
+
+export const startAttemptQuizAPI = async (quizId) => {
+  const res = await authorizedAxiosInstance.post(`/v1/quizzes/${quizId}/start`)
+  return res.data
+}
+
+//-------------------------------------------------------
 
 

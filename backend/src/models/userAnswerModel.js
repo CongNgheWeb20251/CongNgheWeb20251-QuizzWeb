@@ -5,10 +5,10 @@ import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
 const USER_ANSWER_COLLECTION_NAME = 'userAnswers'
 const USER_ANSWER_COLLECTION_SCHEMA = Joi.object({
-  userId: Joi.string().required(),
-  quizId: Joi.string().required(),
-  sessionId: Joi.string().required(),
-  questionId: Joi.string().required(),
+  userId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+  quizId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+  sessionId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+  questionId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
   selectedAnswerIds: Joi.array().items(
     Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
   ).default([]),
@@ -46,7 +46,7 @@ const findOneById = async (id) => {
 const findByUserId = async (userId) => {
   try {
     const userAnswers = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME)
-      .find({ userId: userId })
+      .find({ userId: new ObjectId(userId) })
       .toArray()
     return userAnswers
   } catch (error) {
@@ -57,7 +57,7 @@ const findByUserId = async (userId) => {
 const findByQuizId = async (quizId) => {
   try {
     const userAnswers = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME)
-      .find({ quizId: quizId })
+      .find({ quizId: new ObjectId(quizId) })
       .toArray()
     return userAnswers
   } catch (error) {
@@ -68,7 +68,7 @@ const findByQuizId = async (quizId) => {
 const findByUserAndQuiz = async (userId, quizId) => {
   try {
     const userAnswers = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME)
-      .find({ userId: userId, quizId: quizId })
+      .find({ userId: new ObjectId(userId), quizId: new ObjectId(quizId) })
       .toArray()
     return userAnswers
   } catch (error) {
@@ -79,7 +79,7 @@ const findByUserAndQuiz = async (userId, quizId) => {
 const findByQuestion = async (questionId) => {
   try {
     const userAnswers = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME)
-      .find({ questionId: questionId })
+      .find({ questionId: new ObjectId(questionId) })
       .toArray()
     return userAnswers
   } catch (error) {
@@ -121,7 +121,7 @@ const deleteOne = async (userAnswerId) => {
 
 const findBySessionAndQuestion = async (sessionId, questionId) => {
   try {
-    const userAnswer = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME).findOne({ sessionId: sessionId, questionId: questionId })
+    const userAnswer = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME).findOne({ sessionId: new ObjectId(sessionId), questionId: new ObjectId(questionId) })
     return userAnswer
   } catch (error) {
     throw new Error(error)

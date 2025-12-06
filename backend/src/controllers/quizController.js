@@ -18,8 +18,9 @@ const createNew = async (req, res, next) => {
 const getDetails = async (req, res, next) => {
   try {
     const userId = req.jwtDecoded._id
+    const userRole = req.jwtDecoded.role
     const quizId = req.params.id
-    const quiz = await quizService.getDetails(userId, quizId)
+    const quiz = await quizService.getDetails(userId, quizId, userRole)
     res.status(StatusCodes.OK).json(quiz)
   } catch (error) {
     next(error)
@@ -37,6 +38,19 @@ const getQuizzes = async (req, res, next) => {
     next(error)
   }
 }
+
+const getQuizzesByStudent = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const { page, itemsPerPage } = req.query
+    // console.log({ ...req.query })
+    const quizzes = await quizService.getQuizzesByStudent(userId, page, itemsPerPage)
+    res.status(StatusCodes.OK).json(quizzes)
+  } catch (error) {
+    next(error)
+  }
+}
+
 
 const updateInfo = async (req, res, next) => {
   try {
@@ -65,5 +79,6 @@ export const quizController = {
   getDetails,
   getQuizzes,
   updateInfo,
-  getQuizzesStats
+  getQuizzesStats,
+  getQuizzesByStudent
 }

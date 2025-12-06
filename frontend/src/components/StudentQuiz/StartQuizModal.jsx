@@ -15,9 +15,7 @@ export default function StartQuizModal({
   isOpen,
   onClose,
   onStart,
-  quizTitle,
-  description,
-  metadata,
+  quiz,
   isRetake = false
 }) {
   const modalRef = useRef(null)
@@ -82,8 +80,8 @@ export default function StartQuizModal({
     }
   }
 
-  const getDifficultyColor = (difficulty) => {
-    switch (difficulty) {
+  const getDifficultyColor = (level) => {
+    switch (level) {
     case 'easy':
       return 'text-emerald-700 bg-emerald-100'
     case 'medium':
@@ -95,9 +93,9 @@ export default function StartQuizModal({
     }
   }
 
-  const getDifficultyLabel = (difficulty) => {
-    if (!difficulty) return null
-    return difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
+  const getDifficultyLabel = (level) => {
+    if (!level) return null
+    return level.charAt(0).toUpperCase() + level.slice(1)
   }
 
   if (!isOpen) return null
@@ -134,7 +132,7 @@ export default function StartQuizModal({
                     id="quiz-modal-title"
                     className="text-2xl text-gray-900 leading-tight"
                   >
-                    {quizTitle}
+                    {quiz?.title || 'Start Quiz'}
                   </h2>
                 </div>
                 <button
@@ -154,11 +152,11 @@ export default function StartQuizModal({
                 id="quiz-modal-description"
                 className="text-gray-700 mb-6 leading-relaxed"
               >
-                {description}
+                {quiz?.description || 'You are about to start this quiz. Make sure you are ready before proceeding.'}
               </p>
 
               {/* Metadata Row */}
-              <div className="flex flex-wrap gap-4 mb-6">
+              <div className="flex flex-wrap gap-4 lg:gap-6 mb-6">
                 {/* Duration */}
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <div className="bg-blue-100 p-2 rounded-lg">
@@ -166,7 +164,7 @@ export default function StartQuizModal({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Time limit</p>
-                    <p className="text-gray-900">{metadata.duration} minutes</p>
+                    <p className="text-gray-900">{quiz?.timeLimit} minutes</p>
                   </div>
                 </div>
 
@@ -177,31 +175,31 @@ export default function StartQuizModal({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Questions</p>
-                    <p className="text-gray-900">{metadata.questionCount} questions</p>
+                    <p className="text-gray-900">{quiz?.questionOrderIds?.length} questions</p>
                   </div>
                 </div>
 
-                {/* Difficulty or Attempt Number */}
-                {metadata.difficulty && !isRetake && (
+                {/* level or Attempt Number */}
+                {quiz.level && !isRetake && (
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <div className={`p-2 rounded-lg ${getDifficultyColor(metadata.difficulty)}`}>
+                    <div className={`p-2 rounded-lg ${getDifficultyColor(quiz.level)}`}>
                       <BarChart3 className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Difficulty</p>
-                      <p className="text-gray-900">{getDifficultyLabel(metadata.difficulty)}</p>
+                      <p className="text-xs text-gray-500">level</p>
+                      <p className="text-gray-900">{getDifficultyLabel(quiz.level)}</p>
                     </div>
                   </div>
                 )}
 
-                {metadata.attemptNumber && isRetake && (
+                {quiz?.attemptNumber && isRetake && (
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <div className="bg-orange-100 p-2 rounded-lg">
                       <RotateCcw className="w-4 h-4 text-orange-600" />
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Attempt</p>
-                      <p className="text-gray-900">#{metadata.attemptNumber}</p>
+                      <p className="text-gray-900">#{quiz?.attemptNumber}</p>
                     </div>
                   </div>
                 )}
