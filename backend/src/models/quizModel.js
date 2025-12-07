@@ -277,7 +277,7 @@ const getQuizzesByStudent = async (userId, page, itemsPerPage) => {
             as: 'sessions',
             pipeline: [
               { $project: { createdAt: 0, updatedAt: 0, quizId: 0 } },
-              { $match: { studentId: new ObjectId(userId) } },
+              { $match: { userId: new ObjectId(userId) } },
               {
                 $addFields: {
                   statusPriority: {

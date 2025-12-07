@@ -4,6 +4,8 @@ import { cloneDeep } from 'lodash'
 import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
 import { DEFAULT_PAGE, DEFAULT_ITEMS_PER_PAGE, DEFAULT_FILTER } from '~/utils/constants'
+import { sessionQuizModel } from '~/models/sessionQuizModel'
+import { quizAttemptSocket } from '~/sockets/quizAttemptSocket'
 
 const createNew = async ({ userId, data }) => {
   try {
@@ -17,8 +19,10 @@ const createNew = async ({ userId, data }) => {
       timeLimit: data.timeLimit,
       createdBy: userId,
       passingScore: data.passingScore,
-      startTime: startDate,
-      endTime: endDate
+      startTime: data.startDate,
+      endTime: data.endDate,
+      allowRetake: data.allowRetake || true,
+      showResults: data.immediateResults || true
     }
     const createdQuiz = await quizModel.createNew(newQuiz)
     return createdQuiz
@@ -110,6 +114,40 @@ const getQuizzesByStudent = async (userId, page, itemsPerPage) => {
   }
 }
 
+const startAttemptQuiz = async (userId, quizId) => {
+  try {
+    // Kiểm tra tồn tại của quiz
+    const quiz = await quizModel.findOneById(quizId)
+    if (!quiz) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `Quiz with id ${quizId} not found`)
+    }
+    // Tạo mới session quiz
+    // Lấy thời gian hiện tại theo server
+    const now = Date.now()
+    const newSession = {
+      quizId,
+      userId,
+      startTime: now, // thời gian bắt đầu hiện tại
+      endTime: now + quiz.timeLimit * 60 * 1000 // thời gian kết thúc dự kiến
+    }
+    // Tạo session quiz trong DB
+    const createdSession = await sessionQuizModel.createNew(newSession)
+    const session = await sessionQuizModel.findOneById(createdSession.insertedId.toString())
+    // Lên lịch timeout cho session quiz
+    quizAttemptSocket.scheduleQuizTimeout(session._id.toString(), session.endTime, session.userId)
+
+    return {
+      sessionId: session._id.toString(),
+      quizId: session.quizId,
+      userId: session.userId.toString(),
+      startTime: session.startTime,
+      endTime: session.endTime,
+      status: session.status
+    }
+  } catch (error) {
+    throw new Error(error)
+  }
+}
 
 export const quizService = {
   createNew,
@@ -117,5 +155,6 @@ export const quizService = {
   getQuizzes,
   updateInfo,
   getQuizzesStats,
-  getQuizzesByStudent
+  getQuizzesByStudent,
+  startAttemptQuiz
 }

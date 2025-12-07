@@ -2,6 +2,7 @@ import Joi from 'joi'
 import { DB_GET } from '~/config/mongodb'
 import { ObjectId } from 'mongodb'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
+import { userAnswerModel } from './userAnswerModel'
 
 const SESSION_QUIZ_COLLECTION_NAME = 'sessionQuizzes'
 const SESSION_QUIZ_COLLECTION_SCHEMA = Joi.object({
@@ -9,7 +10,7 @@ const SESSION_QUIZ_COLLECTION_SCHEMA = Joi.object({
   quizId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
 
   // Thời gian
-  timeSpent: Joi.number().required(), // tổng thời gian làm bài (giây)
+  timeSpent: Joi.number(), // tổng thời gian làm bài (giây)
   startTime: Joi.date().timestamp('javascript'),
   submitTime: Joi.date().timestamp('javascript'),
   endTime: Joi.date().timestamp('javascript'),
@@ -36,7 +37,11 @@ const createNew = async (data) => {
   try {
     const validData = await validBeforeCreate(data)
 
-    const createdResult = await DB_GET().collection(SESSION_QUIZ_COLLECTION_NAME).insertOne(validData)
+    const createdResult = await DB_GET().collection(SESSION_QUIZ_COLLECTION_NAME).insertOne({
+      ...validData,
+      userId: new ObjectId(data.userId),
+      quizId: new ObjectId(data.quizId)
+    })
     return createdResult
   } catch (error) {
     throw new Error(error)
@@ -88,6 +93,75 @@ const findByUserAndQuiz = async (userId, quizId) => {
   }
 }
 
+const update = async (sessionId, updateData) => {
+  try {
+    Object.keys(updateData).forEach(key => {
+      if (UNCHANGE_FIELDS.includes(key)) {
+        delete updateData[key]
+      }
+    })
+
+    const result = await DB_GET().collection(SESSION_QUIZ_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(sessionId) },
+      { $set: { ...updateData, updatedAt: Date.now() } },
+      { returnDocument: 'after' }
+    )
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const getQuizSessionDetails = async (sessionId) => {
+  try {
+    // lấy cả thông tin các câu hỏi đã làm trong session
+    /*
+      {
+        "sessionId": "abc",
+        "userId": "...",
+        "quizId": "...",
+        "startTime": 171000000,
+        "endTime": 171003600,
+        "status": "doing",
+        "answers": [
+          {
+            "questionId": "q1",
+            "selectedAnswerIds": ["optA"]
+          },
+          {
+            "questionId": "q2",
+            "selectedAnswerIds": []
+          }
+        ]
+      }
+    */
+    const session = await DB_GET().collection(SESSION_QUIZ_COLLECTION_NAME).aggregate([
+      { $match: { _id: new ObjectId(sessionId) } },
+      {
+        $lookup: {
+          from: userAnswerModel.USER_ANSWER_COLLECTION_NAME,
+          localField: '_id',
+          foreignField: 'sessionId',
+          as: 'answers',
+          pipeline: [
+            {
+              $project: {
+                _id: 0,
+                questionId: 1,
+                selectedAnswerIds: 1
+              }
+            }
+          ]
+        }
+      }
+    ]).toArray()
+    if (!session || session.length === 0) return null
+    return session[0]
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const sessionQuizModel = {
   SESSION_QUIZ_COLLECTION_NAME,
   SESSION_QUIZ_COLLECTION_SCHEMA,
@@ -95,6 +169,8 @@ export const sessionQuizModel = {
   findOneById,
   findByUserId,
   findByQuizId,
-  findByUserAndQuiz
+  findByUserAndQuiz,
+  update,
+  getQuizSessionDetails
 
 }

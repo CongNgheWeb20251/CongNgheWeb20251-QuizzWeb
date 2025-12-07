@@ -228,7 +228,17 @@ export async function getQuiz(id) {
 // attemptQuiz------------------------------------------
 
 export const startAttemptQuizAPI = async (quizId) => {
-  const res = await authorizedAxiosInstance.post(`/v1/quizzes/${quizId}/start`)
+  const res = await authorizedAxiosInstance.post(`/v1/student/quizzes/${quizId}/sessions`)
+  return res.data
+}
+
+export const fetchSessionQuizAPI = async (sessionId) => {
+  const res = await authorizedAxiosInstance.get(`/v1/student/sessions/${sessionId}`)
+  return res.data
+}
+
+export const saveQuestionAnswerAPI = async (sessionId, data) => {
+  const res = await authorizedAxiosInstance.put(`/v1/student/sessions/${sessionId}/answers`, data)
   return res.data
 }
 

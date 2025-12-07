@@ -198,10 +198,12 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
         {/* Time Section */}
         {quiz.sessionsCount > 0 && (
           <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-            <div className="flex items-center gap-1.5">
-              <Timer className="w-4 h-4" />
-              <span>{formatTime(quiz.timeSpent)}</span>
-            </div>
+            { firstSession?.status === 'completed' &&
+              <div className="flex items-center gap-1.5">
+                <Timer className="w-4 h-4" />
+                <span>{formatTime(firstSession.timeSpent)}</span>
+              </div>
+            }
             {quiz.timeLimit && (
               <div className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4" />
@@ -217,7 +219,7 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
         <div className="flex gap-2">
           {
             // 1) Có session và session đã done → Results + Retake
-            quiz.sessionsCount > 0 && firstSession?.status === 'done' ? (
+            quiz.sessionsCount > 0 && firstSession?.status === 'completed' ? (
               <>
                 <button
                   className="flex-1 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all flex items-center justify-center gap-2"
@@ -238,7 +240,7 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
               </>
             ) :
             // 2) Có session in-progress → Continue
-              firstSession?.status === 'in-progress' ? (
+              firstSession?.status === 'doing' ? (
                 <button
                   className="w-full px-4 py-2.5 bg-gradient-to-r from-sky-500 to-blue-500 text-white rounded-lg hover:from-sky-600 hover:to-blue-600 transition-all flex items-center justify-center gap-2"
                   aria-label={`Continue ${quiz.title}`}

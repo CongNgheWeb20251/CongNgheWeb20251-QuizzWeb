@@ -17,7 +17,7 @@ function CreateQuizStep1() {
     passingScore: 70,
     startDate: '',
     endDate: '',
-    randomizeQuestions: true,
+    allowRetake: true,
     immediateResults: true
   })
 
@@ -32,9 +32,14 @@ function CreateQuizStep1() {
   const handleNext = async (e) => {
     e.preventDefault()
     // TODO: Validate and save to context/localStorage
-    console.log('Step 1 data:', quizData)
-    const result = await createQuizStep1API({ ...quizData, status: 'draft' })
-    console.log('Step 1 API result:', result)
+    // console.log('Step 1 data:', {...quizData, status: 'draft', endDate: new Date(quizData.endDate).getTime(), startDate: new Date(quizData.startDate).getTime()})
+    const result = await createQuizStep1API({
+      ...quizData,
+      status: 'draft',
+      endDate: new Date(quizData.endDate).getTime(),
+      startDate: new Date(quizData.startDate).getTime()
+    })
+    // console.log('Step 1 API result:', result)
     navigate(`/teacher/edit/${result.insertedId}/step2`)
   }
 
@@ -54,8 +59,13 @@ function CreateQuizStep1() {
     }
 
     try {
-      const result = await createQuizStep1API({ ...quizData, status: 'draft' })
-      console.log('Saved draft:', result)
+      const result = await createQuizStep1API({
+        ...quizData,
+        status: 'draft',
+        endDate: new Date(quizData.endDate).valueOf(),
+        startDate: new Date(quizData.startDate).valueOf()
+      })
+      // console.log('Saved draft:', result)
       // Navigate to edit step2 (same as Next) so user can continue editing the quiz
       navigate(`/teacher/edit/${result.insertedId}/step1`)
     } catch (err) {
@@ -270,17 +280,17 @@ function CreateQuizStep1() {
                 <div className="cq-form-group">
                   <div className="cq-toggle-wrapper">
                     <div className="cq-toggle-label-wrapper">
-                      <label htmlFor="randomizeQuestions" className="cq-label">
-                        Randomize Questions
+                      <label htmlFor="allowRetake" className="cq-label">
+                        Allow Retake
                       </label>
-                      <p className="cq-toggle-desc">Show questions in random order.</p>
+                      <p className="cq-toggle-desc">Allow users to retake the quiz.</p>
                     </div>
                     <label className="cq-toggle">
                       <input
                         type="checkbox"
-                        id="randomizeQuestions"
-                        name="randomizeQuestions"
-                        checked={quizData.randomizeQuestions}
+                        id="allowRetake"
+                        name="allowRetake"
+                        checked={quizData.allowRetake}
                         onChange={handleChange}
                       />
                       <span className="cq-toggle-slider"></span>

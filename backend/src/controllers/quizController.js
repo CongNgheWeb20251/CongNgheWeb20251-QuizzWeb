@@ -73,6 +73,18 @@ const getQuizzesStats = async (req, res, next) => {
   }
 }
 
+// student làm quiz - tạo mới session
+const startAttemptQuiz = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const quizId = req.params.quizId
+    const result = await quizService.startAttemptQuiz(userId, quizId)
+    res.status(StatusCodes.CREATED).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
 
 export const quizController = {
   createNew,
@@ -80,5 +92,6 @@ export const quizController = {
   getQuizzes,
   updateInfo,
   getQuizzesStats,
-  getQuizzesByStudent
+  getQuizzesByStudent,
+  startAttemptQuiz
 }

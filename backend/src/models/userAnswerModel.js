@@ -97,10 +97,13 @@ const update = async (userAnswerId, updateData) => {
 
     updateData.updatedAt = Date.now()
 
-    const updateResult = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME).findOneAndUpdate(
+    const updateResult = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME).updateOne(
       { _id: new ObjectId(userAnswerId) },
       { $set: updateData },
-      { returnDocument: 'after' }
+      {
+        upsert: true,
+        returnDocument: 'after'
+      }
     )
     return updateResult
   } catch (error) {
@@ -119,9 +122,16 @@ const deleteOne = async (userAnswerId) => {
   }
 }
 
-const findBySessionAndQuestion = async (sessionId, questionId) => {
+const updateBySessionAndQuestion = async (sessionId, questionId, updateData) => {
   try {
-    const userAnswer = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME).findOne({ sessionId: new ObjectId(sessionId), questionId: new ObjectId(questionId) })
+    const userAnswer = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME).updateOne(
+      { sessionId: new ObjectId(sessionId), questionId: new ObjectId(questionId) },
+      { $set: updateData },
+      {
+        upsert: true,
+        returnDocument: 'after'
+      }
+    )
     return userAnswer
   } catch (error) {
     throw new Error(error)
@@ -140,7 +150,7 @@ export const userAnswerModel = {
   findByQuestion,
   update,
   deleteOne,
-  findBySessionAndQuestion
+  updateBySessionAndQuestion
 }
 
 /*
