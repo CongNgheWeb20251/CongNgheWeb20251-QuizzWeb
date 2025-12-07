@@ -33,6 +33,23 @@ export const joinAttemptSocket = (socket, activeSessions) => {
     startSessionTimer(socket, sessionId, session.endTime, activeSessions)
   })
 
+  // Xử lý khi client rời khỏi session
+  socket.on('leave-session', (sessionId) => {
+    socket.leave(sessionId)
+    console.log(`User left session: ${sessionId}`)
+
+    // Nếu không còn ai trong room thì clear timer
+    const room = socket.adapter.rooms.get(sessionId)
+    if (!room || room.size === 0) {
+      const timer = activeSessions.get(sessionId)
+      if (timer) {
+        clearTimeout(timer)
+        activeSessions.delete(sessionId)
+        console.log(`Cleared timer for empty session: ${sessionId}`)
+      }
+    }
+  })
+
   // Xử lý khi client disconnect
   socket.on('disconnect', () => {
     console.log('User disconnected')
@@ -40,27 +57,27 @@ export const joinAttemptSocket = (socket, activeSessions) => {
 }
 
 
-// Tính toán thời gian còn lại và gửi cập nhật định kỳ cho tất cả clients trong room
+// Backup timer: chỉ auto-submit nếu client không tự submit (mất kết nối)
 const startSessionTimer = (socket, sessionId, endTime, activeSessions) => {
   if (activeSessions.has(sessionId)) return
 
-  const timer = setInterval(async () => {
-    const now = Date.now()
-    const timeLeft = Math.max(0, endTime - now)
+  const timeLeft = Math.max(0, endTime - Date.now())
 
-    // Broadcast time left to all clients in the session room
-    socket.to(sessionId).emit('timeLeft', { timeLeft })
+  // Set timeout 1 lần duy nhất khi hết giờ
+  const timer = setTimeout(async () => {
+    activeSessions.delete(sessionId)
 
-    if (timeLeft <= 0) {
-      clearInterval(timer)
-      activeSessions.delete(sessionId)
-
+    // Kiểm tra nếu session chưa completed thì mới auto-submit (backup)
+    const session = await sessionQuizModel.findOneById(sessionId)
+    if (session && session.status !== 'completed') {
       await autoSubmitSession(sessionId, socket)
-      // Emit timeout to all clients in the session
       socket.to(sessionId).emit('timeout')
-      console.log(`Session ${sessionId} has timed out and auto-submitted`)
+      socket.emit('timeout')
+      console.log(`[BACKUP] Auto-submitted session: ${sessionId}`)
+    } else {
+      console.log(`Session ${sessionId} already completed by client`)
     }
-  }, 1000)
+  }, timeLeft)
 
   activeSessions.set(sessionId, timer)
 }

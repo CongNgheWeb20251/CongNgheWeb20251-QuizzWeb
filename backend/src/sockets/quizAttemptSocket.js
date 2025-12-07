@@ -1,4 +1,6 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console *//*
+không dùng các hàm này nhé......
+*/
 import { sessionQuizModel } from '~/models/sessionQuizModel'
 
 let socket = null

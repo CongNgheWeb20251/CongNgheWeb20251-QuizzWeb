@@ -246,8 +246,8 @@ const calculateQuizScore = async (sessionId) => {
       {
         $lookup: {
           from: questionModel.QUESTION_COLLECTION_NAME,
-          localField: 'answers.questionId',
-          foreignField: '_id',
+          localField: 'quizId',
+          foreignField: 'quizId',
           as: 'questions',
           pipeline: [
             {
