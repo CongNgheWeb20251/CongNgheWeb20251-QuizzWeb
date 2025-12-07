@@ -1,0 +1,28 @@
+import { sessionQuizService } from '~/services/sessionQuizService'
+import { StatusCodes } from 'http-status-codes'
+
+const getQuizSessionDetails = async (req, res, next) => {
+  try {
+    const { sessionId } = req.params
+    const sessionDetails = await sessionQuizService.getQuizSessionDetails(sessionId)
+    res.status(StatusCodes.OK).json(sessionDetails)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const submitAnswers = async (req, res, next) => {
+  try {
+    const { sessionId } = req.params
+    const answersData = req.body
+    await sessionQuizService.submitAnswers(sessionId, answersData)
+    res.status(StatusCodes.OK).json({ message: 'Answers submitted successfully' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const sessionQuizController = {
+  getQuizSessionDetails,
+  submitAnswers
+}

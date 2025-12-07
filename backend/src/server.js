@@ -12,6 +12,7 @@ import cookieParser from 'cookie-parser'
 import socketIo from 'socket.io'
 import http from 'http'
 import './providers/passportProvider.js'
+import { quizAttemptSocket } from './sockets/quizAttemptSocket'
 
 const START_SERVER = () => {
   const app = express()
@@ -72,9 +73,18 @@ const START_SERVER = () => {
   const io = socketIo(server, {
     cors: corsOptions
   })
-  // eslint-disable-next-line no-unused-vars
+  // Khởi tạo socket trong quizAttemptSocket
+  quizAttemptSocket.initSocketIO(io)
+
+  // Lắng nghe sự kiện kết nối từ client
   io.on('connection', (socket) => {
     // kết nối socket
+    console.log('User connected')
+
+  socket.on('joinUser', userId => {
+    socket.join(String(userId))
+    console.log('User joined room:', userId)
+  })
   })
 
   // Lắng nghe sự kiện kết nối socket

@@ -12,6 +12,7 @@ import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import ToggleButton from '@mui/material/ToggleButton'
 import Checkbox from '@mui/material/Checkbox'
+import { toast } from 'react-toastify'
 
 import {
   ChevronLeft,
@@ -23,45 +24,49 @@ import {
   List,
   Grid3x3
 } from 'lucide-react'
+import { useParams } from 'react-router-dom'
+import { saveQuestionAnswerAPI } from '~/apis'
 
 const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
   const [isSaving, setIsSaving] = useState(false)
+  const { sessionId } = useParams()
+
 
   const handleAnswerChange = (questionId, optionId) => {
-    setAnswers({ ...answers, [questionId]: optionId })
+    setAnswers({ ...answers, [questionId]: [optionId] })
   }
 
   const handleMultipleAnswerChange = (questionId, optionId) => {
-    const currentAnswer = answers[questionId]
-    if (currentAnswer) {
-      if (currentAnswer.includes(optionId)) {
-        setAnswers({ ...answers, [questionId]: currentAnswer.filter((id) => id !== optionId) })
-      } else {
-        setAnswers({ ...answers, [questionId]: [...currentAnswer, optionId] })
-      }
+    const currentAnswer = answers[questionId] || []
+    if (currentAnswer.includes(optionId)) {
+      setAnswers({ ...answers, [questionId]: currentAnswer.filter((id) => id !== optionId) })
     } else {
-      setAnswers({ ...answers, [questionId]: [optionId] })
+      setAnswers({ ...answers, [questionId]: [...currentAnswer, optionId] })
     }
   }
 
-  const selectedAnswer = answers[question._id]
-  const hasAnswer = Array.isArray(selectedAnswer)
-    ? selectedAnswer.length > 0
-    : selectedAnswer !== undefined && selectedAnswer !== null
+  const selectedAnswer = answers[question?._id] || []
+  const hasAnswer = selectedAnswer.length > 0
 
   const handleSave = async () => {
     if (isSaving || !hasAnswer) return
 
     setIsSaving(true)
     try {
-      // await saveQuestionAnswerAPI({
-      //   questionId: question.id ?? question._id,
-      //   answer: selectedAnswer
+      await saveQuestionAnswerAPI(sessionId, {
+        questionId: question._id,
+        answerIds: selectedAnswer
+      }).then(() => {
+        toast.success('Answer saved successfully!', { autoClose: 1000 })
+      })
+      // console.log("selectedAnswer", {
+      //   sessionId,
+      //   questionId: question._id,
+      //   answerIds: selectedAnswer
       // })
-      console.log({ selectedAnswer: selectedAnswer })
     } catch (error) {
       if (error) {
-        // TODO: Handle save error (e.g., show toast)
+        toast.error('Failed to save answer. Please try again.', { autoClose: 2000 })
       }
     } finally {
       setIsSaving(false)
@@ -99,11 +104,11 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
 
       {['single-choice', 'true-false'].includes(question?.type) ? (
         <RadioGroup
-          value={answers[question._id]?.toString() || ''}
+          value={answers[question._id]?.[0]?.toString() || ''}
           onChange={(e) => handleAnswerChange(question._id, parseInt(e.target.value))}
         >
           {question?.options.map((option) => {
-            const isSelected = answers[question._id] === option._id
+            const isSelected = answers[question._id]?.includes(option._id)
             return (
               <Box
                 key={option._id}

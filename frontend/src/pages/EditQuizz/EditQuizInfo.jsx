@@ -32,6 +32,17 @@ export default function EditQuizInfo() {
   const [isLoading, setIsLoading] = useState(false)
   const { id } = useParams()
 
+  const formatDateTimeLocal = (timestamp) => {
+    if (!timestamp) return ''
+    const date = new Date(timestamp)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  }
+
   const initialFormData = {
     title: quizData?.title,
     description: quizData?.description,
@@ -39,7 +50,8 @@ export default function EditQuizInfo() {
     level: quizData?.level,
     timeLimit: quizData?.timeLimit,
     passingScore: quizData?.passingScore,
-    // shuffleQuestions: quizData?.shuffleQuestions,
+    startTime: formatDateTimeLocal(quizData?.startTime),
+    endTime: formatDateTimeLocal(quizData?.endTime),
     showResults: quizData?.showResults,
     allowRetake: quizData?.allowRetake
   }
@@ -71,6 +83,8 @@ export default function EditQuizInfo() {
         level: quizData.level,
         timeLimit: quizData.timeLimit,
         passingScore: quizData.passingScore,
+        startTime: formatDateTimeLocal(quizData.startTime),
+        endTime: formatDateTimeLocal(quizData.endTime),
         showResults: quizData.showResults,
         allowRetake: quizData.allowRetake
       })
@@ -82,17 +96,31 @@ export default function EditQuizInfo() {
   }
 
   const submitUpdateQuiz = async (data) => {
-    const { title, description, category, level, timeLimit, passingScore, showResults, allowRetake } = data
+    const { title, description, category, level, timeLimit, passingScore, startTime, endTime, showResults, allowRetake } = data
+
+    // Convert datetime-local to milliseconds
+    const updateData = {
+      title,
+      description,
+      category,
+      level,
+      timeLimit,
+      passingScore,
+      startTime: startTime ? new Date(startTime).getTime() : undefined,
+      endTime: endTime ? new Date(endTime).getTime() : undefined,
+      showResults,
+      allowRetake
+    }
 
     // Prepare update data
-    if (title === quizData.title && description === quizData.description && category === quizData.category && level === quizData.level && timeLimit === quizData.timeLimit && passingScore === quizData.passingScore && showResults === quizData.showResults && allowRetake === quizData.allowRetake) {
+    if (title === quizData.title && description === quizData.description && category === quizData.category && level === quizData.level && timeLimit === quizData.timeLimit && passingScore === quizData.passingScore && updateData.startTime === quizData.startTime && updateData.endTime === quizData.endTime && showResults === quizData.showResults && allowRetake === quizData.allowRetake) {
       toast.info('No changes to save.')
       return
     }
     // console.log("data", data)
 
     try {
-      const updatedQuiz = await updateQuizInfo(id, data)
+      const updatedQuiz = await updateQuizInfo(id, updateData)
       toast.success('Quiz information updated successfully!')
       // console.log("first", updatedQuiz)
       // Update redux store
@@ -448,6 +476,79 @@ export default function EditQuizInfo() {
                 />
                 <FieldErrorAlert errors={errors} fieldName="passingScore" />
               </Box>
+              {/* Start Date */}
+              <Box sx={{ marginBottom: '1.5rem' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
+                >
+                Start Date *
+                </Typography>
+                <Controller
+                  name="startTime"
+                  control={control}
+                  rules={{ required: FIELD_REQUIRED_MESSAGE }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      type="datetime-local"
+                      error={!!errors.startTime}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          backgroundColor: '#fafbfc',
+                          '&:hover fieldset': {
+                            borderColor: '#8b5cf6'
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#8b5cf6'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                />
+                <FieldErrorAlert errors={errors} fieldName="startTime" />
+              </Box>
+
+              {/* End Date */}
+              <Box sx={{ marginBottom: '1.5rem' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
+                >
+                End Date *
+                </Typography>
+                <Controller
+                  name="endTime"
+                  control={control}
+                  rules={{ required: FIELD_REQUIRED_MESSAGE }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      type="datetime-local"
+                      error={!!errors.endTime}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          backgroundColor: '#fafbfc',
+                          '&:hover fieldset': {
+                            borderColor: '#8b5cf6'
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#8b5cf6'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                />
+                <FieldErrorAlert errors={errors} fieldName="endTime" />
+              </Box>
 
               {/* Divider */}
               <Box
@@ -566,7 +667,7 @@ export default function EditQuizInfo() {
               </Box>
 
               {/* Info Box */}
-              <Box
+              {/* <Box
                 sx={{
                   marginTop: '2rem',
                   padding: '1rem',
@@ -576,13 +677,13 @@ export default function EditQuizInfo() {
                 }}
               >
                 <Typography variant="body2" sx={{ color: '#92400e', fontWeight: 500 }}>
-                💡 Note
+                Note
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#92400e' }}>
                 Changes to these settings will apply to all future quiz attempts. Existing attempts
                 will not be affected.
                 </Typography>
-              </Box>
+              </Box> */}
             </Paper>
           </Box>
 

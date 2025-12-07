@@ -73,12 +73,18 @@ export default function StudentDashboard() {
   const handleConfirmStart = () => {
     // Handle quiz start logic here
     handleCloseModal()
-    // startAttemptQuizAPI(startQuizModal.quiz?._id).then((res) => {
-    //   const { _id: sessionId, quizId } = res
-    //   navigate(`/quizzes/${quizId}/session/${sessionId}`)
-    // })
-    navigate(`/quizzes/${startQuizModal.quiz?._id}`)
-
+    // 1. Nếu đang làm dở thì tiếp tục session đó
+    if (startQuizModal.quiz.sessions[0].status === 'doing') {
+      const sessionId = startQuizModal.quiz.sessions[0]._id
+      const quizId = startQuizModal.quiz._id
+      navigate(`/quizzes/${quizId}/session/${sessionId}`)
+      return
+    }
+    // 2. Nếu chưa làm thì tạo mới
+    startAttemptQuizAPI(startQuizModal.quiz?._id).then((res) => {
+      const { sessionId, quizId } = res
+      navigate(`/quizzes/${quizId}/session/${sessionId}`)
+    })
   }
 
 

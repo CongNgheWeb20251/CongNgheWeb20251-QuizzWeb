@@ -29,6 +29,7 @@ import QuestionCard from '~/components/StudentQuiz/QuestionCard'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchQuizzDetailsAPI, selectCurrentActiveQuizz } from '~/redux/activeQuizz/activeQuizzSlice'
 import { useParams } from 'react-router-dom'
+import { fetchSessionQuizAPI } from '~/apis'
 
 
 export default function StudentQuizPage() {
@@ -38,7 +39,7 @@ export default function StudentQuizPage() {
   const [timeRemaining, setTimeRemaining] = useState(900) // 15 minutes
   const quiz = useSelector(selectCurrentActiveQuizz)
   const dispatch = useDispatch()
-  const { id } = useParams()
+  const { quizId, sessionId } = useParams()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleNavigateToQuestion = (index) => {
@@ -53,142 +54,19 @@ export default function StudentQuizPage() {
   }
   useEffect(() => {
     setIsLoading(true)
-    dispatch(fetchQuizzDetailsAPI(id)).finally(() => setIsLoading(false))
-
-  }, [dispatch, id])
-
-  // Sample quiz data
-  // const quizData = {
-  //   title: 'JavaScript Fundamentals Quiz',
-  //   description: 'Test your knowledge of JavaScript basics',
-  //   totalQuestions: 10,
-  //   timeLimit: 15,
-  //   passingScore: 70
-  // }
-
-  // const questions = [
-  //   {
-  //     _id: 'q_8f21a9b2',
-  //     content: 'What is the output of: typeof null?',
-  //     type: 'single-choice',
-  //     options: [
-  //       { _id: 'o_c1a91f11', content: '"null"' },
-  //       { _id: 'o_94bc2a3f', content: '"object"' },
-  //       { _id: 'o_233fbb62', content: '"undefined"' },
-  //       { _id: 'o_d120ef7a', content: '"number"' }
-  //     ],
-  //     points: 10
-  //   },
-  //   {
-  //     _id: 'q_a92b1e73',
-  //     content: 'Which methods can be used to manipulate arrays? (Select all that apply)',
-  //     type: 'multiple',
-  //     options: [
-  //       { _id: 'o_51ab9e62', content: 'push()' },
-  //       { _id: 'o_b83cd271', content: 'pop()' },
-  //       { _id: 'o_149dbfee', content: 'shift()' },
-  //       { _id: 'o_92cc741a', content: 'unshift()' }
-  //     ],
-  //     points: 15
-  //   },
-  //   {
-  //     _id: 'q_5b21e9c0',
-  //     content: 'What does "DOM" stand for?',
-  //     type: 'single-choice',
-  //     options: [
-  //       { _id: 'o_34fda892', content: 'Document Object Model' },
-  //       { _id: 'o_56cb917c', content: 'Data Object Model' },
-  //       { _id: 'o_70bcf51a', content: 'Document Oriented Model' },
-  //       { _id: 'o_e1cf28b4', content: 'Digital Object Management' }
-  //     ],
-  //     points: 10
-  //   },
-  //   {
-  //     _id: 'q_7e3d0c15',
-  //     content: 'Which are valid ways to declare variables in JavaScript? (Select all that apply)',
-  //     type: 'multiple',
-  //     options: [
-  //       { _id: 'o_8ff1a634', content: 'var' },
-  //       { _id: 'o_41ab55e7', content: 'let' },
-  //       { _id: 'o_d0e3a17c', content: 'const' },
-  //       { _id: 'o_1cf97d20', content: 'variable' }
-  //     ],
-  //     points: 15
-  //   },
-  //   {
-  //     _id: 'q_8a4d991f',
-  //     content: 'What is the correct syntax for a for loop?',
-  //     type: 'single-choice',
-  //     options: [
-  //       { _id: 'o_72fe1d34', content: 'for (i = 0; i < 5)' },
-  //       { _id: 'o_5acb23d1', content: 'for (i = 0; i < 5; i++)' },
-  //       { _id: 'o_bcd8f612', content: 'for i = 0 to 5' },
-  //       { _id: 'o_4d2739aa', content: 'for (i <= 5; i++)' }
-  //     ],
-  //     points: 10
-  //   },
-  //   {
-  //     _id: 'q_f51a72bb',
-  //     content: 'Which company developed JavaScript?',
-  //     type: 'single-choice',
-  //     options: [
-  //       { _id: 'o_3fbac711', content: 'Microsoft' },
-  //       { _id: 'o_b238dd89', content: 'Netscape' },
-  //       { _id: 'o_914c2fa1', content: 'Oracle' },
-  //       { _id: 'o_c92bd7aa', content: 'Google' }
-  //     ],
-  //     points: 10
-  //   },
-  //   {
-  //     _id: 'q_9de21b56',
-  //     content: 'What is the result of: 2 + "2"?',
-  //     type: 'single-choice',
-  //     options: [
-  //       { _id: 'o_80ff1ab2', content: '4' },
-  //       { _id: 'o_14bd9c71', content: '"22"' },
-  //       { _id: 'o_6adf0e13', content: 'NaN' },
-  //       { _id: 'o_2dcb71af', content: 'undefined' }
-  //     ],
-  //     points: 10
-  //   },
-  //   {
-  //     _id: 'q_c0e781d2',
-  //     content: 'Which methods work with JSON? (Select all that apply)',
-  //     type: 'multiple',
-  //     options: [
-  //       { _id: 'o_1a2bfa01', content: 'JSON.parse()' },
-  //       { _id: 'o_b39ced1e', content: 'JSON.stringify()' },
-  //       { _id: 'o_e24afc81', content: 'JSON.convert()' },
-  //       { _id: 'o_77bc2a9f', content: 'JSON.toObject()' }
-  //     ],
-  //     points: 15
-  //   },
-  //   {
-  //     _id: 'q_4ce1bd88',
-  //     content: 'What is a closure in JavaScript?',
-  //     type: 'single-choice',
-  //     options: [
-  //       { _id: 'o_1aef92d7', content: 'A function with access to its outer scope' },
-  //       { _id: 'o_39fbab22', content: 'A way to close the browser' },
-  //       { _id: 'o_77da4cd1', content: 'A method to end a loop' },
-  //       { _id: 'o_0df12be4', content: 'A type of variable' }
-  //     ],
-  //     points: 10
-  //   },
-  //   {
-  //     _id: 'q_b812d4e1',
-  //     content: 'Which operator is used for strict equality?',
-  //     type: 'single-choice',
-  //     options: [
-  //       { _id: 'o_2af0bc52', content: '==' },
-  //       { _id: 'o_b11cf371', content: '===' },
-  //       { _id: 'o_51cb7aea', content: '=' },
-  //       { _id: 'o_93dd2472', content: '!=' }
-  //     ],
-  //     points: 10
-  //   }
-  // ]
-
+    const [quizPromise, sessionPromise] = [
+      dispatch(fetchQuizzDetailsAPI(quizId)),
+      fetchSessionQuizAPI(sessionId)
+    ]
+    Promise.all([quizPromise, sessionPromise]).then(([quizRes, sessionRes]) => {
+      const initialAnswers = {}
+      sessionRes.answers.forEach(answer => {
+        initialAnswers[answer.questionId] = answer.selectedAnswerIds
+      })
+      setAnswers(initialAnswers)
+      setIsLoading(false)
+    }).catch(() => setIsLoading(false))
+  }, [dispatch, quizId, sessionId])
 
   // Timer countdown
   useEffect(() => {
@@ -415,7 +293,8 @@ export default function StudentQuizPage() {
                 alignItems: 'center',
                 marginBottom: '1.5rem',
                 flexWrap: 'wrap',
-                gap: '1rem'
+                gap: '1rem',
+                marginTop: { xs: '1rem', lg: 0 }
               }}
             >
               {/* <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
