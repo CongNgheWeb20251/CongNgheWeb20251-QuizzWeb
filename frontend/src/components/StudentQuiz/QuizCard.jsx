@@ -92,6 +92,17 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
     return `${hours}h ${mins}m`
   }
 
+  function formatTimeBySeconds(seconds) {
+    if (seconds < 60) return `${seconds}s`
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(minutes / 60)
+    const remMinutes = minutes % 60
+    if (hours > 0) {
+      return `${hours}h ${remMinutes}m`
+    }
+    return `${remMinutes}m ${seconds % 60}s`
+  }
+
   return (
     <article
       className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all timeLimit-300 flex flex-col h-full animate-fade-in"
@@ -201,7 +212,7 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
             { firstSession?.status === 'completed' &&
               <div className="flex items-center gap-1.5">
                 <Timer className="w-4 h-4" />
-                <span>{formatTime(firstSession.timeSpent)}</span>
+                <span>{formatTimeBySeconds(firstSession.timeSpent)}</span>
               </div>
             }
             {quiz.timeLimit && (

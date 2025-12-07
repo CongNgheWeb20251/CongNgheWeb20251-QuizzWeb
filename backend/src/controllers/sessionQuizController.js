@@ -22,7 +22,18 @@ const submitAnswers = async (req, res, next) => {
   }
 }
 
+const submitQuizSession = async (req, res, next) => {
+  try {
+    const { sessionId } = req.params
+    const result = await sessionQuizService.calculateQuizScore(sessionId)
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const sessionQuizController = {
   getQuizSessionDetails,
-  submitAnswers
+  submitAnswers,
+  submitQuizSession
 }

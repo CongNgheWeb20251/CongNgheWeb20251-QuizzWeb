@@ -242,6 +242,11 @@ export const saveQuestionAnswerAPI = async (sessionId, data) => {
   return res.data
 }
 
+export const submitQuizSessionAPI = async (sessionId) => {
+  const res = await authorizedAxiosInstance.post(`/v1/student/sessions/${sessionId}/submit`)
+  return res.data
+}
+
 //-------------------------------------------------------
 
 

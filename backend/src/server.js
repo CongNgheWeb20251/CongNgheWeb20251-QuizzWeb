@@ -13,6 +13,7 @@ import socketIo from 'socket.io'
 import http from 'http'
 import './providers/passportProvider.js'
 import { quizAttemptSocket } from './sockets/quizAttemptSocket'
+import { joinAttemptSocket } from './sockets/joinAttemptSocket'
 
 const START_SERVER = () => {
   const app = express()
@@ -75,16 +76,12 @@ const START_SERVER = () => {
   })
   // Khởi tạo socket trong quizAttemptSocket
   quizAttemptSocket.initSocketIO(io)
-
+  const activeSessions = new Map()
   // Lắng nghe sự kiện kết nối từ client
   io.on('connection', (socket) => {
     // kết nối socket
     console.log('User connected')
-
-  socket.on('joinUser', userId => {
-    socket.join(String(userId))
-    console.log('User joined room:', userId)
-  })
+    joinAttemptSocket(socket, activeSessions)
   })
 
   // Lắng nghe sự kiện kết nối socket
