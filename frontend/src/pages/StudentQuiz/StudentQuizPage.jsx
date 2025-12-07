@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Box from '@mui/material/Box'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
@@ -14,6 +14,7 @@ import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import LinearProgress from '@mui/material/LinearProgress'
 import Checkbox from '@mui/material/Checkbox'
+import PageLoader from '~/components/Loading/PageLoader'
 
 import {
   ChevronLeft,
@@ -45,7 +46,7 @@ export default function StudentQuizPage() {
   const { quizId, sessionId } = useParams()
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const socketRef = useRef(socketIoInstance)
+  const timerIntervalRef = useRef(null)
 
 
   const handleNavigateToQuestion = (index) => {
@@ -60,7 +61,7 @@ export default function StudentQuizPage() {
   }
   useEffect(() => {
     setIsLoading(true)
-    const socket = socketRef.current
+    const socket = socketIoInstance
 
     const [quizPromise, sessionPromise] = [
       dispatch(fetchQuizzDetailsAPI(quizId)),
@@ -78,36 +79,83 @@ export default function StudentQuizPage() {
       socket.emit('join-session', sessionId)
     }).catch(() => setIsLoading(false))
 
-    // lắng nghe sự kiện cập nhật thời gian từ server
+    // Server gửi thời gian ban đầu khi join session (event: 'timeLeft')
     socket.on('timeLeft', ({ timeLeft }) => {
+      // Set thời gian ban đầu từ server
       setTimeRemaining(Math.max(0, Math.floor(timeLeft / 1000)))
+
+      // Tạo timer client tự giảm dần mỗi giây
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current)
+      }
+
+      timerIntervalRef.current = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 0) {
+            clearInterval(timerIntervalRef.current)
+            timerIntervalRef.current = null
+
+            // Submit quiz trước khi navigate
+            socket.emit('leave-session', sessionId)
+            socket.off('timeLeft')
+            socket.off('timeout')
+            socket.off('session-error')
+            socket.off('session-ended')
+
+            submitQuizSessionAPI(sessionId)
+              .then(() => {
+                toast.info('Time is up! Your quiz has been submitted.')
+                navigate('/dashboard')
+              })
+              .catch(() => {
+                toast.error('Failed to submit quiz.')
+                navigate('/dashboard')
+              })
+
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
     })
 
-    // lắng nghe sự kiện timeout từ server
+    // Lắng nghe sự kiện server báo timeout (backup nếu client không kịp submit)
     socket.on('timeout', () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current)
+      }
       toast.info('Time is up! The quiz will be submitted automatically.')
-      // Nếu teacher cho phép xem kết quả luôn thì chuyển sang trang kết quả......
       navigate('/dashboard')
     })
 
-    // lắng nghe sự kiện lỗi phiên làm bài từ server
+    // Lắng nghe sự kiện lỗi phiên làm bài từ server
     socket.on('session-error', ({ message }) => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current)
+      }
       toast.error(message || 'An error occurred with the quiz session.')
       navigate('/dashboard')
     })
 
-    // lắng nghe sự kiện kết thúc phiên làm bài từ server
+    // Lắng nghe sự kiện kết thúc phiên làm bài từ server
     socket.on('session-ended', ({ message }) => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current)
+      }
       toast.info(message || 'The quiz session has ended.')
       navigate('/dashboard')
     })
 
     // Cleanup on unmount
     return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current)
+      }
       socket.off('timeLeft')
       socket.off('timeout')
       socket.off('session-error')
       socket.off('session-ended')
+      socket.emit('leave-session', sessionId)
     }
   }, [dispatch, quizId, sessionId, navigate])
 
@@ -124,19 +172,30 @@ export default function StudentQuizPage() {
     return 'unanswered'
   }
 
-  const submitQuiz = () => {
+  const submitQuiz = useCallback(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current)
+    }
+
+    // Ngừng socket session
+    socketIoInstance.emit('leave-session', sessionId)
+    socketIoInstance.off('timeLeft')
+    socketIoInstance.off('timeout')
+    socketIoInstance.off('session-error')
+    socketIoInstance.off('session-ended')
+
     submitQuizSessionAPI(sessionId).then(() => {
       toast.success('Quiz submitted successfully!')
       navigate('/dashboard')
     }).catch(() => {
       toast.error('Failed to submit quiz. Please try again.')
     })
-  }
+  }, [sessionId, navigate])
 
   const answeredCount = Object.keys(answers).length
   const progress = (answeredCount / quiz?.questions.length) * 100
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading) return <PageLoader fullScreen={true} />
 
   return (
     <Box
