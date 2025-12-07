@@ -5,7 +5,6 @@ import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
 import { DEFAULT_PAGE, DEFAULT_ITEMS_PER_PAGE, DEFAULT_FILTER } from '~/utils/constants'
 import { sessionQuizModel } from '~/models/sessionQuizModel'
-import { quizAttemptSocket } from '~/sockets/quizAttemptSocket'
 
 const createNew = async ({ userId, data }) => {
   try {
@@ -127,14 +126,12 @@ const startAttemptQuiz = async (userId, quizId) => {
     const newSession = {
       quizId,
       userId,
-      startTime: now, // thời gian bắt đầu hiện tại
-      endTime: now + quiz.timeLimit * 60 * 1000 // thời gian kết thúc dự kiến
+      startTime: now, // thời gian bắt đầu hiện tại (milliseconds)
+      endTime: now + quiz.timeLimit * 60 * 1000 // thời gian kết thúc dự kiến (milliseconds)
     }
     // Tạo session quiz trong DB
     const createdSession = await sessionQuizModel.createNew(newSession)
     const session = await sessionQuizModel.findOneById(createdSession.insertedId.toString())
-    // Lên lịch timeout cho session quiz
-    quizAttemptSocket.scheduleQuizTimeout(session._id.toString(), session.endTime, session.userId)
 
     return {
       sessionId: session._id.toString(),

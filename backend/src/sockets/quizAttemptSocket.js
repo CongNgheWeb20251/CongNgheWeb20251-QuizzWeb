@@ -22,7 +22,7 @@ function scheduleQuizTimeout(sessionId, endTime) {
     const session = await sessionQuizModel.findOneById(sessionId)
     if (!session) return
 
-    if (session.status !== 'in_progress') return
+    if (session.status !== 'doing') return
 
     // cập nhật session sang completed
     await sessionQuizModel.update(sessionId, {

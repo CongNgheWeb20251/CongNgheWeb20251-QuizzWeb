@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Box from '@mui/material/Box'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
@@ -7,6 +7,7 @@ import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Container from '@mui/material/Container'
+import { socketIoInstance } from '~/socketClient'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import ToggleButton from '@mui/material/ToggleButton'
@@ -29,18 +30,23 @@ import QuestionCard from '~/components/StudentQuiz/QuestionCard'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchQuizzDetailsAPI, selectCurrentActiveQuizz } from '~/redux/activeQuizz/activeQuizzSlice'
 import { useParams } from 'react-router-dom'
-import { fetchSessionQuizAPI } from '~/apis'
+import { fetchSessionQuizAPI, submitQuizSessionAPI } from '~/apis'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
 
 export default function StudentQuizPage() {
   const [viewMode, setViewMode] = useState('single')
   const [answers, setAnswers] = useState({})
   const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [timeRemaining, setTimeRemaining] = useState(900) // 15 minutes
+  const [timeRemaining, setTimeRemaining] = useState(0)
   const quiz = useSelector(selectCurrentActiveQuizz)
   const dispatch = useDispatch()
   const { quizId, sessionId } = useParams()
   const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
+  const socketRef = useRef(socketIoInstance)
+
 
   const handleNavigateToQuestion = (index) => {
     setCurrentQuestion(index)
@@ -54,34 +60,56 @@ export default function StudentQuizPage() {
   }
   useEffect(() => {
     setIsLoading(true)
+    const socket = socketRef.current
+
     const [quizPromise, sessionPromise] = [
       dispatch(fetchQuizzDetailsAPI(quizId)),
       fetchSessionQuizAPI(sessionId)
     ]
-    Promise.all([quizPromise, sessionPromise]).then(([quizRes, sessionRes]) => {
+    Promise.all([quizPromise, sessionPromise]).then(([, sessionRes]) => {
       const initialAnswers = {}
       sessionRes.answers.forEach(answer => {
         initialAnswers[answer.questionId] = answer.selectedAnswerIds
       })
       setAnswers(initialAnswers)
       setIsLoading(false)
+
+      // Sau khi có session làm bài thì broadcast lên server để tham gia phiên làm bài
+      socket.emit('join-session', sessionId)
     }).catch(() => setIsLoading(false))
-  }, [dispatch, quizId, sessionId])
 
-  // Timer countdown
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 0) {
-          clearInterval(timer)
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
+    // lắng nghe sự kiện cập nhật thời gian từ server
+    socket.on('timeLeft', ({ timeLeft }) => {
+      setTimeRemaining(Math.max(0, Math.floor(timeLeft / 1000)))
+    })
 
-    return () => clearInterval(timer)
-  }, [])
+    // lắng nghe sự kiện timeout từ server
+    socket.on('timeout', () => {
+      toast.info('Time is up! The quiz will be submitted automatically.')
+      // Nếu teacher cho phép xem kết quả luôn thì chuyển sang trang kết quả......
+      navigate('/dashboard')
+    })
+
+    // lắng nghe sự kiện lỗi phiên làm bài từ server
+    socket.on('session-error', ({ message }) => {
+      toast.error(message || 'An error occurred with the quiz session.')
+      navigate('/dashboard')
+    })
+
+    // lắng nghe sự kiện kết thúc phiên làm bài từ server
+    socket.on('session-ended', ({ message }) => {
+      toast.info(message || 'The quiz session has ended.')
+      navigate('/dashboard')
+    })
+
+    // Cleanup on unmount
+    return () => {
+      socket.off('timeLeft')
+      socket.off('timeout')
+      socket.off('session-error')
+      socket.off('session-ended')
+    }
+  }, [dispatch, quizId, sessionId, navigate])
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
@@ -94,6 +122,15 @@ export default function StudentQuizPage() {
     const questionId = quiz.questions[questionIndex]._id
     if (answers[questionId]) return 'answered'
     return 'unanswered'
+  }
+
+  const submitQuiz = () => {
+    submitQuizSessionAPI(sessionId).then(() => {
+      toast.success('Quiz submitted successfully!')
+      navigate('/dashboard')
+    }).catch(() => {
+      toast.error('Failed to submit quiz. Please try again.')
+    })
   }
 
   const answeredCount = Object.keys(answers).length
@@ -389,6 +426,7 @@ export default function StudentQuizPage() {
                           backgroundColor: '#059669'
                         }
                       }}
+                      onClick={submitQuiz}
                     >
                       Submit Quiz
                     </Button>
@@ -436,6 +474,7 @@ export default function StudentQuizPage() {
                         backgroundColor: '#059669'
                       }
                     }}
+                    onClick={submitQuiz}
                   >
                     Submit Quiz
                   </Button>

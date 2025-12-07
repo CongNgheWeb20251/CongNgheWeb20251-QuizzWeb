@@ -12,6 +12,7 @@ Router.get('/quizzes', quizController.getQuizzesByStudent)
 
 Router.get('/sessions/:sessionId', sessionQuizController.getQuizSessionDetails)
 Router.put('/sessions/:sessionId/answers', sessionQuizController.submitAnswers)
+Router.post('/sessions/:sessionId/submit', sessionQuizController.submitQuizSession)
 
 Router.post('/quizzes/:quizId/sessions', quizController.startAttemptQuiz)
 

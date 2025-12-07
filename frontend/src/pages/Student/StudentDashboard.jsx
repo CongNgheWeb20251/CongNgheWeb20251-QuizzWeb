@@ -74,7 +74,7 @@ export default function StudentDashboard() {
     // Handle quiz start logic here
     handleCloseModal()
     // 1. Nếu đang làm dở thì tiếp tục session đó
-    if (startQuizModal.quiz.sessions[0].status === 'doing') {
+    if (startQuizModal?.quiz?.sessions[0]?.status === 'doing') {
       const sessionId = startQuizModal.quiz.sessions[0]._id
       const quizId = startQuizModal.quiz._id
       navigate(`/quizzes/${quizId}/session/${sessionId}`)

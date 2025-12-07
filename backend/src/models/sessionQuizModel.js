@@ -3,6 +3,8 @@ import { DB_GET } from '~/config/mongodb'
 import { ObjectId } from 'mongodb'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 import { userAnswerModel } from './userAnswerModel'
+import { answerOptionModel } from './answerModel'
+import { questionModel } from './questionModel'
 
 const SESSION_QUIZ_COLLECTION_NAME = 'sessionQuizzes'
 const SESSION_QUIZ_COLLECTION_SCHEMA = Joi.object({
@@ -10,10 +12,10 @@ const SESSION_QUIZ_COLLECTION_SCHEMA = Joi.object({
   quizId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
 
   // Thời gian
-  timeSpent: Joi.number(), // tổng thời gian làm bài (giây)
-  startTime: Joi.date().timestamp('javascript'),
+  timeSpent: Joi.number(), // tính theo giây
+  startTime: Joi.number(),
   submitTime: Joi.date().timestamp('javascript'),
-  endTime: Joi.date().timestamp('javascript'),
+  endTime: Joi.number(),
 
   // Điểm số
   score: Joi.number(), // điểm đạt được
@@ -162,6 +164,109 @@ const getQuizSessionDetails = async (sessionId) => {
   }
 }
 
+const calculateQuizScore = async (sessionId) => {
+  try {
+    // lấy cả thông tin các câu hỏi đã làm trong session
+    /*
+      {
+        "sessionId": "abc",
+        "userId": "...",
+        "quizId": "...",
+        "startTime": 171000000,
+        "endTime": 171003600,
+        "status": "doing",
+        "answers": [
+          {
+            "questionId": "q1",
+            "selectedAnswerIds": ["optA"]
+          },
+          {
+            "questionId": "q2",
+            "selectedAnswerIds": []
+          }
+        ],
+        "trueOptions": [
+          {
+            "_id": "optA",
+            "questionId": "q1",
+            "isCorrect": true
+          },
+        ],
+        "questions": [
+          {
+            "_id": "q1",
+            "points": 10
+          },
+          {
+            "_id": "q2",
+            "points": 20
+          }
+        ]
+      }
+    */
+    const session = await DB_GET().collection(SESSION_QUIZ_COLLECTION_NAME).aggregate([
+      { $match: { _id: new ObjectId(sessionId) } },
+      {
+        $lookup: {
+          from: userAnswerModel.USER_ANSWER_COLLECTION_NAME,
+          localField: '_id',
+          foreignField: 'sessionId',
+          as: 'answers',
+          pipeline: [
+            {
+              $project: {
+                _id: 0,
+                questionId: 1,
+                selectedAnswerIds: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $lookup: {
+          from: answerOptionModel.ANSWER_OPTION_COLLECTION_NAME,
+          localField: 'answers.questionId',
+          foreignField: 'questionId',
+          as: 'trueOptions',
+          pipeline: [
+            {
+              $match: { isCorrect: true }
+            },
+            {
+              $project: {
+                _id: 1,
+                questionId: 1,
+                isCorrect: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $lookup: {
+          from: questionModel.QUESTION_COLLECTION_NAME,
+          localField: 'answers.questionId',
+          foreignField: '_id',
+          as: 'questions',
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                points: 1
+              }
+            }
+          ]
+        }
+      }
+    ]).toArray()
+    if (!session || session.length === 0) return null
+    return session[0]
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const sessionQuizModel = {
   SESSION_QUIZ_COLLECTION_NAME,
   SESSION_QUIZ_COLLECTION_SCHEMA,
@@ -171,6 +276,7 @@ export const sessionQuizModel = {
   findByQuizId,
   findByUserAndQuiz,
   update,
-  getQuizSessionDetails
+  getQuizSessionDetails,
+  calculateQuizScore
 
 }
