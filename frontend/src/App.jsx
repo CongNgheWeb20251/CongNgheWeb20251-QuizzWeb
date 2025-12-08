@@ -89,9 +89,9 @@ function App() {
         <Route element={<RoleRoute user={currUser} requiredPermission={permissions.VIEW_STUDENT_DASHBOARD} />}>
           <Route path="/dashboard" element={<StudentDashboard />} />
           <Route path="/quizzes/:quizId/session/:sessionId" element={<StudentQuizPage />} />
-          <Route path="/quizzes/:id/result" element={<QuizResult />} />
-        </Route>``
-``
+          <Route path="/quizzes/:quizId/session/:sessionId/result" element={<QuizResult />} />
+        </Route>
+
         <Route element={<RoleRoute user={currUser} requiredPermission={permissions.VIEW_SETTINGS} />}>
           <Route path="/settings" element={<Settings />} />
         </Route>

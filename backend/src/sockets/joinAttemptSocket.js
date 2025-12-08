@@ -12,7 +12,7 @@ export const joinAttemptSocket = (socket, activeSessions) => {
     }
 
     // Kiểm tra nếu session đã kết thúc
-    if (session.status === 'completed' || session.status === 'submitted') {
+    if (session.status === 'completed') {
       socket.emit('session-ended', { message: 'This session has already ended' })
       return
     }

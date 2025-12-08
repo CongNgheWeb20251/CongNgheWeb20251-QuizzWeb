@@ -1,4 +1,5 @@
 /* eslint-disable no-useless-catch */
+import { cloneDeep } from 'lodash'
 import { sessionQuizModel } from '~/models/sessionQuizModel'
 import { userAnswerModel } from '~/models/userAnswerModel'
 
@@ -111,8 +112,34 @@ const calculateQuizScore = async (sessionId) => {
   }
 }
 
+const getQuizSessionResult = async (sessionId) => {
+  try {
+    const result = await sessionQuizModel.getQuizSessionResult(sessionId)
+    const session = cloneDeep(result)
+    session.questions.forEach(question => {
+      question.options = session.options.filter(opt => opt.questionId.toString() === question._id.toString())
+      // lấy ra mảng đáp án đúng của câu hỏi này
+      const correctOptions = session.options.filter(opt => opt.questionId.toString() === question._id.toString() && opt.isCorrect)
+      question.correctAnswerIds = correctOptions.map(opt => opt._id.toString())
+      // Lấy ra đáp án user đã chọn
+      const userAnswer = session.answers.filter(ans => ans.questionId.toString() === question._id.toString())
+      if (userAnswer.length > 0) {
+        question.userSelectedAnswerIds = userAnswer[0].selectedAnswerIds.map(id => id.toString())
+      } else {
+        question.userSelectedAnswerIds = []
+      }
+    })
+    delete session.options
+    delete session.answers
+    return session
+  } catch (error) {
+    throw error
+  }
+}
+
 export const sessionQuizService = {
   getQuizSessionDetails,
   submitAnswers,
-  calculateQuizScore
+  calculateQuizScore,
+  getQuizSessionResult
 }

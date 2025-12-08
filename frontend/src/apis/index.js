@@ -247,6 +247,11 @@ export const submitQuizSessionAPI = async (sessionId) => {
   return res.data
 }
 
-//-------------------------------------------------------
+export const getQuizResultsAPI = async (sessionId) => {
+  const res = await authorizedAxiosInstance.get(`/v1/student/sessions/${sessionId}/result`)
+  return res.data
+}
+
+//-----------------------------------------------------------
 
 

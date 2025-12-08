@@ -35,7 +35,7 @@ export default function PageLoader({
 
   return (
     <div className={wrapper} aria-busy="true" aria-live="polite">
-      <div className={`${containerBase} ${className}`}> 
+      <div className={`${containerBase} ${className}`}>
         {variant === 'spinner' && (
           <>
             <div className={spinnerClass} role="status" aria-hidden="true" />

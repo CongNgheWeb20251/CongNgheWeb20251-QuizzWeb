@@ -21,6 +21,7 @@ import {
   RefreshCw,
   UserCircle
 } from 'lucide-react'
+import PageLoader from '../Loading/PageLoader'
 
 const AuthCallBack = () => {
   const dispatch = useDispatch()
@@ -54,7 +55,7 @@ const AuthCallBack = () => {
         }
       } catch (err) {
         if (mounted) {
-          setError(err?.message ?? 'Đã có lỗi khi đăng nhập')
+          setError(err?.message ?? 'An error occurred during login')
         }
       } finally {
         if (mounted) {
@@ -89,43 +90,7 @@ const AuthCallBack = () => {
   // Loading state
   if (loading) {
     return (
-      <Box sx= {{ backgroundColor: '#dfe4ea', minHeight: '100vh', py: 6 }}>
-        <Container maxWidth="sm">
-          <Box
-            sx={{
-              minHeight: '60vh',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Fade in={loading} timeout={300}>
-              <Card
-                elevation={3}
-                sx={{
-                  width: '100%',
-                  background: '#17c0eb',
-                  color: 'white'
-                }}
-              >
-                <CardContent sx={{ py: 6, textAlign: 'center' }}>
-                  <CircularProgress
-                    size={60}
-                    sx={{ color: 'white', mb: 3 }}
-                    thickness={4}
-                  />
-                  <Typography variant="h5" fontWeight={600}>
-                    Đang xác thực...
-                  </Typography>
-                  <Typography variant="body2" sx={{ mt: 1, opacity: 0.9, mb: 4 }}>
-                    Vui lòng đợi trong giây lát
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Fade>
-          </Box>
-        </Container>
-      </Box>
+      <PageLoader fullScreen message="Signing you in..." />
     )
   }
 
@@ -170,7 +135,7 @@ const AuthCallBack = () => {
                     onClick={() => window.location.reload()}
                     size="large"
                   >
-                  Thử lại
+                  Retry
                   </Button>
                 </CardContent>
               </Card>
@@ -212,7 +177,7 @@ const AuthCallBack = () => {
                   <UserCircle size={40} color="#ed6c02" />
                 </Box>
                 <Typography variant="h6" gutterBottom>
-                Không tìm thấy thông tin người dùng
+                User not found
                 </Typography>
                 <Button
                   variant="contained"
@@ -222,7 +187,7 @@ const AuthCallBack = () => {
                   sx={{ mt: 2 }}
                   size="large"
                 >
-                Thử lại
+                Retry
                 </Button>
               </CardContent>
             </Card>
@@ -274,10 +239,10 @@ const AuthCallBack = () => {
                       <UserCircle size={50} color="#1976d2" />
                     </Box>
                     <Typography variant="h4" fontWeight={700} gutterBottom>
-                    Chào mừng!
+                    Welcome!
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                    Vui lòng chọn vai trò của bạn để tiếp tục
+                    Please select your role to continue
                     </Typography>
                   </Box>
 
@@ -308,7 +273,7 @@ const AuthCallBack = () => {
                         transition: 'all 0.3s ease'
                       }}
                     >
-                      {updating ? 'Đang cập nhật...' : 'Học sinh'}
+                      {updating ? 'Updating...' : 'Student'}
                     </Button>
 
                     <Button
@@ -337,7 +302,7 @@ const AuthCallBack = () => {
                         transition: 'all 0.3s ease'
                       }}
                     >
-                      {updating ? 'Đang cập nhật...' : 'Giáo viên'}
+                      {updating ? 'Updating...' : 'Teacher'}
                     </Button>
                   </Stack>
 

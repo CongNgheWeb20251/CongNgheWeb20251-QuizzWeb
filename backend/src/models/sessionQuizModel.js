@@ -5,6 +5,7 @@ import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 import { userAnswerModel } from './userAnswerModel'
 import { answerOptionModel } from './answerModel'
 import { questionModel } from './questionModel'
+import { quizModel } from './quizModel'
 
 const SESSION_QUIZ_COLLECTION_NAME = 'sessionQuizzes'
 const SESSION_QUIZ_COLLECTION_SCHEMA = Joi.object({
@@ -267,6 +268,112 @@ const calculateQuizScore = async (sessionId) => {
   }
 }
 
+const getQuizSessionResult = async (sessionId) => {
+  try {
+    const session = await DB_GET().collection(SESSION_QUIZ_COLLECTION_NAME).aggregate([
+      { $match: { _id: new ObjectId(sessionId) } },
+      {
+        $lookup: {
+          from: userAnswerModel.USER_ANSWER_COLLECTION_NAME,
+          localField: '_id',
+          foreignField: 'sessionId',
+          as: 'answers',
+          pipeline: [
+            {
+              $project: {
+                _id: 0,
+                questionId: 1,
+                selectedAnswerIds: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $lookup: {
+          from: quizModel.QUIZ_COLLECTION_NAME,
+          localField: 'quizId',
+          foreignField: '_id',
+          as: 'quizInfo',
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                title: 1,
+                description: 1,
+                passingScore: 1,
+                timeLimit: 1,
+                allowRetake: 1,
+                showResults: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $unwind: '$quizInfo'
+      },
+      {
+        $lookup: {
+          from: questionModel.QUESTION_COLLECTION_NAME,
+          // có thể dùng let và pipeline để lọc dữ liệu nâng cao hơn nếu localField ngừng sp pipeline
+          let: { quizId: '$quizId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$quizId', '$$quizId']
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                points: 1,
+                content: 1,
+                type: 1
+              }
+            }
+          ],
+          as: 'questions'
+        }
+      },
+      {
+        $lookup: {
+          from: answerOptionModel.ANSWER_OPTION_COLLECTION_NAME,
+          localField: 'quizId',
+          foreignField: 'quizId',
+          as: 'options',
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                questionId: 1,
+                isCorrect: 1,
+                content: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $project: {
+          createdAt: 0,
+          startTime: 0,
+          submitTime: 0,
+          endTime: 0,
+          updatedAt: 0,
+          userId: 0
+        }
+      }
+    ]).toArray()
+    if (!session || session.length === 0) return null
+    return session[0]
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const sessionQuizModel = {
   SESSION_QUIZ_COLLECTION_NAME,
   SESSION_QUIZ_COLLECTION_SCHEMA,
@@ -277,6 +384,7 @@ export const sessionQuizModel = {
   findByUserAndQuiz,
   update,
   getQuizSessionDetails,
-  calculateQuizScore
+  calculateQuizScore,
+  getQuizSessionResult
 
 }
