@@ -1,5 +1,7 @@
 /* eslint-disable no-useless-catch */
 import { quizModel } from '~/models/quizModel'
+import { questionModel } from '~/models/questionModel'
+import { answerOptionModel } from '~/models/answerModel'
 import { cloneDeep } from 'lodash'
 import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
@@ -146,6 +148,51 @@ const startAttemptQuiz = async (userId, quizId) => {
   }
 }
 
+const deleteQuiz = async (quizId) => {
+  try {
+    const quiz = await quizModel.findOneById(quizId)
+    if (!quiz) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found')
+    }
+
+    // Xóa tất cả questions và answers của quiz
+    const questionIds = quiz.questionOrderIds || []
+    for (const questionId of questionIds) {
+      await answerOptionModel.deleteByQuestionId(questionId)
+      await questionModel.deleteOne(questionId)
+    }
+
+    // Xóa quiz
+    await quizModel.deleteOne(quizId)
+    return { message: 'Quiz deleted successfully' }
+  } catch (error) {
+    throw error
+  }
+}
+
+const publishQuiz = async (quizId) => {
+  try {
+    const quiz = await quizModel.findOneById(quizId)
+    if (!quiz) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found')
+    }
+
+    if (quiz.status === 'published') {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Quiz is already published')
+    }
+
+    // Kiểm tra quiz có questions không
+    if (!quiz.questionOrderIds || quiz.questionOrderIds.length === 0) {
+      throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, 'Quiz must have at least 1 question to publish')
+    }
+
+    const publishedQuiz = await quizModel.update(quizId, { status: 'published' })
+    return publishedQuiz
+  } catch (error) {
+    throw error
+  }
+}
+
 export const quizService = {
   createNew,
   getDetails,
@@ -153,5 +200,7 @@ export const quizService = {
   updateInfo,
   getQuizzesStats,
   getQuizzesByStudent,
-  startAttemptQuiz
+  startAttemptQuiz,
+  deleteQuiz,
+  publishQuiz
 }
