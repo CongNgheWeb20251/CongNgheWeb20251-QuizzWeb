@@ -31,9 +31,19 @@ const submitQuizSession = async (req, res, next) => {
     next(error)
   }
 }
+const getQuizSessionResult = async (req, res, next) => {
+  try {
+    const { sessionId } = req.params
+    const result = await sessionQuizService.getQuizSessionResult(sessionId)
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
 
 export const sessionQuizController = {
   getQuizSessionDetails,
   submitAnswers,
-  submitQuizSession
+  submitQuizSession,
+  getQuizSessionResult
 }

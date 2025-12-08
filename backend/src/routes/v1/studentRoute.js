@@ -5,6 +5,7 @@ import { sessionQuizController } from '~/controllers/sessionQuizController'
 
 const Router = express.Router()
 
+Router.get('/sessions/:sessionId/result', sessionQuizController.getQuizSessionResult)
 // All dashboard routes require authentication
 Router.use(authMiddleware.isAuthorized)
 
