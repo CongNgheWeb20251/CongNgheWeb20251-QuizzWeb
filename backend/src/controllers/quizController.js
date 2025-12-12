@@ -85,6 +85,25 @@ const startAttemptQuiz = async (req, res, next) => {
   }
 }
 
+const deleteQuiz = async (req, res, next) => {
+  try {
+    const quizId = req.params.id
+    const result = await quizService.deleteQuiz(quizId)
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const publishQuiz = async (req, res, next) => {
+  try {
+    const quizId = req.params.id
+    const publishedQuiz = await quizService.publishQuiz(quizId)
+    res.status(StatusCodes.OK).json(publishedQuiz)
+  } catch (error) {
+    next(error)
+  }
+}
 
 export const quizController = {
   createNew,
@@ -93,5 +112,7 @@ export const quizController = {
   updateInfo,
   getQuizzesStats,
   getQuizzesByStudent,
-  startAttemptQuiz
+  startAttemptQuiz,
+  deleteQuiz,
+  publishQuiz
 }
