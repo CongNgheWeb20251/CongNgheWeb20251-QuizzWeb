@@ -29,4 +29,8 @@ Router.route('/:id')
 Router.route('/:quizId/questions/batch')
   .post(questionController.updateQuestionsInBatch)
 
+Router.route('/:quizId/questions/:questionId')
+  .put(questionController.updateQuestion)
+  .delete(questionController.deleteQuestion)
+
 export const quizRoute = Router
