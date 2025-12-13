@@ -62,6 +62,9 @@ const calculateQuizScore = async (sessionId) => {
     // Tính điểm
     let totalScore = 0
 
+    // Tính số câu trả lời đúng
+    let correctAnswersCount = 0
+
     sessionData.answers.forEach(answer => {
       const questionId = answer.questionId.toString()
       const question = questionsMap.get(questionId)
@@ -82,6 +85,7 @@ const calculateQuizScore = async (sessionId) => {
 
       if (isCorrect) {
         totalScore += question.points
+        correctAnswersCount += 1
       }
     })
 
@@ -96,6 +100,8 @@ const calculateQuizScore = async (sessionId) => {
       submitTime,
       score: totalScore,
       totalPoints,
+      correctAnswers: correctAnswersCount,
+      totalQuestions: sessionData.questions.length,
       timeSpent: Math.floor(timeSpent / 1000), // chuyển sang giây
       status: 'completed'
     })

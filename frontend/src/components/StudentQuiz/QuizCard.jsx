@@ -19,6 +19,7 @@ import {
   TrendingUp,
   Award
 } from 'lucide-react'
+import { format } from 'date-fns'
 
 import { useNavigate } from 'react-router-dom'
 
@@ -43,7 +44,7 @@ const subjectColors= {
 const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
   const [isHovered, setIsHovered] = useState(false)
   const isExpired = quiz.endTime && new Date(quiz.endTime) < new Date()
-  const firstSession = quiz.sessions?.[0]
+  const lastSession = quiz.lastSession
   const badge = getStatusBadge()
   const navigate = useNavigate()
 
@@ -71,8 +72,8 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
       }
     }
     // 1) Đã có session → completed hoặc in-progress
-    if (firstSession?.status === 'completed') return badges.completed
-    if (firstSession?.status === 'doing') return badges['doing']
+    if (lastSession?.status === 'completed') return badges.completed
+    if (lastSession?.status === 'doing') return badges['doing']
 
     // 2) Chưa có session nào → missed hoặc available
     if (quiz.sessionsCount === 0) {
@@ -83,9 +84,8 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
     return null
   }
 
-  function formatDate(dateString) {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('vi-VN', { month: 'long', day: 'numeric', year: 'numeric' })
+  function formatDate(timestamp) {
+    return format(new Date(timestamp), 'MMM d, yyyy')
   }
 
   function formatTime(minutes) {
@@ -106,15 +106,9 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
     return `${remMinutes}m ${seconds % 60}s`
   }
 
-  const handleNavigateToResults = (quiz) => {
-    // Nếu không cho retake thì điều hướng đến trang kết quả /quizzes/:quizId/session/:sessionId/result
-    if (!quiz.allowRetake) {
-      const sessionId = quiz.sessions[0]?._id
-      navigate(`/quizzes/${quiz._id}/session/${sessionId}/result`)
-      return
-    }
+  const handleNavigateToResults = (quizId) => {
     // Nếu cho retake thì điều hướng đến trang danh sách lần làm quiz /quizzes/:quizId/attempts
-    navigate(`/quizzes/${quiz._id}/attempts`)
+    navigate(`/quizzes/${quizId}/attempts`)
   }
 
   return (
@@ -169,7 +163,7 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
         <div className="flex items-center gap-2 mb-4">
           <Calendar className="w-4 h-4 text-gray-400" />
           <span className="text-sm text-gray-600">
-            {formatDate(quiz.endTime)}
+            {formatDate(quiz.startTime)} - {formatDate(quiz.endTime)}
           </span>
         </div>
 
@@ -190,10 +184,10 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
         {/* Time Section */}
         {quiz.sessionsCount > 0 && (
           <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-            { firstSession?.status === 'completed' &&
+            { lastSession?.status === 'completed' &&
               <div className="flex items-center gap-1.5">
                 <Timer className="w-4 h-4" />
-                <span>{formatTimeBySeconds(firstSession.timeSpent)}</span>
+                <span>{formatTimeBySeconds(lastSession.timeSpent)}</span>
               </div>
             }
             {quiz.timeLimit && (
@@ -211,12 +205,12 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
         <div className="flex gap-2">
           {
             // 1) Có session và session đã done → Results + Retake
-            quiz.sessionsCount > 0 && firstSession?.status === 'completed' ? (
+            quiz.sessionsCount > 0 && lastSession?.status === 'completed' ? (
               <>
                 <button
                   className="flex-1 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all flex items-center justify-center gap-2"
                   aria-label={`View results for ${quiz.title}`}
-                  onClick={() => handleNavigateToResults(quiz)}
+                  onClick={() => handleNavigateToResults(quiz._id)}
                 >
                   <Eye className="w-4 h-4" />
                   <span className="text-sm">Results</span>
@@ -233,7 +227,7 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
               </>
             ) :
             // 2) Có session in-progress → Continue
-              firstSession?.status === 'doing' ? (
+              lastSession?.status === 'doing' ? (
                 <button
                   className="w-full px-4 py-2.5 bg-gradient-to-r from-sky-500 to-blue-500 text-white rounded-lg hover:from-sky-600 hover:to-blue-600 transition-all flex items-center justify-center gap-2"
                   aria-label={`Continue ${quiz.title}`}

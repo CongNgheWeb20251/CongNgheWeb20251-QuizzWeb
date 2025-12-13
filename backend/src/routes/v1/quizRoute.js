@@ -16,9 +16,16 @@ Router.route('')
 Router.route('/stats')
   .get(quizController.getQuizzesStats)
 
+Router.route('/join/:inviteToken')
+  .post(quizController.joinQuizByInvite)
+
+Router.route('/:id/info')
+  .get(quizController.getQuizInfo)
+  .put(quizValidation.updateInfo, quizController.updateInfo)
+
 Router.route('/:id')
   .get(quizController.getDetails)
-  .put(quizValidation.updateInfo, quizController.updateInfo)
+
 
 // Router.route('/:id/publish')
 //   .post(quizController.publishQuiz)

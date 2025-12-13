@@ -183,9 +183,15 @@ export const fetchQuizzesStatsAPI = async () => {
   return res.data
 }
 
+// get Quiz info
+export async function getQuizInfo(id) {
+  const res = await authorizedAxiosInstance.get(`/v1/quizzes/${id}/info`)
+  return res.data
+}
+
 // update QuizInfo
 export async function updateQuizInfo(id, updateData) {
-  const res = await authorizedAxiosInstance.put(`/v1/quizzes/${id}`, updateData)
+  const res = await authorizedAxiosInstance.put(`/v1/quizzes/${id}/info`, updateData)
   return res.data
 }
 
@@ -193,36 +199,6 @@ export async function updateQuizInfo(id, updateData) {
 export const createQuestionsInBatchAPI = async (quizId, questions) => {
   const res = await authorizedAxiosInstance.post(`/v1/quizzes/${quizId}/questions/batch`, { questions })
   return res.data
-}
-//
-export async function getQuiz(id) {
-  // TODO: Replace with real API call
-  // const { data } = await api.get(`/quizzes/${id}`)
-  // return data
-
-  // Mock data - find quiz or return default
-  const allQuizzes = await getQuizzes()
-  const quiz = allQuizzes.find(q => q.id === id)
-
-  if (quiz) {
-    return quiz
-  }
-
-  // Default if not found
-  return {
-    id,
-    title: 'Sample Quiz',
-    subtitle: 'Default quiz for demo',
-    questionsCount: 5,
-    duration: 10,
-    completions: 0,
-    status: 'draft',
-    avgScore: 0,
-    topScore: 0,
-    avgTime: '-',
-    recent: [],
-    questionPerf: []
-  }
 }
 
 // attemptQuiz------------------------------------------
@@ -251,6 +227,18 @@ export const getQuizResultsAPI = async (sessionId) => {
   const res = await authorizedAxiosInstance.get(`/v1/student/sessions/${sessionId}/result`)
   return res.data
 }
+
+export const getQuizAttemptsAPI = async (quizId) => {
+  const res = await authorizedAxiosInstance.get(`/v1/student/quizzes/${quizId}/attempts`)
+  return res.data
+}
+//-----------------------------------------------------------
+// Join quiz by invite token
+export const joinQuizByInviteAPI = async (inviteToken) => {
+  const res = await authorizedAxiosInstance.post(`/v1/quizzes/join/${inviteToken}`)
+  return res.data
+}
+
 
 //-----------------------------------------------------------
 

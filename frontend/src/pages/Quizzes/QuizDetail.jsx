@@ -1,14 +1,17 @@
 /* eslint-disable no-console */
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getQuiz } from '~/apis'
+import { getQuizInfo } from '~/apis'
+import { FRONTEND_URL } from '~/utils/constants'
 import './QuizDetail.css'
+import ShareQuizModal from '~/components/Modal/ShareQuizModal'
 
 function QuizDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [quiz, setQuiz] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [shareModalOpen, setShareModalOpen] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -16,7 +19,7 @@ function QuizDetail() {
     async function loadQuiz() {
       setLoading(true)
       try {
-        const data = await getQuiz(id)
+        const data = await getQuizInfo(id)
         if (mounted) {
           setQuiz(data)
         }
@@ -46,9 +49,7 @@ function QuizDetail() {
   }
 
   const handleShare = () => {
-    // console.log('Share quiz:', id)
-    // TODO: Show share modal or copy link to clipboard
-    // alert('Share link copied to clipboard!')
+    setShareModalOpen(true)
   }
 
   if (loading) {
@@ -167,9 +168,15 @@ function QuizDetail() {
 
       <div className="qd-footer">
         <button className="cq-btn cq-btn-primary" onClick={handleShare}>
-          📤 Share Quiz with Students
+          Share Quiz with Students
         </button>
       </div>
+      <ShareQuizModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        quizTitle={quiz.title}
+        joinUrl={quiz.inviteToken ? `${FRONTEND_URL}/join/${quiz.inviteToken}` : ''}
+      />
     </div>
   )
 }

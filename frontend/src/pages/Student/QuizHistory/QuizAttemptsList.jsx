@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   ArrowLeft,
   Clock,
@@ -12,95 +12,93 @@ import {
   BarChart3
 } from 'lucide-react'
 
+import { getQuizAttemptsAPI } from '~/apis'
+import { useNavigate, useParams } from 'react-router-dom'
+import { format } from 'date-fns'
+import PageLoader from '~/components/Loading/PageLoader'
 
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  })
+
+const formatDate = (timestamp) => {
+  return format(new Date(timestamp), 'MMM d, yyyy')
 }
 
-const formatTime = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  })
+const formatTime = (timestamp) => {
+  return format(new Date(timestamp), 'h:mm a')
 }
 
-const formatDuration = (minutes) => {
-  if (minutes < 60) return `${minutes}m`
+const formatDuration = (seconds) => {
+  if (seconds < 60) return `${seconds}s`
+  const minutes = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  if (minutes < 60) {
+    return secs > 0 ? `${minutes}m ${secs}s` : `${minutes}m`
+  }
   const hours = Math.floor(minutes / 60)
   const mins = minutes % 60
   return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
 }
 
-const getScoreColor = (accuracy) => {
-  if (accuracy >= 90) return 'text-emerald-600'
-  if (accuracy >= 70) return 'text-sky-600'
-  if (accuracy >= 50) return 'text-amber-600'
-  return 'text-rose-600'
+const getScoreColor = (accuracy, passingScore) => {
+  return accuracy >= passingScore ? 'text-emerald-600' : 'text-rose-600'
 }
 
-const getScoreBgColor = (accuracy) => {
-  if (accuracy >= 90) return 'bg-emerald-50 border-emerald-200'
-  if (accuracy >= 70) return 'bg-sky-50 border-sky-200'
-  if (accuracy >= 50) return 'bg-amber-50 border-amber-200'
-  return 'bg-rose-50 border-rose-200'
+const getScoreBgColor = (accuracy, passingScore) => {
+  return accuracy >= passingScore ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'
 }
 
-export default function QuizAttemptsList({
-  quizTitle,
-  quizSubject,
-  attempts = [{
-    _id: 'att-1',
-    attemptNumber: 3,
-    dateTaken: '2025-12-08T14:30:00',
-    score: 85,
-    maxScore: 100,
-    correctAnswers: 17,
-    totalQuestions: 20,
-    timeSpent: 25,
-    accuracy: 85
-  },
-  {
-    _id: 'att-2',
-    attemptNumber: 2,
-    dateTaken: '2025-12-05T10:15:00',
-    score: 75,
-    maxScore: 100,
-    correctAnswers: 15,
-    totalQuestions: 20,
-    timeSpent: 28,
-    accuracy: 75
-  },
-  {
-    _id: 'att-3',
-    attemptNumber: 1,
-    dateTaken: '2025-12-01T16:45:00',
-    score: 70,
-    maxScore: 100,
-    correctAnswers: 14,
-    totalQuestions: 20,
-    timeSpent: 30,
-    accuracy: 70
+export default function QuizAttemptsList() {
+
+  const [quizAttempts, setQuizAttempts] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const { quizId } = useParams()
+
+  useEffect(() => {
+    const fetchQuizAttempts = async () => {
+      try {
+        setLoading(true)
+        const response = await getQuizAttemptsAPI(quizId)
+        setQuizAttempts(response)
+      // eslint-disable-next-line no-unused-vars
+      } catch (error) {
+      //
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchQuizAttempts()
+  }, [quizId])
+
+  const onViewAttempt = (sessionId) => {
+    navigate(`/quizzes/${quizId}/session/${sessionId}/result`)
   }
-  ],
-  onBack,
-  onViewAttempt
-}) {
-  const [hoveredId, setHoveredId] = useState(null)
+  const onBack = () => {
+    navigate('/dashboard')
+  }
+  const onStartQuiz = () => {}
 
+  const startDate = quizAttempts?.startTime
+
+  // Process sessions to add calculated fields
+  const processedSessions = quizAttempts?.sessions.map((session, index) => ({
+    ...session,
+    attemptNumber: index + 1,
+    accuracy: (session.score / session.totalPoints) * 100,
+    maxScore: session.totalPoints,
+    dateTaken: session.submitTime
+  })) || []
+
+  if (loading || quizAttempts === null) {
+    return <PageLoader fullScreen />
+  }
   return (
     <div className="min-h-screen bg-[#f0f9ff]">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <button
-            onClick={onBack}
+            onClick={() => navigate('/dashboard')}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors group"
             aria-label="Go back to dashboard"
           >
@@ -110,8 +108,8 @@ export default function QuizAttemptsList({
 
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h1 className="text-3xl text-gray-900">{quizTitle}</h1>
-              <p className="mt-1 text-gray-600">{quizSubject} • All Attempts</p>
+              <h1 className="text-3xl text-gray-900">{quizAttempts?.title}</h1>
+              <p className="mt-1 text-gray-600">{quizAttempts?.description} • All Attempts</p>
             </div>
           </div>
         </div>
@@ -120,47 +118,74 @@ export default function QuizAttemptsList({
       {/* Main Content */}
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Attempts List */}
-        {attempts.length === 0 ? (
+        {processedSessions.length === 0 ? (
           <div className="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-100">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
               <BarChart3 className="w-8 h-8 text-blue-600" />
             </div>
-            <h3 className="text-xl text-gray-900 mb-2">No Attempts Yet</h3>
-            <p className="text-gray-600">
-              You haven{'\''}t taken this quiz yet. Start your first attempt to see your results here.
-            </p>
+            {(() => {
+              const now = new Date()
+              const start = startDate ? new Date(startDate) : null
+              const hasStarted = start ? now >= start : true
+
+              if (!hasStarted) {
+                return (
+                  <>
+                    <h3 className="text-xl text-gray-900 mb-2">Quiz Not Yet Available</h3>
+                    <p className="text-gray-600 mb-6">
+                      The quiz will be available on {formatDate(startDate)} at {formatTime(startDate)}.
+                    </p>
+                    <button
+                      onClick={onBack}
+                      className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition"
+                      aria-label="Go Home"
+                    >
+                      Go Home
+                    </button>
+                  </>
+                )
+              }
+
+              return (
+                <>
+                  <h3 className="text-xl text-gray-900 mb-2">No Attempts Yet</h3>
+                  <p className="text-gray-600 mb-6">
+                    You haven't started this quiz yet. Click the button below to begin your first attempt!
+                  </p>
+                  <button
+                    onClick={onStartQuiz}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                    aria-label="Start Quiz"
+                  >
+                    Start Quiz
+                  </button>
+                </>
+              )
+            })()}
           </div>
         ) : (
           <div className="space-y-6">
             <h2 className="text-xl text-gray-900 mb-6">
-              Attempt History ({attempts.length})
+              Attempt History ({processedSessions.length})
             </h2>
 
             {/* Desktop: Cards Grid, Mobile: Stacked */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {attempts.map((attempt, index) => (
+              {processedSessions.map((attempt, index) => (
                 <div
                   key={attempt._id}
                   className="bg-white rounded-2xl shadow-md border-2 border-gray-200 overflow-hidden hover:shadow-xl hover:border-blue-300 transition-all duration-300 cursor-pointer group"
-                  onMouseEnter={() => setHoveredId(attempt._id)}
-                  onMouseLeave={() => setHoveredId(null)}
                   onClick={() => onViewAttempt(attempt._id)}
                   role="button"
                   tabIndex={0}
                   aria-label={`View details for attempt ${attempt.attemptNumber}`}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      onViewAttempt(attempt._id)
-                    }
-                  }}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="p-6 bg-gradient-to-br from-white to-gray-50">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="bg-gradient-to-br from-blue-500 to-purple-500 text-white rounded-lg px-3 py-1">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="bg-blue-500 text-white rounded-lg px-3 py-1">
                             <span className="text-sm">#{attempt.attemptNumber}</span>
                           </div>
                           <h3 className="text-lg text-gray-900">
@@ -193,16 +218,16 @@ export default function QuizAttemptsList({
                     </div>
 
                     {/* Score Display */}
-                    <div className={`rounded-xl border-2 p-5 mb-5 shadow-sm ${getScoreBgColor(attempt.accuracy)}`}>
+                    <div className={`rounded-xl border-2 p-5 mb-5 shadow-sm ${getScoreBgColor(attempt.accuracy, quizAttempts.passingScore)}`}>
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-sm text-gray-700">Score</span>
-                        <span className={`text-3xl ${getScoreColor(attempt.accuracy)}`}>
+                        <span className={`text-3xl ${getScoreColor(attempt.accuracy, quizAttempts.passingScore)}`}>
                           {attempt.score}/{attempt.maxScore}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-700">Accuracy</span>
-                        <span className={`text-xl ${getScoreColor(attempt.accuracy)}`}>
+                        <span className={`text-xl ${getScoreColor(attempt.accuracy, quizAttempts.passingScore)}`}>
                           {attempt.accuracy.toFixed(1)}%
                         </span>
                       </div>

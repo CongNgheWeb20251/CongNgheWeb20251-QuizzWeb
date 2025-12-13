@@ -14,21 +14,19 @@ import SaveIcon from '@mui/icons-material/Save'
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import { useDispatch, useSelector } from 'react-redux'
-import { selectCurrentActiveQuizz, fetchQuizzDetailsAPI, updateCurrentActiveQuizz } from '~/redux/activeQuizz/activeQuizzSlice'
+// Removed Redux usage
 import { useParams, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { FIELD_REQUIRED_MESSAGE } from '~/utils/validators'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
-import { updateQuizInfo } from '~/apis'
+import { updateQuizInfo, getQuizInfo } from '~/apis'
 import { toast } from 'react-toastify'
 import { cloneDeep } from 'lodash'
 
 
 export default function EditQuizInfo() {
   const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const quizData = useSelector(selectCurrentActiveQuizz)
+  const [quizData, setQuizData] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const { id } = useParams()
 
@@ -60,39 +58,43 @@ export default function EditQuizInfo() {
     defaultValues: initialFormData
   })
 
-  // const currentFormData = watch()
-
-  // Check if form has changes
-  // const hasChanges = () => {
-  //   if (!quizData) return false
-  //   return !isEqual(currentFormData, quizData)
-  // }
-
   useEffect(() => {
-    setIsLoading(true)
-    dispatch(fetchQuizzDetailsAPI(id)).finally(() => setIsLoading(false))
-  }, [dispatch, id])
-
-  // Reset form when quizData changes
-  useEffect(() => {
-    if (quizData) {
-      reset({
-        title: quizData.title,
-        description: quizData.description,
-        category: quizData.category,
-        level: quizData.level,
-        timeLimit: quizData.timeLimit,
-        passingScore: quizData.passingScore,
-        startTime: formatDateTimeLocal(quizData.startTime),
-        endTime: formatDateTimeLocal(quizData.endTime),
-        showResults: quizData.showResults,
-        allowRetake: quizData.allowRetake
-      })
+    let isMounted = true
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        const data = await getQuizInfo(id)
+        if (!isMounted) return
+        setQuizData(data)
+        // Reset form with fetched data
+        reset({
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          level: data.level,
+          timeLimit: data.timeLimit,
+          passingScore: data.passingScore,
+          startTime: formatDateTimeLocal(data.startTime),
+          endTime: formatDateTimeLocal(data.endTime),
+          showResults: data.showResults,
+          allowRetake: data.allowRetake
+        })
+      } catch (err) {
+        toast.error('Failed to load quiz details.')
+        // eslint-disable-next-line no-console
+        console.error('Fetch quiz info error:', err)
+      } finally {
+        if (isMounted) setIsLoading(false)
+      }
     }
-  }, [quizData, reset])
+    fetchData()
+    return () => { isMounted = false }
+  }, [id, reset])
+
+  // Form reset handled after fetching data above
 
   const handleNext = () => {
-    navigate(`/teacher/edit/${quizData._id}/step2`)
+    if (quizData?._id) navigate(`/teacher/edit/${quizData._id}/step2`)
   }
 
   const submitUpdateQuiz = async (data) => {
@@ -122,11 +124,9 @@ export default function EditQuizInfo() {
     try {
       const updatedQuiz = await updateQuizInfo(id, updateData)
       toast.success('Quiz information updated successfully!')
-      // console.log("first", updatedQuiz)
-      // Update redux store
       const quizClone = cloneDeep(quizData)
       const updatedQuizData = { ...quizClone, ...updatedQuiz }
-      dispatch(updateCurrentActiveQuizz(updatedQuizData))
+      setQuizData(updatedQuizData)
     } catch (error) {
       toast.error('Failed to update quiz information. Please try again.')
       // eslint-disable-next-line no-console
