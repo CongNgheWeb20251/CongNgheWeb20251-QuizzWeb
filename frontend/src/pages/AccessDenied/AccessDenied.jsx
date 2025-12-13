@@ -4,6 +4,7 @@ import Button from '@mui/material/Button'
 import HomeIcon from '@mui/icons-material/Home'
 import PlanetSvg from '~/assets/404/planet.svg'
 import AstronautSvg from '~/assets/404/astronaut.svg'
+import bgStar from '~/assets/404/particles.png'
 import { Link } from 'react-router-dom'
 
 function AccessDenied() {
@@ -22,7 +23,7 @@ function AccessDenied() {
         animation: 'stars 12s linear infinite alternate',
         width: '100%',
         height: '100%',
-        backgroundImage: 'url("src/assets/404/particles.png")',
+        backgroundImage: `url(${bgStar})`,
         backgroundSize: 'contain',
         backgroundRepeat: 'repeat',
         backgroundPosition: 'center',
@@ -32,7 +33,7 @@ function AccessDenied() {
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        <Typography variant="h1" sx={{ fontSize: '60px', fontWeight: 600 }}>Access Denied</Typography>
+        <Typography variant="h1" sx={{ fontSize: '60px', fontWeight: 800 }}>Access Denied</Typography>
         <Typography sx={{ fontSize: '18px !important', lineHeight: '25px', fontWeight: 400, maxWidth: '350px', textAlign: 'center' }}>
           LOST IN&nbsp;
           <Typography variant="span" sx={{

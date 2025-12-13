@@ -24,7 +24,8 @@ import StudentDashboard from './pages/Student/StudentDashboard'
 import { usePermission } from '~/customHooks/usePermission'
 import { roles } from '~/config/rbacConfig'
 import { permissions } from './config/rbacConfig'
-import AccessDenied from './pages/AccessDenied/AccessDenied.jsx'
+import AccessDenied from './pages/AccessDenied/AccessDenied'
+import QuizAttemptsList from './pages/Student/QuizHistory/QuizAttemptsList'
 
 const ProtectedRoute = ({ user }) => {
   if (!user) {
@@ -88,6 +89,7 @@ function App() {
         {/* Student permissions */}
         <Route element={<RoleRoute user={currUser} requiredPermission={permissions.VIEW_STUDENT_DASHBOARD} />}>
           <Route path="/dashboard" element={<StudentDashboard />} />
+          <Route path="/quizzes/:quizId/attempts" element={<QuizAttemptsList />} />
           <Route path="/quizzes/:quizId/session/:sessionId" element={<StudentQuizPage />} />
           <Route path="/quizzes/:quizId/session/:sessionId/result" element={<QuizResult />} />
         </Route>

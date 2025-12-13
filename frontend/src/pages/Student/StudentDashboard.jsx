@@ -17,7 +17,10 @@ import {
   Calendar,
   Timer,
   TrendingUp,
-  Award
+  Award,
+  Sparkles,
+  Search,
+  Filter
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
@@ -31,6 +34,7 @@ export default function StudentDashboard() {
   const [quizzes, setQuizzes] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [openMenuId, setOpenMenuId] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
   const [startQuizModal, setStartQuizModal] = useState({
     isOpen: false,
     quiz: null,
@@ -87,16 +91,15 @@ export default function StudentDashboard() {
     })
   }
 
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-2">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl text-gray-900">My Quizzes</h1>
-              <p className="mt-0.5 text-gray-600">Track your progress and continue learning</p>
+            <div className="logo">
+              <span className="logo-qui">Qui</span>
+              <span className="logo-zzy">zzy</span>
             </div>
             <div className="flex items-center gap-4">
               { /* avatar */ }
@@ -108,52 +111,42 @@ export default function StudentDashboard() {
 
       {/* Main Content */}
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="bg-emerald-100 rounded-lg p-3">
-                <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Completed</p>
-                <p className="text-2xl text-gray-900">5</p>
-              </div>
-            </div>
-          </div>
+        {/* Hero Section with Search - Solid Color */}
+        <div className="relative overflow-hidden bg-sky-500 rounded-3xl shadow-xl mb-8 mt-4">
+          {/* Subtle Pattern Overlay */}
+          <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')]"></div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="bg-sky-100 rounded-lg p-3">
-                <Clock className="w-6 h-6 text-sky-600" />
+          <div className="relative px-8 sm:px-12 lg:px-16 py-12 sm:py-16">
+            {/* Greeting and Title */}
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-6 h-6 text-yellow-300" />
+                <p className="text-sky-100 text-sm sm:text-base">Welcome back!</p>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">In Progress</p>
-                <p className="text-2xl text-gray-900">1</p>
-              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl text-white mb-3">
+                Continue Your
+                <br />
+                Learning Journey
+              </h1>
+              <p className="text-sky-100 text-lg sm:text-xl max-w-2xl">
+                Track your progress, explore new quizzes, and achieve your goals
+              </p>
             </div>
-          </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="bg-amber-100 rounded-lg p-3">
-                <TrendingUp className="w-6 h-6 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Avg Score</p>
-                <p className="text-2xl text-gray-900">87.6%</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="bg-violet-100 rounded-lg p-3">
-                <Timer className="w-6 h-6 text-violet-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Time</p>
-                <p className="text-2xl text-gray-900">2h 48m</p>
+            {/* Search Bar */}
+            <div className="max-w-3xl">
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                <input
+                  type="text"
+                  placeholder="Search quizzes by title, subject, or topic..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-14 py-4 bg-white rounded-2xl shadow-lg focus:shadow-xl focus:ring-4 focus:ring-blue-300/50 transition-all outline-none text-gray-900 placeholder-gray-400"
+                />
+                <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                  <Filter className="w-5 h-5 text-gray-500" />
+                </button>
               </div>
             </div>
           </div>
