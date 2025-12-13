@@ -85,6 +85,28 @@ const startAttemptQuiz = async (req, res, next) => {
   }
 }
 
+const publishQuiz = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const quizId = req.params.id
+    const updatedQuiz = await quizService.publishQuiz(userId, quizId)
+    res.status(StatusCodes.OK).json(updatedQuiz)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const draftQuiz = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const quizId = req.params.id
+    const updatedQuiz = await quizService.draftQuiz(userId, quizId)
+    res.status(StatusCodes.OK).json(updatedQuiz)
+  } catch (error) {
+    next(error)
+  }
+}
+
 const joinQuizByInvite = async (req, res, next) => {
   try {
     const userId = req.jwtDecoded._id
@@ -127,5 +149,7 @@ export const quizController = {
   startAttemptQuiz,
   joinQuizByInvite,
   getQuizInfo,
-  getQuizAttempts
+  getQuizAttempts,
+  publishQuiz,
+  draftQuiz
 }

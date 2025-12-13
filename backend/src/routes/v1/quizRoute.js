@@ -29,9 +29,13 @@ Router.route('/:id')
 
 // Router.route('/:id/publish')
 //   .post(quizController.publishQuiz)
+Router.route('/:id/publish')
+  .post(quizController.publishQuiz)
 
 // Router.route('/:id/unpublish')
 //   .post(quizController.unpublishQuiz)
+Router.route('/:id/draft')
+  .post(quizController.draftQuiz)
 
 Router.route('/:quizId/questions/batch')
   .post(questionController.updateQuestionsInBatch)
