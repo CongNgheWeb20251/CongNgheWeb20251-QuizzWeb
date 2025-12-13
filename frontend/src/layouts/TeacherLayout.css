@@ -1,0 +1,111 @@
+/* Layout */
+.teacher-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #1a1a1a;
+  color: white;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 280px;
+  background-color: #242424;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  flex-shrink: 0; /* Prevent sidebar from shrinking */
+}
+
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.logo-qui {
+  background: linear-gradient(45deg, #9333EA, #7C3AED);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-zzy {
+  background: linear-gradient(45deg, #E879F9, #D946EF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Sidebar Navigation */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-section-title {
+  color: #666;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 8px 12px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #999;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: #2f2f2f;
+  color: white;
+}
+
+.nav-item.active {
+  background-color: #9333EA;
+  color: white;
+}
+
+.nav-item .MuiSvgIcon-root {
+  font-size: 1.25rem;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  background-color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.content-wrapper {
+    padding: 24px 32px;
+    flex: 1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+}
