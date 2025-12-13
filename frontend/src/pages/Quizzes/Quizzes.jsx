@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '@mui/material/Button'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import QuizCard from '~/components/QuizCard'
-import UserAvatar from '~/components/UserAvatar/UserAvatar'
 import './Quizzes.css'
 import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
 import { Link, useLocation } from 'react-router-dom'
@@ -98,32 +96,6 @@ function Quizzes() {
 
   return (
     <div className="quizzes-page">
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon fontSize="small" />}
-          onClick={() => navigate('/teacher/dashboard')}
-          sx={{
-            color: 'rgba(255,255,255,0.9)',
-            borderColor: 'rgba(255,255,255,0.06)',
-            textTransform: 'none',
-            px: 2,
-            py: 1,
-            backgroundColor: 'transparent',
-            transition: 'background-color 160ms, transform 200ms, box-shadow 160ms',
-            '& .MuiButton-startIcon': { transition: 'transform 200ms' },
-            '&:hover': {
-              backgroundColor: 'rgba(139,92,246,0.12)',
-              borderColor: 'rgba(139,92,246,0.35)',
-              boxShadow: '0 6px 18px rgba(2,6,23,0.6)',
-              '& .MuiButton-startIcon': { transform: 'translateX(-6px)' }
-            }
-          }}
-        >
-            Dashboard
-        </Button>
-        <UserAvatar />
-      </Box>
       <div className="quizzes-header">
         <div className="quizzes-title-section">
           <h2 className="quizzes-title">Quizzes</h2>

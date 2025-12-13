@@ -26,6 +26,7 @@ import { roles } from '~/config/rbacConfig'
 import { permissions } from './config/rbacConfig'
 import AccessDenied from './pages/AccessDenied/AccessDenied'
 import QuizAttemptsList from './pages/Student/QuizHistory/QuizAttemptsList'
+import TeacherLayout from '~/layouts/TeacherLayout'
 
 const ProtectedRoute = ({ user }) => {
   if (!user) {
@@ -78,9 +79,11 @@ function App() {
           <Route path='teacher/edit/:id/step2' element={<CreateQuizStep2 />} />
         </Route>
         <Route element={<RoleRoute user={currUser} requiredPermission={permissions.VIEW_TEACHER_DASHBOARD} />}>
-          <Route path="/teacher/dashboard" element={<Dashboard />} />
-          <Route path="/teacher/quizzes" element={<Quizzes />} />
-          <Route path="/teacher/quizzes/:id" element={<QuizDetail />} />
+          <Route element={<TeacherLayout />}>
+            <Route path="/teacher/dashboard" element={<Dashboard />} />
+            <Route path="/teacher/quizzes" element={<Quizzes />} />
+            <Route path="/teacher/quizzes/:id" element={<QuizDetail />} />
+          </Route>
         </Route>
         <Route element={<RoleRoute user={currUser} requiredPermission={permissions.VIEW_PREVIEW_QUIZ} />}>
           <Route path="/teacher/quizzes/:id/preview" element={<PreviewQuiz />} />
