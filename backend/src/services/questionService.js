@@ -137,8 +137,88 @@ const createNew = async (quizId, data) => {
   }
 }
 
+const updateQuestion = async (questionId, updateData) => {
+  try {
+    // Tìm question
+    const question = await questionModel.findOneById(questionId)
+    if (!question) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Question not found')
+    }
+
+    // Validate content nếu có update
+    if (updateData.content) {
+      if (updateData.content.length < 10 || updateData.content.length > 500) {
+        throw new ApiError(
+          StatusCodes.UNPROCESSABLE_ENTITY,
+          'Content must be between 10 and 500 characters'
+        )
+      }
+    }
+
+    // Validate level
+    if (updateData.level && !['easy', 'medium', 'hard'].includes(updateData.level)) {
+      throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, 'Invalid level')
+    }
+
+    // Update question
+    const updatedQuestion = await questionModel.update(questionId, updateData)
+
+    // Nếu có cập nhật options
+    if (updateData.options && Array.isArray(updateData.options)) {
+      // Xóa options cũ
+      await answerOptionModel.deleteByQuestionId(questionId)
+
+      // Tạo options mới - Loop 
+      for (const option of updateData.options) {
+        await answerOptionModel.createNew({
+          questionId: questionId,
+          quizId: question.quizId.toString(),
+          content: option.content,
+          isCorrect: option.isCorrect || false
+        })
+      }
+    }
+
+    return updatedQuestion
+  } catch (error) {
+    throw error
+  }
+}
+
+const deleteQuestion = async (questionId, quizId) => {
+  try {
+    // Kiểm tra question tồn tại
+    const question = await questionModel.findOneById(questionId)
+    if (!question) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Question not found')
+    }
+
+    // Kiểm tra question thuộc quiz này
+    if (question.quizId.toString() !== quizId) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Question does not belong to this quiz')
+    }
+
+    // Xóa tất cả answerOptions của câu hỏi
+    await answerOptionModel.deleteByQuestionId(questionId)
+
+    // Xóa câu hỏi
+    await questionModel.deleteOne(questionId)
+
+    // Xóa questionId từ quiz
+    await quizModel.pullQuestionIds({ _id: questionId, quizId })
+
+    return {
+      message: 'Question deleted successfully',
+      questionId
+    }
+  } catch (error) {
+    throw error
+  }
+}
 
 export const questionService = {
   updateQuestionsInBatch,
-  createNew
+  createNew,
+  updateQuestion,
+  deleteQuestion
 }
