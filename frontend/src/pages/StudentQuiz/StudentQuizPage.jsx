@@ -195,7 +195,7 @@ export default function StudentQuizPage() {
   const answeredCount = Object.keys(answers).length
   const progress = (answeredCount / quiz?.questions.length) * 100
 
-  if (isLoading) return <PageLoader fullScreen={true} />
+  if (isLoading || !quiz) return <PageLoader fullScreen={true} />
 
   return (
     <Box
