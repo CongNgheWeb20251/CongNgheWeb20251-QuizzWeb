@@ -20,6 +20,8 @@ import {
   Award
 } from 'lucide-react'
 
+import { useNavigate } from 'react-router-dom'
+
 const subjectIcons = {
   'programming': <Code className="w-6 h-6" />,
   'React': <Cpu className="w-6 h-6" />,
@@ -43,6 +45,7 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
   const isExpired = quiz.endTime && new Date(quiz.endTime) < new Date()
   const firstSession = quiz.sessions?.[0]
   const badge = getStatusBadge()
+  const navigate = useNavigate()
 
   function getStatusBadge() {
     const badges = {
@@ -103,6 +106,17 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
     return `${remMinutes}m ${seconds % 60}s`
   }
 
+  const handleNavigateToResults = (quiz) => {
+    // Nếu không cho retake thì điều hướng đến trang kết quả /quizzes/:quizId/session/:sessionId/result
+    if (!quiz.allowRetake) {
+      const sessionId = quiz.sessions[0]?._id
+      navigate(`/quizzes/${quiz._id}/session/${sessionId}/result`)
+      return
+    }
+    // Nếu cho retake thì điều hướng đến trang danh sách lần làm quiz /quizzes/:quizId/attempts
+    navigate(`/quizzes/${quiz._id}/attempts`)
+  }
+
   return (
     <article
       className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all timeLimit-300 flex flex-col h-full animate-fade-in"
@@ -135,10 +149,6 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
                   <Eye className="w-4 h-4" />
                   View Details
                 </button>
-                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Schedule Retake
-                </button>
                 <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
                   <XCircle className="w-4 h-4" />
                   Remove
@@ -167,35 +177,6 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
           {badge?.icon}
           <span>{badge?.label}</span>
         </div>
-
-        {/* Score Section */}
-        {/* {quiz.status !== 'available' && quiz.status !== 'missed' && (
-          <div className="mb-4 flex-grow">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Score</span>
-              <span className="text-lg text-gray-900">
-                {quiz.score}/{quiz.maxScore}
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all timeLimit-500 ${
-                  (quiz.score || 0) >= 90
-                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
-                    : (quiz.score || 0) >= 70
-                      ? 'bg-gradient-to-r from-sky-500 to-sky-600'
-                      : 'bg-gradient-to-r from-amber-500 to-amber-600'
-                }`}
-                style={{ width: `${((quiz.score || 0) / (quiz.maxScore || 100)) * 100}%` }}
-                role="progressbar"
-                aria-valuenow={quiz.score}
-                aria-valuemin={0}
-                aria-valuemax={quiz.maxScore}
-                aria-label={`Score: ${quiz.score} out of ${quiz.maxScore}`}
-              />
-            </div>
-          </div>
-        )} */}
 
         {quiz.endTime && new Date(quiz.endTime) < new Date() && (
           <div className="mb-4 flex-grow">
@@ -235,6 +216,7 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
                 <button
                   className="flex-1 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all flex items-center justify-center gap-2"
                   aria-label={`View results for ${quiz.title}`}
+                  onClick={() => handleNavigateToResults(quiz)}
                 >
                   <Eye className="w-4 h-4" />
                   <span className="text-sm">Results</span>

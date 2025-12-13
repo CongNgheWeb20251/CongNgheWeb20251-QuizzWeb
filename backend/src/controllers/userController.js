@@ -41,14 +41,16 @@ const login = async (req, res, next) => {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: ms('14 days')
+      maxAge: ms('14 days'),
+      path: '/'
     })
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: ms('14 days')
+      maxAge: ms('14 days'),
+      path: '/'
     })
     res.status(StatusCodes.OK).json(result)
 
@@ -67,14 +69,16 @@ const googleOAuthCallback = async (req, res, next) => {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: ms('14 days')
+      maxAge: ms('14 days'),
+      path: '/'
     })
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: ms('14 days')
+      maxAge: ms('14 days'),
+      path: '/'
     })
 
     // Redirect về frontend
@@ -86,8 +90,18 @@ const googleOAuthCallback = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    res.clearCookie('accessToken')
-    res.clearCookie('refreshToken')
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/'
+    })
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/'
+    })
     res.status(StatusCodes.OK).json({ message: 'Logged out successfully' })
   }
   catch (error) {
@@ -103,7 +117,8 @@ const refreshToken = async (req, res, next) => {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: ms('14 days')
+      maxAge: ms('14 days'),
+      path: '/'
     })
 
     res.status(StatusCodes.OK).json(result)

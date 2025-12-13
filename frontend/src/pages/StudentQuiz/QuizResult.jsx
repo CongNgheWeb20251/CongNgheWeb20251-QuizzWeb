@@ -203,7 +203,7 @@ export default function QuizResult() {
             }}
           />
         </Paper>
-        {session.quizInfo?.showResults && (
+        {1===1 && (
           <>
             {/* Question Review */}
             <Typography variant="h5" sx={{ fontWeight: 600, marginBottom: '1.5rem', color: '#374151' }}>
