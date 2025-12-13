@@ -120,6 +120,55 @@
   border-color: #8b5cf6;
 }
 
+.qc-more-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.qc-more-menu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background: #111827;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  min-width: 160px;
+  padding: 6px;
+  z-index: 10;
+}
+
+.qc-menu-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.15s ease;
+}
+
+.qc-menu-item:hover {
+  background: rgba(139, 92, 246, 0.12);
+  color: #fff;
+}
+
+.qc-menu-item.active {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.qc-menu-item:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
 @media (max-width: 640px) {
   .qc-card {
     flex-direction: column;

@@ -204,6 +204,54 @@ const getQuizAttempts = async (userId, quizId) => {
   }
 }
 
+const publishQuiz = async (userId, quizId) => {
+  try {
+    // Kiểm tra quiz tồn tại
+    const quiz = await quizModel.findOneById(quizId)
+    if (!quiz) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `Quiz with id ${quizId} not found`)
+    }
+
+    // Kiểm tra quyền sở hữu quiz
+    if (quiz.createdBy.toString() !== userId.toString()) {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'You do not have permission to publish this quiz')
+    }
+
+    // Kiểm tra quiz có ít nhất 1 câu hỏi
+    if (!quiz.questionOrderIds || quiz.questionOrderIds.length === 0) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Quiz must have at least one question to be published')
+    }
+
+    // Update status to published
+    const updatedQuiz = await quizModel.update(quizId, { status: 'published' })
+    return updatedQuiz
+  } catch (error) {
+    throw error
+  }
+}
+
+const draftQuiz = async (userId, quizId) => {
+  try {
+    // Kiểm tra quiz tồn tại
+    const quiz = await quizModel.findOneById(quizId)
+    if (!quiz) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `Quiz with id ${quizId} not found`)
+    }
+
+    // Kiểm tra quyền sở hữu quiz
+    if (quiz.createdBy.toString() !== userId.toString()) {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'You do not have permission to draft this quiz')
+    }
+
+    // Update status to draft
+    const updatedQuiz = await quizModel.update(quizId, { status: 'draft' })
+    return updatedQuiz
+  } catch (error) {
+    throw error
+  }
+}
+
+
 
 export const quizService = {
   createNew,
@@ -215,5 +263,7 @@ export const quizService = {
   startAttemptQuiz,
   joinQuizByInvite,
   getQuizInfo,
-  getQuizAttempts
+  getQuizAttempts,
+  publishQuiz,
+  draftQuiz
 }

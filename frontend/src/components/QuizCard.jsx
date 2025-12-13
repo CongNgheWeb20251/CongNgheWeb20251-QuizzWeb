@@ -1,17 +1,54 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { draftQuizAPI, publishQuizAPI } from '~/apis'
 import './QuizCard.css'
 
-const QuizCard = ({ quiz }) => {
+const QuizCard = ({ quiz, onStatusChange }) => {
   const navigate = useNavigate()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const menuRef = useRef(null)
 
   const handleViewClick = () => {
     navigate(`/teacher/quizzes/${quiz._id}`)
   }
 
   const handleMoreClick = () => {
-    // console.log('More options for quiz:', quiz._id)
-    // TODO: Implement more options menu (edit, delete, share, etc)
+    setMenuOpen((prev) => !prev)
+  }
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false)
+      }
+    }
+    if (menuOpen) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [menuOpen])
+
+  const handleStatusUpdate = async (nextStatus) => {
+    if (quiz.status === nextStatus) {
+      setMenuOpen(false)
+      return
+    }
+    try {
+      setSubmitting(true)
+      if (nextStatus === 'published') {
+        await publishQuizAPI(quiz._id)
+      } else {
+        await draftQuizAPI(quiz._id)
+      }
+      onStatusChange?.(quiz._id, nextStatus)
+      toast.success(`Quiz is now ${nextStatus}`)
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Failed to update status')
+    } finally {
+      setSubmitting(false)
+      setMenuOpen(false)
+    }
   }
 
   return (
@@ -34,9 +71,35 @@ const QuizCard = ({ quiz }) => {
         <button className="qc-btn qc-btn-view" onClick={handleViewClick}>
           View
         </button>
-        <button className="qc-btn-more" onClick={handleMoreClick} title="More options">
-          ⋮
-        </button>
+        <div className="qc-more-wrapper" ref={menuRef}>
+          <button
+            className="qc-btn-more"
+            onClick={handleMoreClick}
+            title="More options"
+            aria-haspopup="true"
+            aria-expanded={menuOpen}
+          >
+            ⋮
+          </button>
+          {menuOpen && (
+            <div className="qc-more-menu">
+              <button
+                className={`qc-menu-item ${quiz.status === 'draft' ? 'active' : ''}`}
+                onClick={() => handleStatusUpdate('draft')}
+                disabled={submitting}
+              >
+                {quiz.status === 'draft' ? '• Draft' : 'Draft'}
+              </button>
+              <button
+                className={`qc-menu-item ${quiz.status === 'published' ? 'active' : ''}`}
+                onClick={() => handleStatusUpdate('published')}
+                disabled={submitting}
+              >
+                {quiz.status === 'published' ? '• Published' : 'Published'}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
