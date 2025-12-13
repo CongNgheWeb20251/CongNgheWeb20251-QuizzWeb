@@ -14,5 +14,10 @@ const apiRoot = import.meta.env.DEV
 
 export const API_ROOT = apiRoot
 
+// Frontend URL for invite links
+export const FRONTEND_URL = import.meta.env.DEV
+  ? 'http://localhost:5173' // Development
+  : 'https://cong-nghe-web20251-quizz-web.vercel.app' // Production
+
 export const DEFAULT_PAGE = 1
 export const DEFAULT_ITEMS_PER_PAGE = 4

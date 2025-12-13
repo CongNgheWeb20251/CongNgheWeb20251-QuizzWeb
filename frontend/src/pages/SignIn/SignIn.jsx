@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useLocation } from 'react-router-dom'
 import Google from '@mui/icons-material/Google'
 import Facebook from '@mui/icons-material/Facebook'
 import Person from '@mui/icons-material/Person'
@@ -21,6 +21,7 @@ import { API_ROOT } from '~/utils/constants'
 
 function SignIn() {
   const navigate = useNavigate()
+  const location = useLocation()
   const dispatch = useDispatch()
   let [searchParams] = useSearchParams()
   const registeredEmail = searchParams.get('registeredEmail')
@@ -35,6 +36,14 @@ function SignIn() {
       { pending: 'Logging in...' }
     ).then((res) => {
       if (!res.error) {
+        // Nếu có location.state.from (từ trang join), redirect về đó
+        const from = location.state?.from
+        if (from) {
+          navigate(from, { replace: true })
+          return
+        }
+
+        // Nếu không, redirect về dashboard tương ứng với role
         if (res.payload?.role === 'teacher') {
           navigate('/teacher/dashboard', { replace: true })
         } else {
@@ -45,10 +54,20 @@ function SignIn() {
   }
 
   const loginWithGoogle = () => {
+    // Lưu redirect path vào localStorage trước khi OAuth
+    const from = location.state?.from
+    if (from) {
+      localStorage.setItem('oauth_redirect_after_login', from)
+    }
     window.location.href = `${API_ROOT}/v1/users/google`
   }
 
   const loginWithFacebook = () => {
+    // Lưu redirect path vào localStorage trước khi OAuth
+    const from = location.state?.from
+    if (from) {
+      localStorage.setItem('oauth_redirect_after_login', from)
+    }
     window.location.href = `${API_ROOT}/v1/users/facebook`
   }
 

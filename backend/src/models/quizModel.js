@@ -31,7 +31,8 @@ const QUIZ_COLLECTION_SCHEMA = Joi.object({
   startTime: Joi.date().timestamp('javascript'),
   endTime: Joi.date().timestamp('javascript'),
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
-  updatedAt: Joi.date().timestamp('javascript').default(null)
+  updatedAt: Joi.date().timestamp('javascript').default(null),
+  inviteToken: Joi.string().optional().trim().strict()
 })
 
 const UNCHANGE_FIELDS = ['_id', 'createdAt', 'createdBy']
@@ -291,15 +292,17 @@ const getQuizzesByStudent = async (userId, page, itemsPerPage) => {
                   }
                 }
               },
-              { $sort: { statusPriority: -1, score: -1, timeSpent: 1 } }
+              { $sort: { statusPriority: -1, submitTime: -1 } },
+              { $limit: 1 }
             ]
           } },
           // Thêm field sessionsCount
           { $addFields: {
-            sessionsCount: { $size: '$sessions' }
+            sessionsCount: { $size: '$sessions' },
+            lastSession: { $arrayElemAt: ['$sessions', 0] }
           } },
           // Loại bỏ array sessions để giảm data trả về
-          { $project: { status: 0 } }
+          { $project: { status: 0, sessions: 0 } }
         ],
         // 2 query total count
         'queryCountTotalQuizzes': [
@@ -318,6 +321,66 @@ const getQuizzesByStudent = async (userId, page, itemsPerPage) => {
   }
 }
 
+// Tìm quiz theo inviteToken
+const findOneByInviteToken = async (inviteToken) => {
+  try {
+    const quiz = await DB_GET().collection(QUIZ_COLLECTION_NAME).findOne({ inviteToken: inviteToken })
+    return quiz
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+// Thêm userId vào mảng memberIds của quiz
+const addMemberToQuiz = async (quizId, userId) => {
+  try {
+    // Kiểm tra xem userId đã tồn tại trong memberIds chưa
+    const quiz = await findOneById(quizId)
+    if (!quiz) {
+      throw new Error('Quiz not found')
+    }
+
+    // Nếu user đã là member rồi thì không thêm nữa
+    const isMember = quiz.memberIds.some(memberId => memberId.toString() === userId.toString())
+    if (isMember) {
+      return quiz
+    }
+
+    const updateResult = await DB_GET().collection(QUIZ_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(quizId) },
+      { $push: { memberIds: new ObjectId(userId) } },
+      { returnDocument: 'after' }
+    )
+    return updateResult
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const getSessionsByUserAndQuiz = async (userId, quizId) => {
+  try {
+    const sessions = await DB_GET().collection(QUIZ_COLLECTION_NAME).aggregate([
+      { $match: { _id: new ObjectId(quizId) } },
+      { $lookup: {
+        from: sessionQuizModel.SESSION_QUIZ_COLLECTION_NAME,
+        localField: '_id',
+        foreignField: 'quizId',
+        as: 'sessions',
+        pipeline: [
+          { $project: { createdAt: 0, updatedAt: 0, quizId: 0 } },
+          { $match: { userId: new ObjectId(userId) } },
+          { $sort: { startTime: -1 } }
+        ]
+      } },
+      { $project: { category: 0, createdAt: 0, updatedAt: 0, status: 0, memberIds: 0, questionOrderIds: 0, level: 0, createdBy: 0 } }
+    ]).toArray()
+    return sessions[0] || []
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+
 export const quizModel = {
   QUIZ_COLLECTION_NAME,
   QUIZ_COLLECTION_SCHEMA,
@@ -332,5 +395,8 @@ export const quizModel = {
   pushQuestionIds,
   pullQuestionIds,
   getQuizzesStats,
-  getQuizzesByStudent
+  getQuizzesByStudent,
+  findOneByInviteToken,
+  addMemberToQuiz,
+  getSessionsByUserAndQuiz
 }

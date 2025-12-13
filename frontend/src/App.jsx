@@ -26,6 +26,7 @@ import { roles } from '~/config/rbacConfig'
 import { permissions } from './config/rbacConfig'
 import AccessDenied from './pages/AccessDenied/AccessDenied'
 import QuizAttemptsList from './pages/Student/QuizHistory/QuizAttemptsList'
+import JoinQuiz from './pages/Student/JoinQuiz/JoinQuiz'
 
 const ProtectedRoute = ({ user }) => {
   if (!user) {
@@ -98,6 +99,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>
+      <Route path="/join/:inviteToken" element={<JoinQuiz />} />
       <Route path="/auth-successful" element={<AuthCallBack />} />
       <Route path="*" element={<NotFound />} />
       <Route path="/access-denied" element={<AccessDenied />} />

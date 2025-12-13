@@ -85,6 +85,37 @@ const startAttemptQuiz = async (req, res, next) => {
   }
 }
 
+const joinQuizByInvite = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const { inviteToken } = req.params
+    const result = await quizService.joinQuizByInvite(userId, inviteToken)
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const getQuizInfo = async (req, res, next) => {
+  try {
+    const quizId = req.params.id
+    const quizInfo = await quizService.getQuizInfo(quizId)
+    res.status(StatusCodes.OK).json(quizInfo)
+  } catch (error) {
+    next(error)
+  }
+}
+const getQuizAttempts = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const quizId = req.params.quizId
+    const attempts = await quizService.getQuizAttempts(userId, quizId)
+    res.status(StatusCodes.OK).json(attempts)
+  } catch (error) {
+    next(error)
+  }
+}
+
 
 export const quizController = {
   createNew,
@@ -93,5 +124,8 @@ export const quizController = {
   updateInfo,
   getQuizzesStats,
   getQuizzesByStudent,
-  startAttemptQuiz
+  startAttemptQuiz,
+  joinQuizByInvite,
+  getQuizInfo,
+  getQuizAttempts
 }

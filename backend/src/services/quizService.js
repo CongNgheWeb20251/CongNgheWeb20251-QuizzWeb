@@ -5,6 +5,7 @@ import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
 import { DEFAULT_PAGE, DEFAULT_ITEMS_PER_PAGE, DEFAULT_FILTER } from '~/utils/constants'
 import { sessionQuizModel } from '~/models/sessionQuizModel'
+import { nanoid } from 'nanoid'
 
 const createNew = async ({ userId, data }) => {
   try {
@@ -21,7 +22,8 @@ const createNew = async ({ userId, data }) => {
       startTime: data.startDate,
       endTime: data.endDate,
       allowRetake: data.allowRetake || true,
-      showResults: data.immediateResults || true
+      showResults: data.immediateResults || true,
+      inviteToken: nanoid(10)
     }
     const createdQuiz = await quizModel.createNew(newQuiz)
     return createdQuiz
@@ -60,6 +62,7 @@ const getDetails = async (userId, quizzId, userRole) => {
       delete quizClone.updatedAt
       delete quizClone.createdAt
       delete quizClone.allowRetake
+      delete quizClone.inviteToken
     }
 
     return quizClone
@@ -146,6 +149,62 @@ const startAttemptQuiz = async (userId, quizId) => {
   }
 }
 
+const joinQuizByInvite = async (userId, inviteToken) => {
+  try {
+    // Tìm quiz theo inviteToken
+    const quiz = await quizModel.findOneByInviteToken(inviteToken)
+
+    if (!quiz) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Invite link is invalid or quiz not found')
+    }
+
+    // Kiểm tra xem quiz đã published chưa
+    if (quiz.status !== 'published') {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'This quiz is not available yet')
+    }
+
+    // Kiểm tra xem user có phải là owner của quiz không
+    if (quiz.createdBy.toString() === userId.toString()) {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'You are the owner of this quiz')
+    }
+
+    // Thêm user vào memberIds
+    await quizModel.addMemberToQuiz(quiz._id.toString(), userId)
+
+    return {
+      message: 'Successfully joined the quiz',
+      quizId: quiz._id.toString(),
+      quizTitle: quiz.title
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getQuizInfo = async (quizId) => {
+  try {
+    const quizInfo = await quizModel.findOneById(quizId)
+    return quizInfo
+  } catch (error) {
+    throw error
+  }
+}
+const getQuizAttempts = async (userId, quizId) => {
+  try {
+    // Kiểm tra tồn tại của quiz
+    const quiz = await quizModel.findOneById(quizId)
+    if (!quiz) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `Quiz with id ${quizId} not found`)
+    }
+    // Lấy danh sách các attempts của user cho quiz này
+    const attempts = await quizModel.getSessionsByUserAndQuiz(userId, quizId)
+    return attempts
+  } catch (error) {
+    throw error
+  }
+}
+
+
 export const quizService = {
   createNew,
   getDetails,
@@ -153,5 +212,8 @@ export const quizService = {
   updateInfo,
   getQuizzesStats,
   getQuizzesByStudent,
-  startAttemptQuiz
+  startAttemptQuiz,
+  joinQuizByInvite,
+  getQuizInfo,
+  getQuizAttempts
 }

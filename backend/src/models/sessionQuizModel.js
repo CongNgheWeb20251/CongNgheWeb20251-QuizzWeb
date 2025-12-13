@@ -21,6 +21,8 @@ const SESSION_QUIZ_COLLECTION_SCHEMA = Joi.object({
   // Điểm số
   score: Joi.number(), // điểm đạt được
   totalPoints: Joi.number(), // tổng điểm số
+  correctAnswers: Joi.number(), // số câu trả lời đúng
+  totalQuestions: Joi.number(), // tổng số câu hỏi
 
 
   //Trạng thái
@@ -386,5 +388,4 @@ export const sessionQuizModel = {
   getQuizSessionDetails,
   calculateQuizScore,
   getQuizSessionResult
-
 }

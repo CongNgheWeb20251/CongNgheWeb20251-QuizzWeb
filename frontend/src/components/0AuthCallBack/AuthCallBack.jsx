@@ -42,6 +42,14 @@ const AuthCallBack = () => {
         const fetchedUser = result?.payload
 
         if (mounted) {
+          // Kiểm tra xem có redirect path từ OAuth không
+          const redirectPath = localStorage.getItem('oauth_redirect_after_login')
+          if (redirectPath) {
+            localStorage.removeItem('oauth_redirect_after_login')
+            navigate(redirectPath)
+            return
+          }
+
           // nếu có role => điều hướng ngay
           const role = fetchedUser?.role
           if (role === 'student') {
@@ -77,8 +85,16 @@ const AuthCallBack = () => {
       // Sử dụng updateUserAPI từ userSlice để cập nhật role
       await dispatch(updateUserAPI({ role }))
 
+      // Kiểm tra xem có redirect path từ OAuth không
+      const redirectPath = localStorage.getItem('oauth_redirect_after_login')
+      if (redirectPath) {
+        localStorage.removeItem('oauth_redirect_after_login')
+        navigate(redirectPath)
+        return
+      }
+
       // điều hướng theo role đã chọn
-      if (role === 'student') navigate('/dasboard')
+      if (role === 'student') navigate('/dashboard')
       else navigate('/teacher/dashboard')
     } catch (err) {
       setError(err?.message ?? 'Lỗi khi cập nhật vai trò')

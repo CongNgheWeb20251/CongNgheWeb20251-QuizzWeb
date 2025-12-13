@@ -16,5 +16,6 @@ Router.put('/sessions/:sessionId/answers', sessionQuizController.submitAnswers)
 Router.post('/sessions/:sessionId/submit', sessionQuizController.submitQuizSession)
 
 Router.post('/quizzes/:quizId/sessions', quizController.startAttemptQuiz)
+Router.get('/quizzes/:quizId/attempts', quizController.getQuizAttempts)
 
 export const studentRoute = Router
