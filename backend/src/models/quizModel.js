@@ -149,7 +149,7 @@ const deleteOne = async (quizId) => {
   }
 }
 
-const getQuizzes = async (userId, page, itemsPerPage, filter) => {
+const getQuizzes = async (userId, page, itemsPerPage, filter, search) => {
   try {
     //
     const queryConditions = [
@@ -163,6 +163,12 @@ const getQuizzes = async (userId, page, itemsPerPage, filter) => {
     // filter status
     if (filter && filter !== 'all') {
       queryConditions.push({ status: filter })
+    }
+    // full text search
+    if (search && search.trim() !== '') {
+      queryConditions.push({
+        $text: { $search: search.trim() }
+      })
     }
 
     const query = await DB_GET().collection(QUIZ_COLLECTION_NAME).aggregate([

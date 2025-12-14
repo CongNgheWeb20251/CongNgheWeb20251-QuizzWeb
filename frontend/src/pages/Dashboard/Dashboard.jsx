@@ -91,7 +91,7 @@ function Dashboard() {
             Dashboard
           </Typography>
           <Typography variant="subtitle1" className="welcome-text">
-            Welcome back, Sarah! Here's what's happening with your quizzes
+            Welcome back! Here's what's happening with your quizzes
           </Typography>
         </div>
         <Button
