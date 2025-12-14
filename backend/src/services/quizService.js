@@ -104,12 +104,12 @@ const getQuizzesStats = async (userId) => {
   }
 }
 
-const getQuizzesByStudent = async (userId, page, itemsPerPage) => {
+const getQuizzesByStudent = async (userId, page, itemsPerPage, search) => {
   try {
     if (!page) page = DEFAULT_PAGE
     if (!itemsPerPage) itemsPerPage = DEFAULT_ITEMS_PER_PAGE
 
-    const result = await quizModel.getQuizzesByStudent(userId, parseInt(page, 10), parseInt(itemsPerPage, 10))
+    const result = await quizModel.getQuizzesByStudent(userId, parseInt(page, 10), parseInt(itemsPerPage, 10), search)
     return result
   } catch (error) {
     throw new Error(error)

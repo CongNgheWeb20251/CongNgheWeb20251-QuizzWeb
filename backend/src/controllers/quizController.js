@@ -42,9 +42,9 @@ const getQuizzes = async (req, res, next) => {
 const getQuizzesByStudent = async (req, res, next) => {
   try {
     const userId = req.jwtDecoded._id
-    const { page, itemsPerPage } = req.query
+    const { page, itemsPerPage, search } = req.query
     // console.log({ ...req.query })
-    const quizzes = await quizService.getQuizzesByStudent(userId, page, itemsPerPage)
+    const quizzes = await quizService.getQuizzesByStudent(userId, page, itemsPerPage, search)
     res.status(StatusCodes.OK).json(quizzes)
   } catch (error) {
     next(error)

@@ -6,7 +6,7 @@ let dbInstance = null // lưu lại kết nối db đã tạo (singleton pattent
 const mongoClient = new MongoClient(env.MONGODB_URI, {
     serverApi: {
         version: ServerApiVersion.v1,
-        strict: true,
+        strict: false,
         deprecationErrors: true
     }
 })
@@ -18,6 +18,10 @@ export const DB_CONNECT = async () => {
     await dbInstance.collection('otps').createIndex(
       { 'expiresAt': 1 },
       { expireAfterSeconds: 0 }
+    )
+    // tạo index tìm kiếm text cho quiz
+    await dbInstance.collection('quizzes').createIndex(
+      { title: 'text', description: 'text', category: 'text', level: 'text' }
     )
 }
 
