@@ -12,7 +12,7 @@ import cookieParser from 'cookie-parser'
 import socketIo from 'socket.io'
 import http from 'http'
 import './providers/passportProvider.js'
-import { quizAttemptSocket } from './sockets/quizAttemptSocket'
+// import { quizAttemptSocket } from './sockets/quizAttemptSocket'
 import { joinAttemptSocket } from './sockets/joinAttemptSocket'
 
 const START_SERVER = () => {
@@ -24,10 +24,10 @@ const START_SERVER = () => {
   })
 
   // process.stdin.resume()
-  app.use(express.json())
-  app.use(cookieParser())
+  app.use(express.json()) // dùng để parse json từ req.body
+  app.use(cookieParser()) // dùng để đọc cookie từ req.cookie
 
-  // Enable CORS with proper configuration
+  // CORS
   app.use(cors(corsOptions))
 
   app.get('/', (req, res) => {
@@ -66,7 +66,7 @@ const START_SERVER = () => {
 })
 
   app.use('/v1', Router_V1)
-  app.use(errorHandlingMiddleware)
+  app.use(errorHandlingMiddleware) // middleware xử lý lỗi chung
 
   // Tạo server mới để sử dụng socker.io
   const server = http.createServer(app)
@@ -75,7 +75,7 @@ const START_SERVER = () => {
     cors: corsOptions
   })
   // Khởi tạo socket trong quizAttemptSocket
-  quizAttemptSocket.initSocketIO(io)
+  // quizAttemptSocket.initSocketIO(io)
   const activeSessions = new Map()
   // Lắng nghe sự kiện kết nối từ client
   io.on('connection', (socket) => {

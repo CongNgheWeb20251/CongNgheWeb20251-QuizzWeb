@@ -97,7 +97,29 @@ function Quizzes() {
   const levelOptions = Array.from(new Set(quizzes.map(q => q.level).filter(Boolean)))
 
   const handleStatusChange = (quizId, nextStatus) => {
-    setQuizzes(prev => prev.map(q => (q._id === quizId ? { ...q, status: nextStatus } : q)))
+    // Update quiz status in the quizzes list
+    setQuizzes(prev => {
+      const updated = prev.map(q => (q._id === quizId ? { ...q, status: nextStatus } : q))
+      if (filter === 'published') return updated.filter(q => q.status === 'published')
+      if (filter === 'drafts') return updated.filter(q => q.status === 'draft')
+      return updated
+    })
+
+    // Update stats
+    setQuizzesStats(prevStats => {
+      const current = quizzes.find(q => q._id === quizId)
+      if (!current || current.status === nextStatus) return prevStats
+      const wasPublished = current.status === 'published'
+      const willPublished = nextStatus === 'published'
+      const wasDraft = current.status === 'draft'
+      const willDraft = nextStatus === 'draft'
+
+      return {
+        ...prevStats,
+        publishedQuizzes: prevStats.publishedQuizzes + (willPublished ? 1 : 0) - (wasPublished ? 1 : 0),
+        draftQuizzes: prevStats.draftQuizzes + (willDraft ? 1 : 0) - (wasDraft ? 1 : 0)
+      }
+    })
   }
 
   return (
@@ -151,12 +173,12 @@ function Quizzes() {
                 placeholder="Search quizzes by title, description, or category..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-12 pr-14 py-4 rounded-2xl transition-all outline-none 
-                bg-white/5 text-white/90 placeholder-white/60 
+                className="w-full pl-12 pr-14 py-4 rounded-2xl transition-all outline-none
+                bg-white/5 text-white/90 placeholder-white/60
                 border border-white/10 shadow-[0_8px_24px_rgba(2,6,23,0.55)]
                 focus:ring-4 focus:ring-sky-500/25 focus:border-sky-400/60"
               />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-colors 
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-colors
                 hover:bg-white/10">
                 <Filter className="w-5 h-5 text-white/70 group-focus-within:text-sky-400" />
               </button>
@@ -290,8 +312,9 @@ function Quizzes() {
 
           <div className="side-card">
             <h4 className="side-card-title">Quick Actions</h4>
-            <button className="side-btn" onClick={handleCreateNew}>
-              ➕ Create New
+            <button className="side-btn flex items-center gap-2 justify-center" onClick={handleCreateNew}>
+              <CirclePlus />
+              Create New Quiz
             </button>
             {/* <input
               className="side-input"

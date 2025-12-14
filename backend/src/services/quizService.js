@@ -123,6 +123,9 @@ const startAttemptQuiz = async (userId, quizId) => {
     if (!quiz) {
       throw new ApiError(StatusCodes.NOT_FOUND, `Quiz with id ${quizId} not found`)
     }
+    if (quiz.status !== 'published' || !quiz.startTime || !quiz.endTime || Date.now() < quiz.startTime || Date.now() > quiz.endTime) {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'This quiz is not available for attempts')
+    }
     // Tạo mới session quiz
     // Lấy thời gian hiện tại theo server
     const now = Date.now()

@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { JwtProvider } from '~/providers/JwtProvider'
 import { env } from '~/config/environment'
 import ApiError from '~/utils/ApiError'
+import { quizModel } from '~/models/quizModel'
 
 const isAuthorized = async (req, res, next) => {
   const clientAccessToken = req.cookies?.accessToken
@@ -28,6 +29,35 @@ const isAuthorized = async (req, res, next) => {
   }
 }
 
+const isQuizOwner = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const quizId = req.params.id || req.params.quizId
+    const userRole = req.jwtDecoded.role
+
+    // Validate quizId
+    if (!quizId) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Quiz ID is required')
+    }
+
+    // Tìm quiz
+    const quiz = await quizModel.findOneById(quizId)
+    if (!quiz) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found')
+    }
+
+    if (quiz.createdBy.toString() !== userId || userRole === 'student') {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'You do not have permission to perform this action')
+    }
+
+    // req.quiz = quiz
+    next()
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const authMiddleware = {
-  isAuthorized
+  isAuthorized,
+  isQuizOwner
 }

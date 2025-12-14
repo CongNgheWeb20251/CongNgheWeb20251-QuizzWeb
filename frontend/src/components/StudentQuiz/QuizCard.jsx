@@ -17,7 +17,9 @@ import {
   Calendar,
   Timer,
   TrendingUp,
-  Award
+  Award,
+  Atom,
+  SquareSigma
 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -25,20 +27,21 @@ import { useNavigate } from 'react-router-dom'
 
 const subjectIcons = {
   'programming': <Code className="w-6 h-6" />,
-  'React': <Cpu className="w-6 h-6" />,
-  'CSS': <Palette className="w-6 h-6" />,
-  'Database': <Database className="w-6 h-6" />,
-  'Web Dev': <Globe className="w-6 h-6" />,
-  'General': <BookOpen className="w-6 h-6" />
+  'css': <Palette className="w-6 h-6" />,
+  'database': <Database className="w-6 h-6" />,
+  'other': <BookOpen className="w-6 h-6" />,
+  'mathematics': <SquareSigma className="w-6 h-6" />,
+  'science': <Atom className="w-6 h-6" />,
+  'geography': <Globe className="w-6 h-6" />,
+  'technology': <Cpu className="w-6 h-6" />
 }
 
 const subjectColors= {
   'programming': 'bg-amber-100 text-amber-700',
-  'React': 'bg-sky-100 text-sky-700',
-  'CSS': 'bg-pink-100 text-pink-700',
-  'Database': 'bg-emerald-100 text-emerald-700',
-  'Web Dev': 'bg-purple-100 text-purple-700',
-  'General': 'bg-blue-100 text-blue-700'
+  'science': 'bg-sky-100 text-sky-700',
+  'css': 'bg-pink-100 text-pink-700',
+  'database': 'bg-emerald-100 text-emerald-700',
+  'other': 'bg-blue-100 text-blue-700'
 }
 
 const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {

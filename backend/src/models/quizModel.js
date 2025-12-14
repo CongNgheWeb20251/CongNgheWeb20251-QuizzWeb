@@ -153,10 +153,9 @@ const getQuizzes = async (userId, page, itemsPerPage, filter, search) => {
   try {
     //
     const queryConditions = [
-      // Dk1 board thuoc ve userId (member or owner)
+      // Dk1 board thuoc ve userId (owner)
       { $or: [
-        { createdBy: new ObjectId(userId) },
-        { memberIds: { $all: [new ObjectId(userId)] } }
+        { createdBy: new ObjectId(userId) }
       ] }
     ]
 
@@ -174,6 +173,21 @@ const getQuizzes = async (userId, page, itemsPerPage, filter, search) => {
     const query = await DB_GET().collection(QUIZ_COLLECTION_NAME).aggregate([
       { $match: { $and: queryConditions } },
       { $sort: { title : 1 } },
+      // Lấy số lượng completed của mỗi quiz
+      { $lookup: {
+        from: sessionQuizModel.SESSION_QUIZ_COLLECTION_NAME,
+        localField: '_id',
+        foreignField: 'quizId',
+        as: 'sessions',
+        pipeline: [
+          { $project: { createdAt: 0, updatedAt: 0, quizId: 0 } },
+          { $match: { status: 'completed' } }
+        ]
+      } },
+      { $addFields: {
+        completedCount: { $size: '$sessions' }
+      } },
+      { $project: { sessions: 0 } },
       // Xử lí nhiều luồng
       { $facet: {
         // 1 query quizzes
