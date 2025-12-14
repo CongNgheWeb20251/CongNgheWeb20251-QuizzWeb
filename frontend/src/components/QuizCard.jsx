@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { draftQuizAPI, publishQuizAPI } from '~/apis'
 import './QuizCard.css'
+import { Book, BookKey, BookLock, Check } from 'lucide-react'
 
 const QuizCard = ({ quiz, onStatusChange }) => {
   const navigate = useNavigate()
@@ -43,8 +44,9 @@ const QuizCard = ({ quiz, onStatusChange }) => {
       }
       onStatusChange?.(quiz._id, nextStatus)
       toast.success(`Quiz is now ${nextStatus}`)
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
-      toast.error(error?.response?.data?.message || 'Failed to update status')
+      //
     } finally {
       setSubmitting(false)
       setMenuOpen(false)
@@ -54,7 +56,9 @@ const QuizCard = ({ quiz, onStatusChange }) => {
   return (
     <div className="qc-card">
       <div className="qc-left">
-        <div className="qc-icon">📘</div>
+        <div className="qc-icon">
+          {quiz.status === 'published' ? <BookKey /> : <BookLock />}
+        </div>
         <div className="qc-info">
           <h4 className="qc-title">{quiz.title}</h4>
           <p className="qc-subtitle">{quiz.subtitle}</p>
@@ -63,7 +67,7 @@ const QuizCard = ({ quiz, onStatusChange }) => {
             <span className="qc-meta-item">•</span>
             <span className="qc-meta-item">{quiz.timeLimit} min</span>
             <span className="qc-meta-item">•</span>
-            <span className="qc-meta-item">{quiz?.completions} completions</span>
+            <span className="qc-meta-item">{quiz?.completedCount} completions</span>
           </div>
         </div>
       </div>
@@ -88,14 +92,14 @@ const QuizCard = ({ quiz, onStatusChange }) => {
                 onClick={() => handleStatusUpdate('draft')}
                 disabled={submitting}
               >
-                {quiz.status === 'draft' ? '• Draft' : 'Draft'}
+                {quiz.status === 'draft' ? <div className="flex items-center justify-center gap-2"> Draft <Check /></div> : 'Draft'}
               </button>
               <button
                 className={`qc-menu-item ${quiz.status === 'published' ? 'active' : ''}`}
                 onClick={() => handleStatusUpdate('published')}
                 disabled={submitting}
               >
-                {quiz.status === 'published' ? '• Published' : 'Published'}
+                {quiz.status === 'published' ? <div className="flex items-center justify-center gap-2"> Published <Check /></div> : 'Published'}
               </button>
             </div>
           )}

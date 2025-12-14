@@ -21,7 +21,8 @@ import { FIELD_REQUIRED_MESSAGE } from '~/utils/validators'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import { updateQuizInfo, getQuizInfo } from '~/apis'
 import { toast } from 'react-toastify'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, isEqual } from 'lodash'
+import PageLoader from '~/components/Loading/PageLoader'
 
 
 export default function EditQuizInfo() {
@@ -46,6 +47,7 @@ export default function EditQuizInfo() {
     description: quizData?.description,
     category: quizData?.category,
     level: quizData?.level,
+    status: quizData?.status,
     timeLimit: quizData?.timeLimit,
     passingScore: quizData?.passingScore,
     startTime: formatDateTimeLocal(quizData?.startTime),
@@ -72,6 +74,7 @@ export default function EditQuizInfo() {
           description: data.description,
           category: data.category,
           level: data.level,
+          status: data.status,
           timeLimit: data.timeLimit,
           passingScore: data.passingScore,
           startTime: formatDateTimeLocal(data.startTime),
@@ -97,8 +100,24 @@ export default function EditQuizInfo() {
     if (quizData?._id) navigate(`/teacher/edit/${quizData._id}/step2`)
   }
 
+  const hasChanges = (data) => {
+    return !isEqual(data, {
+      title: quizData.title,
+      description: quizData.description,
+      category: quizData.category,
+      level: quizData.level,
+      status: quizData.status,
+      timeLimit: quizData.timeLimit,
+      passingScore: quizData.passingScore,
+      startTime: formatDateTimeLocal(quizData.startTime),
+      endTime: formatDateTimeLocal(quizData.endTime),
+      showResults: quizData.showResults,
+      allowRetake: quizData.allowRetake
+    })
+  }
+
   const submitUpdateQuiz = async (data) => {
-    const { title, description, category, level, timeLimit, passingScore, startTime, endTime, showResults, allowRetake } = data
+    const { title, description, category, level, status, timeLimit, passingScore, startTime, endTime, showResults, allowRetake } = data
 
     // Convert datetime-local to milliseconds
     const updateData = {
@@ -106,6 +125,7 @@ export default function EditQuizInfo() {
       description,
       category,
       level,
+      status,
       timeLimit,
       passingScore,
       startTime: startTime ? new Date(startTime).getTime() : undefined,
@@ -115,7 +135,7 @@ export default function EditQuizInfo() {
     }
 
     // Prepare update data
-    if (title === quizData.title && description === quizData.description && category === quizData.category && level === quizData.level && timeLimit === quizData.timeLimit && passingScore === quizData.passingScore && updateData.startTime === quizData.startTime && updateData.endTime === quizData.endTime && showResults === quizData.showResults && allowRetake === quizData.allowRetake) {
+    if (!hasChanges(data)) {
       toast.info('No changes to save.')
       return
     }
@@ -324,6 +344,8 @@ export default function EditQuizInfo() {
                         <MenuItem value="technology">Technology</MenuItem>
                         <MenuItem value="geography">Geography</MenuItem>
                         <MenuItem value="literature">Literature</MenuItem>
+                        <MenuItem value="css">CSS</MenuItem>
+                        <MenuItem value="database">Database</MenuItem>
                         <MenuItem value="other">Other</MenuItem>
                       </Select>
                     )}
@@ -369,6 +391,43 @@ export default function EditQuizInfo() {
                   />
                 </FormControl>
                 <FieldErrorAlert errors={errors} fieldName="level" />
+              </Box>
+
+              { /* status */}
+              <Box sx={{ marginBottom: '1.5rem' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, marginBottom: '0.5rem', color: '#475569' }}
+                >
+                Status *
+                </Typography>
+                <FormControl fullWidth>
+                  <Controller
+                    name="status"
+                    control={control}
+                    rules={{ required: FIELD_REQUIRED_MESSAGE }}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        error={!!errors.status}
+                        sx={{
+                          borderRadius: '8px',
+                          backgroundColor: '#fafbfc',
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#8b5cf6'
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#8b5cf6'
+                          }
+                        }}
+                      >
+                        <MenuItem value="draft">Draft</MenuItem>
+                        <MenuItem value="published">Published</MenuItem>
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+                <FieldErrorAlert errors={errors} fieldName="status" />
               </Box>
             </Paper>
 

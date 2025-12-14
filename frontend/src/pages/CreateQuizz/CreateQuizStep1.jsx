@@ -175,8 +175,12 @@ function CreateQuizStep1() {
                     <option value="mathematics">Mathematics</option>
                     <option value="history">History</option>
                     <option value="geography">Geography</option>
-                    <option value="literature">Literature</option>
                     <option value="technology">Technology</option>
+                    <option value="programming">Programming</option>
+                    <option value="literature">Literature</option>
+                    <option value="css">CSS</option>
+                    <option value="database">Database</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
 

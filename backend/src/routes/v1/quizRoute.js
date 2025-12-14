@@ -21,7 +21,7 @@ Router.route('/join/:inviteToken')
 
 Router.route('/:id/info')
   .get(quizController.getQuizInfo)
-  .put(quizValidation.updateInfo, quizController.updateInfo)
+  .put(authMiddleware.isQuizOwner, quizValidation.updateInfo, quizController.updateInfo)
 
 Router.route('/:id')
   .get(quizController.getDetails)
@@ -30,14 +30,14 @@ Router.route('/:id')
 // Router.route('/:id/publish')
 //   .post(quizController.publishQuiz)
 Router.route('/:id/publish')
-  .post(quizController.publishQuiz)
+  .post(authMiddleware.isQuizOwner, quizController.publishQuiz)
 
 // Router.route('/:id/unpublish')
 //   .post(quizController.unpublishQuiz)
 Router.route('/:id/draft')
-  .post(quizController.draftQuiz)
+  .post(authMiddleware.isQuizOwner, quizController.draftQuiz)
 
 Router.route('/:quizId/questions/batch')
-  .post(questionController.updateQuestionsInBatch)
+  .post(authMiddleware.isQuizOwner, questionController.updateQuestionsInBatch)
 
 export const quizRoute = Router

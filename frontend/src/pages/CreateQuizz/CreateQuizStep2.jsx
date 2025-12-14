@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable no-console */
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import './CreateQuizStep2.css'
@@ -26,6 +25,8 @@ import AddIcon from '@mui/icons-material/Add'
 import { toast } from 'react-toastify'
 import { createQuestionsInBatchAPI } from '~/apis'
 import { isEqual, cloneDeep } from 'lodash'
+import { Save } from 'lucide-react'
+import PageLoader from '~/components/Loading/PageLoader'
 
 const addTempIds = (rawQuestions = []) => rawQuestions.map((question, index) => {
   const tempId = question.tempId ?? index + 1
@@ -230,7 +231,7 @@ function CreateQuizStep2() {
     return !isEqual(questions, originalQuestions)
   }
 
-  const handleSaveDraft = async () => {
+  const handleSave = async () => {
     if (!validateQuestions()) return
 
     // Kiểm tra xem có thay đổi không
@@ -239,7 +240,7 @@ function CreateQuizStep2() {
       return
     }
 
-    console.log('Save draft - Step 2:', { questions })
+    // console.log('Save draft - Step 2:', { questions })
     // 2. Trước khi gửi lên server, loại bỏ tempId khỏi questions và options
     const questionsToSave = questions.map(q => {
       const { tempId, ...questionData } = q
@@ -249,7 +250,7 @@ function CreateQuizStep2() {
       })
       return questionData
     })
-    console.log('Questions to save:', questionsToSave)
+    // console.log('Questions to save:', questionsToSave)
     toast.promise(
       createQuestionsInBatchAPI(quizData._id, questionsToSave),
       {
@@ -262,7 +263,7 @@ function CreateQuizStep2() {
       }
     }).catch(error => {
       // toast.error('Failed to save draft. Please try again.')
-      console.error('Save draft error:', error)
+      // console.error('Save draft error:', error)
     })
   }
 
@@ -270,22 +271,19 @@ function CreateQuizStep2() {
     localStorage.setItem('previewQuiz', JSON.stringify({ ...quizData, questions }))
   }
 
-  const handlePublish = () => {
+  const handleFinish = () => {
     if (!validateQuestions()) return
-    console.log('Publish quiz:', { ...quizData, questions })
-    // TODO: Validate, call API, navigate to success page
-    toast.success('Quiz published successfully! (TODO: implement API)')
-    // navigate('/dashboard')
+    if (!hasChanges()) {
+      navigate(`/teacher/quizzes/${quizData._id}`)
+      return
+    }
+    handleSave()
+    navigate(`/teacher/quizzes/${quizData._id}`)
   }
 
   if (isLoading || !quizData) {
     return (
-      <Box>
-        <div className="loader-container">
-          <div className="loader"></div>
-          <p>Loading quiz details...</p>
-        </div>
-      </Box>
+      <PageLoader fullScreen />
     )
   }
 
@@ -315,9 +313,10 @@ function CreateQuizStep2() {
                 backgroundColor: '#f8fafc'
               }
             }}
-            onClick={handleSaveDraft}
+            onClick={handleSave}
           >
-            Save Draft
+            <Save size={20} style={{ marginRight: '0.5rem' }} />
+            Save
           </Button>
           <Link
             to={`/teacher/quizzes/${quizData._id}/preview`}
@@ -629,9 +628,9 @@ function CreateQuizStep2() {
                   backgroundColor: '#059669'
                 }
               }}
-              onClick={handlePublish}
+              onClick={handleFinish}
             >
-              Publish & Finish
+              Finish
             </Button>
           </Box>
         </Paper>
