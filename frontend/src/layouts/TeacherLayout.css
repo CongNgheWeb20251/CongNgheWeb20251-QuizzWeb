@@ -7,7 +7,7 @@
 }
 
 /* Sidebar */
-.sidebar {
+.sidebar-layout {
   width: 280px;
   background-color: #242424;
   padding: 24px;
@@ -17,7 +17,7 @@
   flex-shrink: 0; /* Prevent sidebar from shrinking */
 }
 
-.sidebar-header {
+.sidebar-header-layout {
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -99,7 +99,7 @@
 }
 
 .content-wrapper {
-    padding: 24px 32px;
+    /* padding: 24px 32px; */
     flex: 1;
 }
 

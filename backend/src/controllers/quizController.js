@@ -30,9 +30,9 @@ const getDetails = async (req, res, next) => {
 const getQuizzes = async (req, res, next) => {
   try {
     const userId = req.jwtDecoded._id
-    const { page, itemsPerPage, filter } = req.query
+    const { page, itemsPerPage, filter, search } = req.query
     // console.log({ ...req.query })
-    const quizzes = await quizService.getQuizzes(userId, page, itemsPerPage, filter)
+    const quizzes = await quizService.getQuizzes(userId, page, itemsPerPage, filter, search)
     res.status(StatusCodes.OK).json(quizzes)
   } catch (error) {
     next(error)

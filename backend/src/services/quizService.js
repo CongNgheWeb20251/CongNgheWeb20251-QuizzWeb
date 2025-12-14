@@ -71,7 +71,7 @@ const getDetails = async (userId, quizzId, userRole) => {
   }
 }
 
-const getQuizzes = async (userId, page, itemsPerPage, filter) => {
+const getQuizzes = async (userId, page, itemsPerPage, filter, search) => {
   try {
     if (!page) page = DEFAULT_PAGE
     if (!itemsPerPage) itemsPerPage = DEFAULT_ITEMS_PER_PAGE
@@ -79,7 +79,7 @@ const getQuizzes = async (userId, page, itemsPerPage, filter) => {
     else if (filter === 'drafts') filter = 'draft'
     // console.log({page, itemsPerPage, filter})
 
-    const result = await quizModel.getQuizzes(userId, parseInt(page, 10), parseInt(itemsPerPage, 10), filter)
+    const result = await quizModel.getQuizzes(userId, parseInt(page, 10), parseInt(itemsPerPage, 10), filter, search)
     return result
   } catch (error) {
     throw new Error(error)
@@ -250,7 +250,6 @@ const draftQuiz = async (userId, quizId) => {
     throw error
   }
 }
-
 
 
 export const quizService = {
