@@ -22,16 +22,22 @@ import {
   Search,
   Filter
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import Box from '@mui/material/Box'
+
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 
 import QuizCard from '~/components/StudentQuiz/QuizCard'
 import SkeletonCard from '~/components/Skeleton/QuizCardSkeleton'
 import UserAvatar from '~/components/UserAvatar/UserAvatar'
 import StartQuizModal from '~/components/StudentQuiz/StartQuizModal'
 import { startAttemptQuizAPI, fetchQuizzesByStudentAPI } from '~/apis/index'
+import Pagination from '@mui/material/Pagination'
+import PaginationItem from '@mui/material/PaginationItem'
+import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
 
 export default function StudentDashboard() {
   const [quizzes, setQuizzes] = useState([])
+  const [totalQuizzes, setTotalQuizzes] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [openMenuId, setOpenMenuId] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -40,19 +46,61 @@ export default function StudentDashboard() {
     quiz: null,
     isRetake: false
   })
+  const location = useLocation()
+  const query = new URLSearchParams(location.search)
+  const page = parseInt(query.get('page') || '1', 10)
+  const searchFromUrl = query.get('search') || ''
   const navigate = useNavigate()
-  // Simulate data loading
+
+  // Hàm xây dựng URL với page và search
+  const buildUrl = (pageParam, searchParam) => {
+    const params = new URLSearchParams()
+    if (pageParam && Number(pageParam) !== DEFAULT_PAGE) params.set('page', pageParam)
+    if (searchParam && searchParam !== '') params.set('search', searchParam)
+    const qs = params.toString()
+    return `/dashboard${qs ? `?${qs}` : ''}`
+  }
+
+  // Đồng bộ searchQuery với searchFromUrl khi URL thay đổi
+  useEffect(() => {
+    setSearchQuery(searchFromUrl)
+  }, [searchFromUrl])
+
+  // fetch quizzes khi page hoặc searchFromUrl thay đổi
   useEffect(() => {
     setIsLoading(true)
-    fetchQuizzesByStudentAPI('?page=1').then((data) => {
+    const params = new URLSearchParams()
+
+    // Chỉ thêm page khi không có search (backend không pagination khi search)
+    if (!searchFromUrl) {
+      params.set('page', page)
+    }
+
+    if (searchFromUrl) {
+      params.set('search', searchFromUrl)
+    }
+
+    fetchQuizzesByStudentAPI(`?${params.toString()}`).then((data) => {
       setQuizzes(data.quizzes || [])
+      setTotalQuizzes(data.totalQuizzes || 0)
       setIsLoading(false)
     // eslint-disable-next-line no-unused-vars
     }).catch((error) => {
       // console.error('Error fetching quizzes:', error)
       setIsLoading(false)
     })
-  }, [])
+  }, [page, searchFromUrl])
+
+  // dùng debounce để cập nhật URL khi searchQuery thay đổi
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery !== searchFromUrl) {
+        navigate(buildUrl(1, searchQuery), { replace: true })
+      }
+    }, 1000) // 1000ms debounce
+
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery, searchFromUrl, navigate])
 
   const toggleMenu = (quizId) => {
     setOpenMenuId(openMenuId === quizId ? null : quizId)
@@ -162,21 +210,74 @@ export default function StudentDashboard() {
         ) : quizzes.length === 0 ? (
           <EmptyState />
         ) : (
-          <div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-            role="list"
-            aria-label="Quiz cards"
-          >
-            {quizzes.map((quiz, index) => (
-              <QuizCard
-                key={quiz._id}
-                quiz={quiz}
-                index={index}
-                openMenuId={openMenuId}
-                toggleMenu={toggleMenu}
-                onStartQuiz={handleStartQuiz}
-              />
-            ))}
+          <div>
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              role="list"
+              aria-label="Quiz cards"
+            >
+              {quizzes.map((quiz, index) => (
+                <QuizCard
+                  key={quiz._id}
+                  quiz={quiz}
+                  index={index}
+                  openMenuId={openMenuId}
+                  toggleMenu={toggleMenu}
+                  onStartQuiz={handleStartQuiz}
+                />
+              ))}
+            </div>
+            {/* Chỉ hiển thị pagination */}
+            {(totalQuizzes > 0) &&
+              <Box sx={{ my: 3, pr: 5, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                <Pagination
+                  size="large"
+                  showFirstButton
+                  showLastButton
+                  count={Math.ceil(totalQuizzes / DEFAULT_ITEMS_PER_PAGE)}
+                  page={page}
+                  sx={{
+                    '& .MuiPaginationItem-root': {
+                      color: '#1f2937',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '12px',
+                      minWidth: 40,
+                      height: 40,
+                      transition: 'all 0.2s ease'
+                    },
+                    '& .MuiPaginationItem-root:hover': {
+                      backgroundColor: '#f3f4f6',
+                      borderColor: '#d1d5db'
+                    },
+                    '& .MuiPaginationItem-root.Mui-selected': {
+                      color: '#0ea5e9',
+                      backgroundColor: '#e0f2fe',
+                      borderColor: '#7dd3fc',
+                      fontWeight: 600
+                    },
+                    '& .MuiPaginationItem-root.Mui-selected:hover': {
+                      backgroundColor: '#bae6fd'
+                    },
+                    '& .MuiPaginationItem-ellipsis': {
+                      backgroundColor: 'transparent',
+                      border: 'none'
+                    },
+                    '& .MuiPaginationItem-icon': {
+                      color: '#6b7280'
+                    }
+                  }}
+
+                  renderItem={(item) => (
+                    <PaginationItem
+                      component={Link}
+                      to={buildUrl(item.page, searchQuery)}
+                      {...item}
+                    />
+                  )}
+                />
+              </Box>
+            }
           </div>
         )}
       </main>

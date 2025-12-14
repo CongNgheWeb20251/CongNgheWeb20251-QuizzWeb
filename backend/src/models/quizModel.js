@@ -256,11 +256,71 @@ const getQuizzesStats = async (userId) => {
   }
 }
 
-const getQuizzesByStudent = async (userId, page, itemsPerPage) => {
+/**
+ * Phải tạo index text cho các trường cần tìm kiếm trong ProductModel trước khi sử dụng hàm này
+ * Đây là cách sử dụng tính năng Full-Text Search của MongoDB
+ * Ví dụ: name: tuan pro 123 thì có thể search với keySearch = 'tuan' hoặc 'pro' hoặc '123', tương tự với product_description
+ * @returns
+ */
+
+const getQuizzesByStudent = async (userId, page, itemsPerPage, search) => {
   try {
     const queryConditions = [
       { memberIds: { $all: [new ObjectId(userId)] } }
     ]
+    // Thêm điều kiện search nếu có
+    if (search && search.trim() !== '') {
+      queryConditions.push({
+        $text: { $search: search.trim() }
+      })
+    }
+
+    // Build queryQuizzes pipeline
+    const queryQuizzesPipeline = []
+
+    // Nếu có search thì reset về page 1, nếu không thì dùng page từ params
+    const currentPage = (search && search.trim() !== '') ? 1 : page
+
+    queryQuizzesPipeline.push(
+      { $skip: pagingSkipValue(currentPage, itemsPerPage) }, // bỏ qua số lượng bản ghi của những page trước đó
+      { $limit: itemsPerPage } // giới hạn tối đa số lượng bản ghi trả về trên 1 page
+    )
+
+    // Thêm các lookup operations
+    queryQuizzesPipeline.push(
+      { $lookup: {
+        from: sessionQuizModel.SESSION_QUIZ_COLLECTION_NAME,
+        localField: '_id',
+        foreignField: 'quizId',
+        as: 'sessions',
+        pipeline: [
+          { $project: { createdAt: 0, updatedAt: 0, quizId: 0 } },
+          { $match: { userId: new ObjectId(userId) } },
+          {
+            $addFields: {
+              statusPriority: {
+                $switch: {
+                  branches: [
+                    { case: { $eq: ['$status', 'doing'] }, then: 3 },
+                    { case: { $eq: ['$status', 'completed'] }, then: 2 }
+                  ],
+                  default: 0
+                }
+              }
+            }
+          },
+          { $sort: { statusPriority: -1, submitTime: -1 } },
+          { $limit: 1 }
+        ]
+      } },
+      // Thêm field sessionsCount
+      { $addFields: {
+        sessionsCount: { $size: '$sessions' },
+        lastSession: { $arrayElemAt: ['$sessions', 0] }
+      } },
+      // Loại bỏ array sessions để giảm data trả về
+      { $project: { status: 0, sessions: 0 } }
+    )
 
     const query = await DB_GET().collection(QUIZ_COLLECTION_NAME).aggregate([
       { $match: { $and: queryConditions } },
@@ -268,42 +328,7 @@ const getQuizzesByStudent = async (userId, page, itemsPerPage) => {
       // Xử lí nhiều luồng
       { $facet: {
         // 1 query quizzes
-        'queryQuizzes': [
-          { $skip: pagingSkipValue(page, itemsPerPage) }, // bỏ qua số lượng bản ghi của những page trước đó
-          { $limit: itemsPerPage }, // giới hạn tối đa số lượng bản ghi trả về trên 1 page
-          { $lookup: {
-            from: sessionQuizModel.SESSION_QUIZ_COLLECTION_NAME,
-            localField: '_id',
-            foreignField: 'quizId',
-            as: 'sessions',
-            pipeline: [
-              { $project: { createdAt: 0, updatedAt: 0, quizId: 0 } },
-              { $match: { userId: new ObjectId(userId) } },
-              {
-                $addFields: {
-                  statusPriority: {
-                    $switch: {
-                      branches: [
-                        { case: { $eq: ['$status', 'doing'] }, then: 3 },
-                        { case: { $eq: ['$status', 'completed'] }, then: 2 }
-                      ],
-                      default: 0
-                    }
-                  }
-                }
-              },
-              { $sort: { statusPriority: -1, submitTime: -1 } },
-              { $limit: 1 }
-            ]
-          } },
-          // Thêm field sessionsCount
-          { $addFields: {
-            sessionsCount: { $size: '$sessions' },
-            lastSession: { $arrayElemAt: ['$sessions', 0] }
-          } },
-          // Loại bỏ array sessions để giảm data trả về
-          { $project: { status: 0, sessions: 0 } }
-        ],
+        'queryQuizzes': queryQuizzesPipeline,
         // 2 query total count
         'queryCountTotalQuizzes': [
           { $count: 'totalQuizzes' }

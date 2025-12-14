@@ -63,10 +63,14 @@ export default function StudentQuizPage() {
     setIsLoading(true)
     const socket = socketIoInstance
 
-    const [quizPromise, sessionPromise] = [
-      dispatch(fetchQuizzDetailsAPI(quizId)),
-      fetchSessionQuizAPI(sessionId)
-    ]
+    // Chỉ fetch quiz nếu chưa có trong Redux store hoặc khác quizId
+    const quizPromise = quiz && quiz._id === quizId
+      ? Promise.resolve()
+      : dispatch(fetchQuizzDetailsAPI(quizId))
+
+    // Session luôn phải fetch lại
+    const sessionPromise = fetchSessionQuizAPI(sessionId)
+
     Promise.all([quizPromise, sessionPromise]).then(([, sessionRes]) => {
       const initialAnswers = {}
       sessionRes.answers.forEach(answer => {
@@ -157,7 +161,7 @@ export default function StudentQuizPage() {
       socket.off('session-ended')
       socket.emit('leave-session', sessionId)
     }
-  }, [dispatch, quizId, sessionId, navigate])
+  }, [dispatch, quizId, sessionId, navigate, quiz])
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
