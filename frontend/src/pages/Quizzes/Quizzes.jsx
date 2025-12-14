@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '@mui/material/Button'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import QuizCard from '~/components/QuizCard'
+import UserAvatar from '~/components/UserAvatar/UserAvatar'
 import './Quizzes.css'
 import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
 import { Link, useLocation } from 'react-router-dom'
@@ -16,6 +18,9 @@ function Quizzes() {
   const [quizzes, setQuizzes] = useState([])
   const [totalQuizzes, setTotalQuizzes] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [levelFilter, setLevelFilter] = useState('all')
   const location = useLocation()
   const query = new URLSearchParams(location.search)
   const page = parseInt(query.get('page') || '1', 10)
@@ -94,8 +99,51 @@ function Quizzes() {
     return true
   })
 
+  const searchedQuizzes = filteredQuizzes.filter(q => {
+    const term = searchTerm.trim().toLowerCase()
+    const matchesSearch = term
+      ? (q.title?.toLowerCase().includes(term) || q.description?.toLowerCase().includes(term))
+      : true
+    const matchesCategory = categoryFilter === 'all' ? true : q.category === categoryFilter
+    const matchesLevel = levelFilter === 'all' ? true : q.level === levelFilter
+    return matchesSearch && matchesCategory && matchesLevel
+  })
+
+  const categoryOptions = Array.from(new Set(quizzes.map(q => q.category).filter(Boolean)))
+  const levelOptions = Array.from(new Set(quizzes.map(q => q.level).filter(Boolean)))
+
+  const handleStatusChange = (quizId, nextStatus) => {
+    setQuizzes(prev => prev.map(q => (q._id === quizId ? { ...q, status: nextStatus } : q)))
+  }
+
   return (
     <div className="quizzes-page">
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon fontSize="small" />}
+          onClick={() => navigate('/teacher/dashboard')}
+          sx={{
+            color: 'rgba(255,255,255,0.9)',
+            borderColor: 'rgba(255,255,255,0.06)',
+            textTransform: 'none',
+            px: 2,
+            py: 1,
+            backgroundColor: 'transparent',
+            transition: 'background-color 160ms, transform 200ms, box-shadow 160ms',
+            '& .MuiButton-startIcon': { transition: 'transform 200ms' },
+            '&:hover': {
+              backgroundColor: 'rgba(139,92,246,0.12)',
+              borderColor: 'rgba(139,92,246,0.35)',
+              boxShadow: '0 6px 18px rgba(2,6,23,0.6)',
+              '& .MuiButton-startIcon': { transform: 'translateX(-6px)' }
+            }
+          }}
+        >
+            Dashboard
+        </Button>
+        <UserAvatar />
+      </Box>
       <div className="quizzes-header">
         <div className="quizzes-title-section">
           <h2 className="quizzes-title">Quizzes</h2>
@@ -147,7 +195,7 @@ function Quizzes() {
                 <div className="loader"></div>
                 <p>Loading quizzes...</p>
               </div>
-            ) : filteredQuizzes.length === 0 ? (
+            ) : searchedQuizzes.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">📚</div>
                 <h3>No quizzes found</h3>
@@ -157,8 +205,8 @@ function Quizzes() {
                 </button>
               </div>
             ) : (
-              filteredQuizzes.map(quiz => (
-                <QuizCard key={quiz._id} quiz={quiz} />
+              searchedQuizzes.map(quiz => (
+                <QuizCard key={quiz._id} quiz={quiz} onStatusChange={handleStatusChange} />
               ))
             )}
           </div>
@@ -239,12 +287,34 @@ function Quizzes() {
             <button className="side-btn" onClick={handleCreateNew}>
               ➕ Create New
             </button>
-            <button className="side-btn">
-              🔍 Browse Templates
-            </button>
-            <button className="side-btn">
-              ⚙️ Settings
-            </button>
+            <input
+              className="side-input"
+              placeholder="🔍 Search quizzes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="side-select-row">
+              <select
+                className="side-select"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+              >
+                <option value="all">All categories</option>
+                {categoryOptions.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <select
+                className="side-select"
+                value={levelFilter}
+                onChange={(e) => setLevelFilter(e.target.value)}
+              >
+                <option value="all">All levels</option>
+                {levelOptions.map(lv => (
+                  <option key={lv} value={lv}>{lv}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </aside>
       </div>

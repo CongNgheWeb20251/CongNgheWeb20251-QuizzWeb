@@ -158,6 +158,57 @@
   color: #e5e7eb;
 }
 
+.side-input {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e5e7eb;
+  outline: none;
+}
+
+.side-input:focus {
+  border-color: rgba(139, 92, 246, 0.45);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18);
+}
+
+.side-select-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.side-select {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e5e7eb;
+  outline: none;
+}
+
+.side-select:focus {
+  border-color: rgba(139, 92, 246, 0.45);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18);
+}
+
+.side-select option {
+  background: #1a1a2e;
+  color: #e5e7eb;
+  padding: 10px;
+}
+
+.side-select option:hover {
+  background: rgba(139, 92, 246, 0.2);
+}
+
+.side-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .side-card-title {
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
