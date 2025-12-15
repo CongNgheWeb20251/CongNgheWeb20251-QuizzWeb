@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getQuizInfo } from '~/apis'
+import { getQuizInfo, deleteQuizAPI } from '~/apis'
 import { FRONTEND_URL } from '~/utils/constants'
 import './QuizDetail.css'
 import ShareQuizModal from '~/components/Modal/ShareQuizModal'
@@ -40,11 +40,14 @@ function QuizDetail() {
     navigate(`/teacher/edit/${id}/step1`)
   }
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this quiz?')) {
-      console.log('Delete quiz:', id)
-      // TODO: Implement API call to delete quiz
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this quiz?')) return
+    try {
+      await deleteQuizAPI(id)
       navigate('/teacher/quizzes')
+    } catch (err) {
+      console.error('Delete quiz failed:', err)
+      // Optional: keep user on page; errors are handled via API toast interceptor if any
     }
   }
 

@@ -6,6 +6,8 @@ import { StatusCodes } from 'http-status-codes'
 import { DEFAULT_PAGE, DEFAULT_ITEMS_PER_PAGE, DEFAULT_FILTER } from '~/utils/constants'
 import { sessionQuizModel } from '~/models/sessionQuizModel'
 import { nanoid } from 'nanoid'
+import { DB_GET } from '~/config/mongodb'
+import { ObjectId } from 'mongodb'
 
 const createNew = async ({ userId, data }) => {
   try {
@@ -66,6 +68,34 @@ const getDetails = async (userId, quizzId, userRole) => {
     }
 
     return quizClone
+  } catch (error) {
+    throw error
+  }
+}
+
+const deleteQuiz = async (userId, quizId) => {
+  try {
+    const quiz = await quizModel.findOneById(quizId)
+    if (!quiz) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `Quiz with id ${quizId} not found`)
+    }
+
+    if (quiz.createdBy.toString() !== userId.toString()) {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'You do not have permission to delete this quiz')
+    }
+
+    // Cascade delete related data
+    const db = DB_GET()
+    const qid = new ObjectId(quizId)
+
+    // Delete answer options, questions, user answers, sessions, then the quiz
+    await db.collection('answerOptions').deleteMany({ quizId: qid })
+    await db.collection('questions').deleteMany({ quizId: qid })
+    await db.collection('userAnswers').deleteMany({ quizId: qid })
+    await db.collection('sessionQuizzes').deleteMany({ quizId: qid })
+    await quizModel.deleteOne(quizId)
+
+    return { message: 'Quiz deleted successfully', quizId }
   } catch (error) {
     throw error
   }
@@ -267,5 +297,6 @@ export const quizService = {
   getQuizInfo,
   getQuizAttempts,
   publishQuiz,
-  draftQuiz
+  draftQuiz,
+  deleteQuiz
 }

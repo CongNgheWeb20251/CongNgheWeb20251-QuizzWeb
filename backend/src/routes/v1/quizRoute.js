@@ -25,6 +25,7 @@ Router.route('/:id/info')
 
 Router.route('/:id')
   .get(quizController.getDetails)
+    .delete(quizController.deleteQuiz)
 
 
 // Router.route('/:id/publish')
