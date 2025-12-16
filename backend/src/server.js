@@ -14,8 +14,10 @@ import http from 'http'
 import './providers/passportProvider.js'
 import passport from 'passport'
 import { joinAttemptSocket } from './sockets/joinAttemptSocket'
+import { RedisDB } from './config/redis.init.js'
+import { createGlobalRateLimit } from './middlewares/rateLimit'
 
-const START_SERVER = () => {
+const START_SERVER = async () => {
   const app = express()
 
   app.use((req, res, next) => {
@@ -31,6 +33,12 @@ const START_SERVER = () => {
 
   // CORS
   app.use(cors(corsOptions))
+
+  // Khởi tạo Redis
+  await RedisDB.initRedis()
+
+  // Áp dụng rate limit toàn cục (sau khi Redis đã sẵn sàng)
+  app.use(createGlobalRateLimit())
 
   app.get('/', (req, res) => {
   const mode = env.BUILD_MODE === 'production' ? 'PRODUCTION' : 'DEVELOPMENT'
@@ -108,7 +116,7 @@ const START_SERVER = () => {
 (async () => {
   try {
     await DB_CONNECT()
-    START_SERVER()
+    await START_SERVER()
   }
   catch (err) {
     console.error(err)
