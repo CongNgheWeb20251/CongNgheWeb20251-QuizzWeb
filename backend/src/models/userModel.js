@@ -30,8 +30,9 @@ const USER_COLLECTION_SCHEMA = Joi.object({
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false),
-  require_2fa: Joi.boolean().default(false)
-
+  require_2fa: Joi.boolean().default(false),
+  // set exprire time là 5 phút nếu user không verifyToken
+  expiresAt: Joi.date()
 })
 
 const UNCHANGE_FIELDS = ['_id', 'email', 'createdAt']
@@ -107,6 +108,27 @@ const update = async (userId, updateData) => {
   }
 }
 
+const updateUserActive = async (userId, updateData) => {
+  try {
+    Object.keys(updateData).forEach((key) => {
+      if (UNCHANGE_FIELDS.includes(key)) {
+        delete updateData[key]
+      }
+    })
+    const updateResult = await DB_GET().collection(USER_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(userId) },
+      {
+        $set: updateData,
+        $unset: { expiresAt: '' } // Xóa trường expiresAt sau khi kích hoạt để TTL không xóa user
+      },
+      { returnDocument: 'after' }
+    )
+    return updateResult
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 
 export const userModel = {
   USER_COLLECTION_NAME,
@@ -116,5 +138,6 @@ export const userModel = {
   findOneByEmail,
   update,
   findOneByGoogleId,
-  findOneByFacebookId
+  findOneByFacebookId,
+  updateUserActive
 }
