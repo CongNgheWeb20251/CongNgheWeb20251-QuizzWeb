@@ -5,6 +5,8 @@ import { getQuizInfo, deleteQuizAPI } from '~/apis'
 import { FRONTEND_URL } from '~/utils/constants'
 import './QuizDetail.css'
 import ShareQuizModal from '~/components/Modal/ShareQuizModal'
+import { useConfirm } from 'material-ui-confirm'
+import { CircleAlert, X } from 'lucide-react'
 
 function QuizDetail() {
   const { id } = useParams()
@@ -12,6 +14,7 @@ function QuizDetail() {
   const [quiz, setQuiz] = useState(null)
   const [loading, setLoading] = useState(true)
   const [shareModalOpen, setShareModalOpen] = useState(false)
+  const confirm = useConfirm()
 
   useEffect(() => {
     let mounted = true
@@ -41,13 +44,51 @@ function QuizDetail() {
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this quiz?')) return
-    try {
+    const { confirmed } = await confirm({
+      title: (
+        <div className='flex  flex-row items-center gap-2 justify-between'>
+          <div className='flex gap-2 items-center'>
+            <CircleAlert color="red" />
+            <span>Are you sure you want to delete this quiz?</span>
+          </div>
+          {/* <X color="red" /> */}
+        </div>
+      ),
+      description: (
+        <div className="mt-4 space-y-2 mb-2">
+          <p className="text-sm text-gray-600">
+            This action will permanently delete
+            <span className="mx-1 font-semibold text-gray-900">
+              {quiz.title}
+            </span>
+            and all related data.
+          </p>
+          <div className="pt-1 text-sm text-gray-600">
+            Type
+            <span className="mx-1 rounded bg-gray-100 px-1.5 py-0.5 font-mono text-gray-900">
+              {quiz.title}
+            </span>
+            to confirm.
+          </div>
+          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+          ⚠ This action cannot be undone.
+          </div>
+        </div>
+      ),
+      confirmationText: 'Delete',
+      cancellationText: 'Cancel',
+      confirmationKeyword: `${quiz.title}`,
+      allowClose: true
+
+    })
+    if (confirmed) {
+      // Call the API to delete the quiz
       await deleteQuizAPI(id)
       navigate('/teacher/quizzes')
-    } catch (err) {
-      console.error('Delete quiz failed:', err)
-      // Optional: keep user on page; errors are handled via API toast interceptor if any
+      return
+    }
+    else {
+      () => {}
     }
   }
 

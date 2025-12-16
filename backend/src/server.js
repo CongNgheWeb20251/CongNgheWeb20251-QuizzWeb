@@ -13,7 +13,6 @@ import socketIo from 'socket.io'
 import http from 'http'
 import './providers/passportProvider.js'
 import passport from 'passport'
-// import { quizAttemptSocket } from './sockets/quizAttemptSocket'
 import { joinAttemptSocket } from './sockets/joinAttemptSocket'
 
 const START_SERVER = () => {
@@ -77,8 +76,7 @@ const START_SERVER = () => {
   const io = socketIo(server, {
     cors: corsOptions
   })
-  // Khởi tạo socket trong quizAttemptSocket
-  // quizAttemptSocket.initSocketIO(io)
+
   const activeSessions = new Map()
   // Lắng nghe sự kiện kết nối từ client
   io.on('connection', (socket) => {
