@@ -12,6 +12,7 @@ import cookieParser from 'cookie-parser'
 import socketIo from 'socket.io'
 import http from 'http'
 import './providers/passportProvider.js'
+import passport from 'passport'
 // import { quizAttemptSocket } from './sockets/quizAttemptSocket'
 import { joinAttemptSocket } from './sockets/joinAttemptSocket'
 
@@ -26,6 +27,8 @@ const START_SERVER = () => {
   // process.stdin.resume()
   app.use(express.json()) // dùng để parse json từ req.body
   app.use(cookieParser()) // dùng để đọc cookie từ req.cookie
+  // Khởi tạo Passport cho OAuth
+  app.use(passport.initialize())
 
   // CORS
   app.use(cors(corsOptions))
