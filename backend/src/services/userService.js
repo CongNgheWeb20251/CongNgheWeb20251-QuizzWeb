@@ -33,7 +33,8 @@ const createNew = async (userData) => {
       username: userData.username || nameFromEmail,
       fullName: userData.fullName || nameFromEmail,
       role: userData.accountType || 'student',
-      authProvider: 'local'
+      authProvider: 'local',
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 phút hết hạn
       // verifyToken: uuidv4()
     }
     const token = uuidv4()
@@ -110,7 +111,7 @@ const verifyAccount = async (resBody) => {
       isActive: true
     }
 
-    const updatedUser = await userModel.update(existingUser._id, updateData)
+    const updatedUser = await userModel.updateUserActive(existingUser._id, updateData)
     return pickUser(updatedUser)
 
   } catch (error) {

@@ -23,6 +23,11 @@ export const DB_CONNECT = async () => {
     await dbInstance.collection('quizzes').createIndex(
       { title: 'text', description: 'text', category: 'text', level: 'text' }
     )
+    // tạo index hết hạn user không verifyToken thì db sẽ tự động xóa
+    await dbInstance.collection('users').createIndex(
+      { 'expiresAt': 1 },
+      { expireAfterSeconds: 0 }
+    )
 }
 
 export const DB_GET = () => {

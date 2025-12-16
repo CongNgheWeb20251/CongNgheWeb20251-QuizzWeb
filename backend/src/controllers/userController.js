@@ -2,7 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { userService } from '~/services/userService'
 import ms from 'ms'
 import ApiError from '~/utils/ApiError'
-import { SERVER_DOMAIN, WEBSITE_DOMAIN } from '~/utils/constants'
+import { WEBSITE_DOMAIN } from '~/utils/constants'
 
 const createNew = async (req, res, next) => {
   try {

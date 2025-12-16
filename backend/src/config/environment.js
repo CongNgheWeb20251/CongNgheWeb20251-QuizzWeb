@@ -35,5 +35,11 @@ export const env = {
   // Facebook OAuth
   FACEBOOK_APP_ID: process.env.FACEBOOK_APP_ID,
   FACEBOOK_APP_SECRET: process.env.FACEBOOK_APP_SECRET,
-  FACEBOOK_CALLBACK_URL: process.env.FACEBOOK_CALLBACK_URL
+  FACEBOOK_CALLBACK_URL: process.env.FACEBOOK_CALLBACK_URL,
+
+  // Redis
+  PASSWORD_REDIS: process.env.PASSWORD_REDIS,
+  HOST_REDIS: process.env.HOST_REDIS,
+  PORT_REDIS: process.env.PORT_REDIS
+
 }

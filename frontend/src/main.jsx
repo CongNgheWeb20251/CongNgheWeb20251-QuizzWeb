@@ -30,7 +30,7 @@ root.render(
           cancellationButtonProps: { color: 'inherit', variant: 'outlined' },
           allowClose: false }}>
           <App />
-          <ToastContainer theme="light" position="top-center" autoClose={2000} />
+          <ToastContainer theme="light" position="top-right" autoClose={2000} />
         </ConfirmProvider>
       </BrowserRouter>
     </PersistGate>
