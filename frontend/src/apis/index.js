@@ -225,6 +225,12 @@ export const draftQuizAPI = async (quizId) => {
   return res.data
 }
 
+export const deleteQuizAPI = async (quizId) => {
+  const res = await authorizedAxiosInstance.delete(`/v1/quizzes/${quizId}`)
+  toast.success('Quiz deleted successfully', { theme:'colored' })
+  return res.data
+}
+
 // attemptQuiz------------------------------------------
 
 export const startAttemptQuizAPI = async (quizId) => {

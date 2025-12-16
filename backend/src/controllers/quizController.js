@@ -15,6 +15,17 @@ const createNew = async (req, res, next) => {
   }
 }
 
+const deleteQuiz = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const quizId = req.params.id
+    const result = await quizService.deleteQuiz(userId, quizId)
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
 const getDetails = async (req, res, next) => {
   try {
     const userId = req.jwtDecoded._id
@@ -151,5 +162,6 @@ export const quizController = {
   getQuizInfo,
   getQuizAttempts,
   publishQuiz,
-  draftQuiz
+  draftQuiz,
+  deleteQuiz
 }
