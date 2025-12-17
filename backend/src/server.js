@@ -15,7 +15,7 @@ import './providers/passportProvider.js'
 import passport from 'passport'
 import { joinAttemptSocket } from './sockets/joinAttemptSocket'
 import { RedisDB } from './config/redis.init.js'
-import { createGlobalRateLimit } from './middlewares/rateLimit'
+import { initAuthRateLimit, initUserRateLimit } from './middlewares/rateLimit'
 
 const START_SERVER = async () => {
   const app = express()
@@ -37,8 +37,9 @@ const START_SERVER = async () => {
   // Khởi tạo Redis
   await RedisDB.initRedis()
 
-  // Áp dụng rate limit toàn cục (sau khi Redis đã sẵn sàng)
-  app.use(createGlobalRateLimit())
+  // Khởi tạo rate limit middlewares sau khi Redis sẵn sàng
+  initAuthRateLimit()
+  initUserRateLimit()
 
   app.get('/', (req, res) => {
   const mode = env.BUILD_MODE === 'production' ? 'PRODUCTION' : 'DEVELOPMENT'

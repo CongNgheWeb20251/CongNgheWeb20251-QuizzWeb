@@ -27,6 +27,7 @@ import { createQuestionsInBatchAPI } from '~/apis'
 import { isEqual, cloneDeep } from 'lodash'
 import { Save } from 'lucide-react'
 import PageLoader from '~/components/Loading/PageLoader'
+import QuestionContentMdEditor from '~/components/Form/QuestionContentMdEditor'
 
 const addTempIds = (rawQuestions = []) => rawQuestions.map((question, index) => {
   const tempId = question.tempId ?? index + 1
@@ -168,7 +169,7 @@ function CreateQuizStep2() {
     const newQuestionTempId = maxId + 1
     const newQuestion = {
       tempId: newQuestionTempId,
-      content: '',
+      content: '```cpp \n // Click edit to edit content \n```',
       points: 10,
       type: 'single-choice',
       options: [
@@ -445,12 +446,9 @@ function CreateQuizStep2() {
 
                     <div className="cq-form-group">
                       <label className="cq-label">Question Text</label>
-                      <textarea
-                        className="cq-textarea"
-                        rows={2}
-                        value={question.content}
-                        onChange={(e) => handleQuestionChange(question.tempId, 'content', e.target.value)}
-                        placeholder="Enter your question here..."
+                      <QuestionContentMdEditor
+                        questionContentProp={question.content}
+                        onUpdateQuestionContent={(newContent) => handleQuestionChange(question.tempId, 'content', newContent)}
                       />
                     </div>
 

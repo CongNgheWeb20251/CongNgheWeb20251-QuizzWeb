@@ -1,3 +1,4 @@
+import MDEditor from '@uiw/react-md-editor'
 import Box from '@mui/material/Box'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
@@ -66,9 +67,17 @@ const PreviewQuestionCard = ({ question, index, viewMode, answers, setAnswers })
         />
       </Box>
 
-      <Typography variant="body1" sx={{ marginBottom: '1.5rem', fontSize: { xs: '1rem', sm: '1.1rem' } }}>
-        {question?.content}
-      </Typography>
+      <Box sx={{ marginBottom: '1.5rem' }}>
+        <MDEditor.Markdown
+          source={question?.content}
+          style={{
+            whiteSpace: 'pre-wrap',
+            padding: question?.content ? '10px' : '0px',
+            border: question?.content ? '0.5px solid rgba(0, 0, 0, 0.2)' : 'none',
+            borderRadius: '8px'
+          }}
+        />
+      </Box>
 
       {['single-choice', 'true-false'].includes(question?.type) ? (
         <RadioGroup

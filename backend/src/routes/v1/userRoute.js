@@ -6,17 +6,18 @@ import { multerUploadMiddleware } from '~/middlewares/multerUploadMiddleware'
 import passport from 'passport'
 import { googleMiddleware } from '~/middlewares/googleMiddleware'
 import { facebookMiddleware } from '~/middlewares/facebookMiddleware'
+import { authRateLimit, userRateLimit } from '~/middlewares/rateLimit'
 
 const Router = express.Router()
 
 Router.route('/register')
-  .post(userValidation.createNew, userController.createNew)
+  .post(authRateLimit, userValidation.createNew, userController.createNew)
 
 Router.route('/verify')
-  .put(userValidation.verifyAccount, userController.verifyAccount)
+  .put(authRateLimit, userValidation.verifyAccount, userController.verifyAccount)
 
 Router.route('/login')
-  .post(userValidation.login, userController.login)
+  .post(authRateLimit, userValidation.login, userController.login)
 
 Router.route('/google')
   .get(passport.authenticate('google', {
@@ -51,12 +52,13 @@ Router.route('/refresh_token')
 Router.route('/update')
   .put(
     authMiddleware.isAuthorized,
+    userRateLimit,
     multerUploadMiddleware.upload.single('avatar'),
     userValidation.update,
     userController.update
   )
 
 Router.route('/me')
-  .get(authMiddleware.isAuthorized, userController.getCurrentUser)
+  .get(authMiddleware.isAuthorized, userRateLimit, userController.getCurrentUser)
 
 export const userRoute = Router

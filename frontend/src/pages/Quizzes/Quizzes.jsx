@@ -124,7 +124,7 @@ function Quizzes() {
 
   return (
     <div className="quizzes-page">
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Button
           variant="outlined"
           startIcon={<ArrowBackIcon fontSize="small" />}
@@ -149,7 +149,7 @@ function Quizzes() {
             Dashboard
         </Button>
         <UserAvatar />
-      </Box>
+      </Box> */}
       <div className="quizzes-header">
         <div className="quizzes-title-section">
           <h2 className="quizzes-title">Quizzes</h2>
@@ -165,7 +165,7 @@ function Quizzes() {
 
       <div className="quizzes-container">
         <div className="quizzes-main">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl" >
             <div className="relative group mb-5">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60 group-focus-within:text-sky-400 transition-colors" />
               <input
