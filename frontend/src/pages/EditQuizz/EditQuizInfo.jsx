@@ -11,7 +11,6 @@ import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Container from '@mui/material/Container'
 import SaveIcon from '@mui/icons-material/Save'
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 // Removed Redux usage
@@ -23,6 +22,7 @@ import { updateQuizInfo, getQuizInfo } from '~/apis'
 import { toast } from 'react-toastify'
 import { cloneDeep, isEqual } from 'lodash'
 import PageLoader from '~/components/Loading/PageLoader'
+import { CircleAlert } from 'lucide-react'
 
 
 export default function EditQuizInfo() {
@@ -726,7 +726,7 @@ export default function EditQuizInfo() {
               </Box>
 
               {/* Info Box */}
-              {/* <Box
+              <Box
                 sx={{
                   marginTop: '2rem',
                   padding: '1rem',
@@ -735,26 +735,20 @@ export default function EditQuizInfo() {
                   border: '1px solid #fbbf24'
                 }}
               >
-                <Typography variant="body2" sx={{ color: '#92400e', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: '#92400e', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <CircleAlert />
                 Note
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#92400e' }}>
                 Changes to these settings will apply to all future quiz attempts. Existing attempts
                 will not be affected.
                 </Typography>
-              </Box> */}
+              </Box>
             </Paper>
           </Box>
 
           {/* Action Buttons */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: '1rem',
-              marginTop: '2rem'
-            }}
-          >
+          <Box sx={{ display: 'flex', gap: '1rem', marginTop: '2rem', justifyContent: 'flex-end' }}>
             <Button
               type="submit"
               variant="outlined"
@@ -772,40 +766,23 @@ export default function EditQuizInfo() {
                 }
               }}
             >
-            Save Changes
+              Save Changes
             </Button>
-
-            <Box sx={{ display: 'flex', gap: '1rem' }}>
-              <Button
-                variant="contained"
-                startIcon={<RemoveRedEyeIcon fontSize="small" />}
-                sx={{
-                  backgroundColor: '#8b5cf6',
-                  color: 'white',
-                  padding: '0.75rem 1.5rem',
-                  '&:hover': {
-                    backgroundColor: '#7c3aed'
-                  }
-                }}
-              >
-              Preview
-              </Button>
-              <Button
-                variant="contained"
-                endIcon={<ArrowForwardIcon fontSize="small" />}
-                sx={{
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  padding: '0.75rem 2rem',
-                  '&:hover': {
-                    backgroundColor: '#059669'
-                  }
-                }}
-                onClick={handleNext}
-              >
-              Edit Questions
-              </Button>
-            </Box>
+            <Button
+              variant="contained"
+              endIcon={<ArrowForwardIcon fontSize="small" />}
+              sx={{
+                backgroundColor: '#10b981',
+                color: 'white',
+                padding: '0.75rem 2rem',
+                '&:hover': {
+                  backgroundColor: '#059669'
+                }
+              }}
+              onClick={handleNext}
+            >
+            Edit Questions
+            </Button>
           </Box>
         </form>
       </Container>

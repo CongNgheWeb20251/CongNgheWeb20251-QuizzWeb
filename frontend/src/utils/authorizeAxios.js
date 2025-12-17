@@ -83,7 +83,13 @@ authorizedAxiosInstance.interceptors.response.use((response) => {
   }
 
   if (error.response?.status === 429) {
-    toast.info('You are sending requests too frequently. Please try again later.')
+    toast.info(errorMessage)
+  }
+
+  // Nếu mã lỗi là 401 và message là Unauthorized: Invalid token hay Unauthorized: Token not found, không hiển thị toast
+  else if (error.response?.status === 401 &&
+    (errorMessage === 'Unauthorized: Invalid token' || errorMessage === 'Unauthorized: Token not found')) {
+    // Không làm gì cả, đã được xử lý log out trong phần trên
   }
   // Hiển thị thông báo lỗi, ngoại trừ lỗi 410
   else if (error.response?.status !== 410) {

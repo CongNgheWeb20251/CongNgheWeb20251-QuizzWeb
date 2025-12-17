@@ -3,12 +3,17 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import Quiz from '@mui/icons-material/Quiz'
 import Settings from '@mui/icons-material/Settings'
+import Drawer from '@mui/material/Drawer'
+import IconButton from '@mui/material/IconButton'
+import { Menu, X } from 'lucide-react'
 import UserAvatar from '~/components/UserAvatar/UserAvatar'
 import './TeacherLayout.css'
 
 function TeacherLayout() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const DRAWER_WIDTH = 280
 
   // Determine active menu based on current path
   const getActiveMenu = () => {
@@ -28,13 +33,17 @@ function TeacherLayout() {
     } else if (menuId === 'dashboard') {
       navigate('/teacher/dashboard')
     }
+    setMobileOpen(false)
   }
 
   const handleManageClick = (manageId) => {
     if (manageId === 'settings') {
       navigate('/settings')
     }
+    setMobileOpen(false)
   }
+
+  const handleDrawerToggle = () => setMobileOpen(prev => !prev)
 
   const menuItems = [
     { id: 'dashboard', icon: <DashboardIcon />, label: 'Dashboard' },
@@ -48,6 +57,60 @@ function TeacherLayout() {
 
   return (
     <div className="teacher-layout">
+      {/* Mobile Drawer for navigation */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{ keepMounted: true }}
+        PaperProps={{
+          sx: {
+            width: DRAWER_WIDTH,
+            bgcolor: '#242424',
+            color: '#fff',
+            borderRight: '1px solid rgba(255,255,255,0.08)'
+          }
+        }}
+        anchor="left"
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="logo" style={{ fontSize: '1.25rem' }}>
+            <span className="logo-qui">Qui</span>
+            <span className="logo-zzy">zzy</span>
+          </div>
+          <IconButton onClick={handleDrawerToggle} size="small" sx={{ color: '#e5e7eb' }}>
+            <X size={18} />
+          </IconButton>
+        </div>
+        <nav className="sidebar-nav mt-2" style={{ padding: 16 }}>
+          <div className="nav-section">
+            {menuItems.map((item) => (
+              <div
+                key={item.id}
+                className={`nav-item ${getActiveMenu() === item.id ? 'active' : ''}`}
+                onClick={() => handleMenuClick(item.id)}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="nav-section">
+            <div className="nav-section-title">Manage</div>
+            {manageItems.map((item) => (
+              <div
+                key={item.id}
+                className={`nav-item ${getActiveMenu() === item.id ? 'active' : ''}`}
+                onClick={() => handleManageClick(item.id)}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </nav>
+      </Drawer>
+
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
@@ -90,12 +153,17 @@ function TeacherLayout() {
       {/* Main Content */}
       <main className="main-content">
         {/* Top Bar */}
-        <div className="top-bar" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '1rem' }}>
-          <UserAvatar />
+        <div className="top-bar">
+          <IconButton onClick={handleDrawerToggle} className="menu-button" sx={{ color: '#e5e7eb' }}>
+            <Menu size={20} />
+          </IconButton>
+          <div className="topbar-right">
+            <UserAvatar />
+          </div>
         </div>
-        
+
         <div className="content-wrapper">
-            <Outlet />
+          <Outlet />
         </div>
       </main>
     </div>

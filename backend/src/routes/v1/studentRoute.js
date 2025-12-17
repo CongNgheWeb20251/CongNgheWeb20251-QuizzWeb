@@ -2,12 +2,14 @@ import express from 'express'
 import { authMiddleware } from '~/middlewares/authMiddleware'
 import { quizController } from '~/controllers/quizController'
 import { sessionQuizController } from '~/controllers/sessionQuizController'
+import { userRateLimit } from '~/middlewares/rateLimit'
 
 const Router = express.Router()
 
 Router.get('/sessions/:sessionId/result', sessionQuizController.getQuizSessionResult)
 // All dashboard routes require authentication
 Router.use(authMiddleware.isAuthorized)
+Router.use(userRateLimit)
 
 Router.get('/quizzes', quizController.getQuizzesByStudent)
 
