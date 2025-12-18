@@ -10,6 +10,9 @@ import { persistStore } from 'redux-persist'
 import { injectStore } from '~/utils/authorizeAxios'
 import { ToastContainer } from 'react-toastify'
 import { ConfirmProvider } from 'material-ui-confirm'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from '~/customLib/queryClient'
+
 
 const persistor = persistStore(store)
 injectStore(store)
@@ -29,7 +32,9 @@ root.render(
         <ConfirmProvider defaultOptions ={{ confirmationButtonProps: { color:'error', variant: 'contained' },
           cancellationButtonProps: { color: 'inherit', variant: 'outlined' },
           allowClose: false }}>
-          <App />
+          <QueryClientProvider client={queryClient}>
+            <App />
+          </QueryClientProvider>
           <ToastContainer theme="light" position="top-right" autoClose={1500} />
         </ConfirmProvider>
       </BrowserRouter>

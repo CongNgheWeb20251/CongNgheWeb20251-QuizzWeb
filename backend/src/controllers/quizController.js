@@ -149,6 +149,26 @@ const getQuizAttempts = async (req, res, next) => {
   }
 }
 
+const getScoreDistribution = async (req, res, next) => {
+  try {
+    const { quizId } = req.params
+    const distribution = await quizService.getScoreDistribution(quizId)
+    res.status(StatusCodes.OK).json(distribution)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const getQuizMetrics = async (req, res, next) => {
+  try {
+    const { quizId } = req.params
+    const metrics = await quizService.getQuizMetrics(quizId)
+    res.status(StatusCodes.OK).json(metrics)
+  } catch (error) {
+    next(error)
+  }
+}
+
 
 export const quizController = {
   createNew,
@@ -163,5 +183,7 @@ export const quizController = {
   getQuizAttempts,
   publishQuiz,
   draftQuiz,
-  deleteQuiz
+  deleteQuiz,
+  getScoreDistribution,
+  getQuizMetrics
 }
