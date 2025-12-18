@@ -31,6 +31,7 @@ const submitQuizSession = async (req, res, next) => {
     next(error)
   }
 }
+
 const getQuizSessionResult = async (req, res, next) => {
   try {
     const { sessionId } = req.params

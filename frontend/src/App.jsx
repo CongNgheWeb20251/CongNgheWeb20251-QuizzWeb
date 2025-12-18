@@ -85,6 +85,7 @@ function App() {
             <Route path="/teacher/quizzes" element={<Quizzes />} />
             <Route path="/teacher/quizzes/:id" element={<QuizDetail />} />
           </Route>
+          {/* <Route path="/teacher/quizzes/:id" element={<QuizDashboard />} /> */}
         </Route>
         <Route element={<RoleRoute user={currUser} requiredPermission={permissions.VIEW_PREVIEW_QUIZ} />}>
           <Route path="/teacher/quizzes/:id/preview" element={<PreviewQuiz />} />

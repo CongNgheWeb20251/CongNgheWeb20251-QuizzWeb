@@ -1,4 +1,12 @@
 /* Dashboard Page Styles - scoped to page-specific classes to avoid conflicts */
+/* Centered loading state */
+.dashboard-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: calc(100vh - 200px);
+  padding: 24px;
+}
 
 /* Content Header */
 .content-header {

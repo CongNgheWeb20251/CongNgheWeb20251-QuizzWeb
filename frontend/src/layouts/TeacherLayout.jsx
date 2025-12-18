@@ -57,7 +57,7 @@ function TeacherLayout() {
 
   return (
     <div className="teacher-layout">
-      {/* Mobile Drawer for navigation */}
+      {/* Sidebar cho mobile*/}
       <Drawer
         variant="temporary"
         open={mobileOpen}

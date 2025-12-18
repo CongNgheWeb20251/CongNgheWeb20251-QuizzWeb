@@ -43,4 +43,11 @@ Router.route('/:id/draft')
 Router.route('/:quizId/questions/batch')
   .post(authMiddleware.isQuizOwner, questionController.updateQuestionsInBatch)
 
+Router.route('/:quizId/score-distribution')
+  .get(authMiddleware.isQuizOwner, quizController.getScoreDistribution)
+
+Router.route('/:quizId/metrics')
+  .get(authMiddleware.isQuizOwner, quizController.getQuizMetrics)
+
+
 export const quizRoute = Router

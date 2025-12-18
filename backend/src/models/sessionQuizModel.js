@@ -318,7 +318,6 @@ const getQuizSessionResult = async (sessionId) => {
       {
         $lookup: {
           from: questionModel.QUESTION_COLLECTION_NAME,
-          // có thể dùng let và pipeline để lọc dữ liệu nâng cao hơn nếu localField ngừng sp pipeline
           let: { quizId: '$quizId' },
           pipeline: [
             {
@@ -376,6 +375,72 @@ const getQuizSessionResult = async (sessionId) => {
   }
 }
 
+const getScoreDistribution = async (quizId) => {
+  try {
+    const result = await DB_GET().collection(SESSION_QUIZ_COLLECTION_NAME).aggregate([
+      {
+        $match: {
+          quizId: new ObjectId(quizId),
+          status: 'completed',
+          score: { $exists: true },
+          totalPoints: { $exists: true, $gt: 0 }
+        }
+      },
+      {
+        $addFields: {
+          scorePercentage: {
+            $multiply: [
+              { $divide: ['$score', '$totalPoints'] },
+              100
+            ]
+          }
+        }
+      },
+      {
+        $bucket: {
+          groupBy: '$scorePercentage',
+          // Chia nhỏ 10 đơn vị: 0-10, 11-20, 21-30, ...
+          boundaries: [0, 11, 21, 31, 41, 51, 61, 71, 81, 91, 101],
+          default: 'other',
+          output: {
+            count: { $sum: 1 }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          range: {
+            $switch: {
+              branches: [
+                { case: { $eq: ['$_id', 0] }, then: '0-10' },
+                { case: { $eq: ['$_id', 11] }, then: '11-20' },
+                { case: { $eq: ['$_id', 21] }, then: '21-30' },
+                { case: { $eq: ['$_id', 31] }, then: '31-40' },
+                { case: { $eq: ['$_id', 41] }, then: '41-50' },
+                { case: { $eq: ['$_id', 51] }, then: '51-60' },
+                { case: { $eq: ['$_id', 61] }, then: '61-70' },
+                { case: { $eq: ['$_id', 71] }, then: '71-80' },
+                { case: { $eq: ['$_id', 81] }, then: '81-90' },
+                { case: { $eq: ['$_id', 91] }, then: '91-100' }
+              ],
+              default: 'unknown'
+            }
+          },
+          count: 1
+        }
+      },
+      {
+        $sort: { range: 1 }
+      }
+    ]).toArray()
+
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const sessionQuizModel = {
   SESSION_QUIZ_COLLECTION_NAME,
   SESSION_QUIZ_COLLECTION_SCHEMA,
@@ -387,5 +452,6 @@ export const sessionQuizModel = {
   update,
   getQuizSessionDetails,
   calculateQuizScore,
-  getQuizSessionResult
+  getQuizSessionResult,
+  getScoreDistribution
 }

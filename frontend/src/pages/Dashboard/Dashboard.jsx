@@ -79,7 +79,11 @@ function Dashboard() {
 
   // Show loading spinner while fetching data
   if (loading) {
-    return <PageLoadingSpinner />
+    return (
+      <div className="dashboard-loading">
+        <PageLoadingSpinner caption="Loading..." />
+      </div>
+    )
   }
 
   return (

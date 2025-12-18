@@ -286,6 +286,33 @@ const draftQuiz = async (userId, quizId) => {
   }
 }
 
+const getScoreDistribution = async (quizId) => {
+  try {
+    const result = await sessionQuizModel.getScoreDistribution(quizId)
+    // Đảm bảo trả về đầy đủ các khoảng 10 đơn vị, ngay cả khi count = 0
+    const ranges = ['0-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90', '91-100']
+    const distribution = ranges.map(range => {
+      const found = result.find(r => r.range === range)
+      return {
+        range,
+        count: found ? found.count : 0
+      }
+    })
+    return distribution
+  } catch (error) {
+    throw error
+  }
+}
+
+const getQuizMetrics = async (quizId) => {
+  try {
+    const metrics = await quizModel.getQuizMetrics(quizId)
+    return metrics
+  } catch (error) {
+    throw error
+  }
+}
+
 
 export const quizService = {
   createNew,
@@ -300,5 +327,7 @@ export const quizService = {
   getQuizAttempts,
   publishQuiz,
   draftQuiz,
-  deleteQuiz
+  deleteQuiz,
+  getScoreDistribution,
+  getQuizMetrics
 }

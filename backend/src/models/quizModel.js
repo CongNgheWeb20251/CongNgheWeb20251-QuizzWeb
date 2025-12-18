@@ -425,6 +425,185 @@ const getSessionsByUserAndQuiz = async (userId, quizId) => {
   }
 }
 
+const getQuizMetrics = async (quizId) => {
+  try {
+    const result = await DB_GET().collection(QUIZ_COLLECTION_NAME).aggregate([
+      { $match: { _id: new ObjectId(quizId) } },
+      {
+        $lookup: {
+          from: sessionQuizModel.SESSION_QUIZ_COLLECTION_NAME,
+          localField: '_id',
+          foreignField: 'quizId',
+          as: 'sessions'
+        }
+      },
+      {
+        $facet: {
+          quizInfo: [
+            {
+              $project: {
+                passingScore: 1
+              }
+            }
+          ],
+          students: [
+            {
+              $project: {
+                totalStudents: { $size: '$memberIds' }
+              }
+            }
+          ],
+          stats: [
+            { $unwind: '$sessions' },
+            {
+              $addFields: {
+                isCompleted: { $eq: ['$sessions.status', 'completed'] },
+                scorePercentage: {
+                  $cond: [
+                    {
+                      $and: [
+                        { $eq: ['$sessions.status', 'completed'] },
+                        { $gt: ['$sessions.totalPoints', 0] }
+                      ]
+                    },
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            '$sessions.score',
+                            '$sessions.totalPoints'
+                          ]
+                        },
+                        100
+                      ]
+                    },
+                    null
+                  ]
+                }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                passingScore: { $first: '$passingScore' },
+                totalAttempts: { $sum: 1 },
+                completedUsers: {
+                  $addToSet: {
+                    $cond: ['$isCompleted', '$sessions.userId', null]
+                  }
+                },
+                passedUsers: {
+                  $addToSet: {
+                    $cond: [
+                      {
+                        $and: [
+                          { $ne: ['$scorePercentage', null] },
+                          { $gte: ['$scorePercentage', '$passingScore'] }
+                        ]
+                      },
+                      '$sessions.userId',
+                      null
+                    ]
+                  }
+                },
+                scores: { $push: '$scorePercentage' }
+              }
+            },
+            {
+              $project: {
+                passingScore: 1,
+                totalAttempts: 1,
+                completedStudents: {
+                  $size: {
+                    $filter: {
+                      input: '$completedUsers',
+                      as: 'u',
+                      cond: { $ne: ['$$u', null] }
+                    }
+                  }
+                },
+                passedStudents: {
+                  $size: {
+                    $filter: {
+                      input: '$passedUsers',
+                      as: 'u',
+                      cond: { $ne: ['$$u', null] }
+                    }
+                  }
+                },
+                scores: {
+                  $filter: {
+                    input: '$scores',
+                    as: 's',
+                    cond: { $ne: ['$$s', null] }
+                  }
+                }
+              }
+            },
+            {
+              $addFields: {
+                avgScore: { $avg: '$scores' },
+                highestScore: { $max: '$scores' }
+              }
+            }
+          ]
+        }
+      },
+      {
+        $project: {
+          passingScore: {
+            $ifNull: [{ $arrayElemAt: ['$quizInfo.passingScore', 0] }, 0]
+          },
+          totalStudents: {
+            $ifNull: [{ $arrayElemAt: ['$students.totalStudents', 0] }, 0]
+          },
+          totalAttempts: {
+            $ifNull: [{ $arrayElemAt: ['$stats.totalAttempts', 0] }, 0]
+          },
+          completedStudents: {
+            $ifNull: [{ $arrayElemAt: ['$stats.completedStudents', 0] }, 0]
+          },
+          passedStudents: {
+            $ifNull: [{ $arrayElemAt: ['$stats.passedStudents', 0] }, 0]
+          },
+          avgScore: {
+            $round: [
+              { $ifNull: [{ $arrayElemAt: ['$stats.avgScore', 0] }, 0] },
+              0
+            ]
+          },
+          highestScore: {
+            $round: [
+              { $ifNull: [{ $arrayElemAt: ['$stats.highestScore', 0] }, 0] },
+              0
+            ]
+          }
+        }
+      },
+      {
+        $addFields: {
+          passRate: {
+            $cond: [
+              { $gt: ['$completedStudents', 0] },
+              {
+                $multiply: [
+                  { $divide: ['$passedStudents', '$completedStudents'] },
+                  100
+                ]
+              },
+              0
+            ]
+          }
+        }
+      }
+    ]).toArray()
+    return (
+      result[0] || null
+    )
+  } catch (error) {
+    throw new Error(error)
+  }
+}
 
 export const quizModel = {
   QUIZ_COLLECTION_NAME,
@@ -443,5 +622,6 @@ export const quizModel = {
   getQuizzesByStudent,
   findOneByInviteToken,
   addMemberToQuiz,
-  getSessionsByUserAndQuiz
+  getSessionsByUserAndQuiz,
+  getQuizMetrics
 }
