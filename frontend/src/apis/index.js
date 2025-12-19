@@ -51,6 +51,11 @@ export const getRecentQuizzesAPI = async (limit = 3) => {
   return response.data
 }
 
+export const getTopQuizzesAPI = async (limit = 3) => {
+  const response = await authorizedAxiosInstance.get(`/v1/dashboard/top-quizzes?limit=${limit}`)
+  return response.data
+}
+
 
 // createQuiz
 export const createQuizStep1API = async (data) => {
