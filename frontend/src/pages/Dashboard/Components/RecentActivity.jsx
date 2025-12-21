@@ -7,65 +7,32 @@ import {
   Clock,
   Plus
 } from 'lucide-react'
+import { getNotificationsByTeacherAPI } from '~/apis'
 
-const getRecentActivities = () => {
-  return [
-    {
-      _id: 'a1',
-      type: 'completed',
-      quizTitle: 'JavaScript Fundamentals',
-      studentName: 'Sarah Johnson',
-      timestamp: '2025-12-17T14:30:00',
-      score: 92
-    },
-    {
-      _id: 'a2',
-      type: 'started',
-      quizTitle: 'React Hooks Deep Dive',
-      studentName: 'Michael Chen',
-      timestamp: '2025-12-17T13:15:00'
-    },
-    {
-      _id: 'a3',
-      type: 'completed',
-      quizTitle: 'Database Design Principles',
-      studentName: 'Emily Rodriguez',
-      timestamp: '2025-12-17T11:45:00',
-      score: 88
-    },
-    {
-      _id: 'a4',
-      type: 'completed',
-      quizTitle: 'JavaScript Fundamentals',
-      studentName: 'David Park',
-      timestamp: '2025-12-17T10:20:00',
-      score: 78
-    },
-    {
-      _id: 'a5',
-      type: 'created',
-      quizTitle: 'TypeScript Essentials',
-      timestamp: '2025-12-16T16:00:00'
-    }
-  ]
+const getRecentActivities = async () => {
+  return await getNotificationsByTeacherAPI()
 }
 
 function RecentActivity() {
+
   const { data: activities } = useQuery({
-    queryKey: ['teacher', 'dashboard', 'recentActivities'],
+    queryKey: ['notifications'],
     queryFn: () => getRecentActivities()
   })
+
+  // Socket logic đã được xử lý ở Notification component (global)
+  // Không cần duplicate ở đây để tránh thêm notification 2 lần
 
   return (
     <div className="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 p-6">
       <h2 className="text-xl text-gray-100 mb-6">Recent Activity</h2>
 
-      {activities.length === 0 ? (
+      {!activities || activities.length === 0 ? (
         <EmptyActivityState />
       ) : (
         <div className="space-y-4">
           {activities.map((activity) => (
-            <ActivityItem key={activity._id} activity={activity} />
+            <ActivityItem key={activity._id || `${activity.quizTitle}-${activity.createdAt}`} activity={activity} />
           ))}
         </div>
       )}
@@ -74,12 +41,12 @@ function RecentActivity() {
 }
 
 
-function ActivityItem({ activity }) {
+export const ActivityItem = ({ activity }) => {
   const getActivityIcon = () => {
     switch (activity.type) {
-    case 'completed':
+    case 'submit':
       return <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-    case 'started':
+    case 'start':
       return <Clock className="w-5 h-5 text-blue-400" />
     case 'created':
       return <Plus className="w-5 h-5 text-purple-400" />
@@ -90,17 +57,17 @@ function ActivityItem({ activity }) {
 
   const getActivityText = () => {
     switch (activity.type) {
-    case 'completed':
+    case 'submit':
       return (
         <>
           <span className="text-gray-100">{activity.studentName}</span> completed{' '}
           <span className="text-gray-100">{activity.quizTitle}</span>
-          {activity.score && (
-            <span className="text-emerald-400"> • {activity.score}%</span>
+          {typeof activity.scorePercents === 'number' && (
+            <span className="text-emerald-400"> • {activity.scorePercents}%</span>
           )}
         </>
       )
-    case 'started':
+    case 'start':
       return (
         <>
           <span className="text-gray-100">{activity.studentName}</span> started{' '}
@@ -130,7 +97,7 @@ function ActivityItem({ activity }) {
         <p className="text-sm text-gray-300 leading-relaxed">
           {getActivityText()}
         </p>
-        <p className="text-xs text-gray-500 mt-1">{formatTime(activity.timestamp)}</p>
+        <p className="text-xs text-gray-500 mt-1">{formatTime(activity.createdAt)}</p>
       </div>
     </div>
   )

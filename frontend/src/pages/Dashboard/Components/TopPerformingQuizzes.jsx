@@ -41,9 +41,9 @@ function TopPerformingQuizzes() {
 
 function TopQuizCard({ quiz, rank, onClick }) {
   const medalColors = [
+    'from-orange-400 to-amber-500',
     'from-amber-400 to-yellow-500',
-    'from-gray-400 to-gray-500',
-    'from-orange-400 to-amber-500'
+    'from-gray-400 to-gray-500'
   ]
 
   return (

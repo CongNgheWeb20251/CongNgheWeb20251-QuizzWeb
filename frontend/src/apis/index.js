@@ -168,3 +168,10 @@ export const getStudentsQuizAttemptsAPI = async ({ quizId, searchPath }) => {
   return res.data
 }
 
+
+// Notification APIs
+export const getNotificationsByTeacherAPI = async () => {
+  const res = await authorizedAxiosInstance.get('/v1/notifications')
+  return res.data
+}
+

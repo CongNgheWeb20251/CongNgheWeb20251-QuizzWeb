@@ -175,7 +175,7 @@ export default function StartQuizModal({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Questions</p>
-                    <p className="text-gray-900">{quiz?.questionOrderIds?.length} questions</p>
+                    <p className="text-gray-900">{quiz?.questionOrderIds?.length || quiz?.questionsCount} questions</p>
                   </div>
                 </div>
 

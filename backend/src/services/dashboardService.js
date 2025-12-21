@@ -63,7 +63,7 @@ const getTopStudents = async (teacherId, limit) => {
     const teacherObjectId = new ObjectId(teacherId)
     const parsedLimit = Number(limit) || 5
 
-      const topStudents = await db.collection('sessionQuizzes').aggregate([
+    const topStudents = await db.collection('sessionQuizzes').aggregate([
       { $match: { startTime: { $exists: true, $ne: null } } },
       { $sort: { startTime: -1 } },
       {
@@ -153,41 +153,50 @@ const getTopPerformingQuizzes = async (teacherId, limit) => {
     const teacherObjectId = new ObjectId(teacherId)
     const parsedLimit = Number(limit) || 3
 
-    const quizzes = await db.collection('sessionQuizzes').aggregate([
-      { $match: { status: 'completed' } },
+    const quizzes = await db.collection('quizzes').aggregate([
+      // Bắt đầu từ tất cả quizzes của teacher
+      { $match: { createdBy: teacherObjectId } },
+      // Lookup các session completed của từng quiz
       {
         $lookup: {
-          from: 'quizzes',
-          localField: 'quizId',
-          foreignField: '_id',
-          as: 'quiz',
+          from: 'sessionQuizzes',
+          let: { quizId: '$_id' },
           pipeline: [
-            { $match: { createdBy: teacherObjectId } },
-            { $project: { title: 1, category: 1, memberIds: 1 } }
-          ]
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$quizId', '$$quizId'] },
+                    { $eq: ['$status', 'completed'] }
+                  ]
+                }
+              }
+            },
+            { $count: 'total' }
+          ],
+          as: 'completionData'
         }
       },
-      { $unwind: '$quiz' },
+      // Tính số students và completions (có thể = 0)
       {
-        $group: {
-          _id: '$quiz._id',
-          title: { $first: '$quiz.title' },
-          subject: { $first: '$quiz.category' },
-          students: {
-            $first: {
-              $size: { $ifNull: ['$quiz.memberIds', []] }
-            }
-          },
-          completions: { $sum: 1 }
+        $addFields: {
+          students: { $size: { $ifNull: ['$memberIds', []] } },
+          completions: {
+            $ifNull: [
+              { $arrayElemAt: ['$completionData.total', 0] },
+              0
+            ]
+          }
         }
       },
-      { $sort: { completions: -1 } },
+      // Sort theo completions trước, nếu bằng nhau thì theo students
+      { $sort: { completions: -1, students: -1 } },
       { $limit: parsedLimit },
       {
         $project: {
           _id: { $toString: '$_id' },
           title: 1,
-          subject: { $ifNull: ['$subject', 'General'] },
+          subject: { $ifNull: ['$category', 'General'] },
           students: 1,
           completions: 1
         }

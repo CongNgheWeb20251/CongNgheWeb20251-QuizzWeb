@@ -16,6 +16,8 @@ import { getQuizAttemptsAPI } from '~/apis'
 import { useNavigate, useParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import PageLoader from '~/components/Loading/PageLoader'
+import StartQuizModal from '~/components/StudentQuiz/StartQuizModal'
+import { startAttemptQuizAPI } from '~/apis/index'
 
 
 const formatDate = (timestamp) => {
@@ -50,8 +52,26 @@ export default function QuizAttemptsList() {
 
   const [quizAttempts, setQuizAttempts] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [startQuizModal, setStartQuizModal] = useState(false)
   const navigate = useNavigate()
   const { quizId } = useParams()
+
+  const handleStartQuiz = () => {
+    setStartQuizModal(true)
+  }
+
+  const handleCloseModal = () => {
+    setStartQuizModal(false)
+  }
+
+  const handleConfirmStart = () => {
+    // Handle quiz start logic here
+    handleCloseModal()
+    startAttemptQuizAPI(quizId).then((res) => {
+      const { sessionId: newSessionId, quizId: newQuizId } = res
+      navigate(`/quizzes/${newQuizId}/session/${newSessionId}`)
+    })
+  }
 
   useEffect(() => {
     const fetchQuizAttempts = async () => {
@@ -76,7 +96,6 @@ export default function QuizAttemptsList() {
   const onBack = () => {
     navigate('/dashboard')
   }
-  const onStartQuiz = () => {}
 
   const startDate = quizAttempts?.startTime
 
@@ -153,7 +172,7 @@ export default function QuizAttemptsList() {
                     You haven't started this quiz yet. Click the button below to begin your first attempt!
                   </p>
                   <button
-                    onClick={onStartQuiz}
+                    onClick={handleStartQuiz}
                     className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
                     aria-label="Start Quiz"
                   >
@@ -298,6 +317,15 @@ export default function QuizAttemptsList() {
           </div>
         )}
       </main>
+      {startQuizModal && (
+        <StartQuizModal
+          isOpen={startQuizModal}
+          onClose={handleCloseModal}
+          onStart={handleConfirmStart}
+          quiz= {quizAttempts}
+          isRetake={true}
+        />
+      )}
     </div>
   )
 }
