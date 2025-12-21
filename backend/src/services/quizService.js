@@ -184,8 +184,12 @@ const startAttemptQuiz = async (userId, quizId) => {
   }
 }
 
-const joinQuizByInvite = async (userId, inviteToken) => {
+const joinQuizByInvite = async (userId, userRole, inviteToken) => {
   try {
+    // Nếu user là teacher, không cho join
+    if (userRole === 'teacher') {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'Teachers accounts cannot join quizzes as participants')
+    }
     // Tìm quiz theo inviteToken
     const quiz = await quizModel.findOneByInviteToken(inviteToken)
 
@@ -313,6 +317,21 @@ const getQuizMetrics = async (quizId) => {
   }
 }
 
+const getStudentQuizAttempts = async (quizId, page, limit, statusFilter, search) => {
+  try {
+    page = parseInt(page, 10)
+    limit = parseInt(limit, 10)
+    if (isNaN(page) || page < 1) page = DEFAULT_PAGE
+    if (isNaN(limit) || limit < 1) limit = 5
+    if (statusFilter === 'all' || !statusFilter) statusFilter = null
+    const skip = (page - 1) * limit
+    const attempts = await quizModel.getStudentQuizAttempts({ quizId, skip, limit, statusFilter, search })
+    return attempts
+  } catch (error) {
+    throw error
+  }
+}
+
 
 export const quizService = {
   createNew,
@@ -329,5 +348,6 @@ export const quizService = {
   draftQuiz,
   deleteQuiz,
   getScoreDistribution,
-  getQuizMetrics
+  getQuizMetrics,
+  getStudentQuizAttempts
 }

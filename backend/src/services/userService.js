@@ -205,7 +205,8 @@ const refreshToken = async (clientRefreshToken) => {
     const refreshTokenDecoded = await JwtProvider.verifyToken(clientRefreshToken, env.REFRESH_TOKEN_SECRET)
     const userInfo = {
       _id: refreshTokenDecoded._id,
-      email: refreshTokenDecoded.email
+      email: refreshTokenDecoded.email,
+      role: refreshTokenDecoded.role
     }
 
     // Tạo ra accessToken

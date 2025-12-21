@@ -1,8 +1,9 @@
-import React from 'react'
+import { useState } from 'react'
 import {
   ArrowLeft,
   Edit,
-  Share2
+  Share2,
+  CircleAlert, X, Trash
 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
@@ -10,7 +11,10 @@ import { useQuery } from '@tanstack/react-query'
 import ErrorBoundary from '~/components/Error/ErrorBoundary'
 import TableSkeleton from './QuizDashboardPage/skeletons/TableSkeleton'
 import MetricsSkeleton from './QuizDashboardPage/skeletons/MetricsSkeleton'
-import { getQuizInfo } from '~/apis'
+import { getQuizInfo, deleteQuizAPI } from '~/apis'
+import ShareQuizModal from '~/components/Modal/ShareQuizModal'
+import { useConfirm } from 'material-ui-confirm'
+import { FRONTEND_URL } from '~/utils/constants'
 
 const ScoreDistributionCard = lazy(() => import('./QuizDashboardPage/ScoreDistributionCard'))
 const StudentsTable = lazy(() => import('./QuizDashboardPage/StudentsTable'))
@@ -31,6 +35,65 @@ export default function QuizDashboard() {
   const navigate = useNavigate()
   const { id } = useParams()
   const { data: quizInfo } = useQuizInfo(id)
+  const [shareModalOpen, setShareModalOpen] = useState(false)
+  const confirm = useConfirm()
+
+  const handleEdit = () => {
+    navigate(`/teacher/edit/${id}/step1`)
+  }
+
+  const handleDelete = async () => {
+    const { confirmed } = await confirm({
+      title: (
+        <div className='flex  flex-row items-center gap-2 justify-between'>
+          <div className='flex gap-2 items-center'>
+            <CircleAlert color="red" />
+            <span>Are you sure you want to delete this quiz?</span>
+          </div>
+          {/* <X color="red" /> */}
+        </div>
+      ),
+      description: (
+        <div className="mt-4 space-y-2 mb-2">
+          <p className="text-sm text-gray-600">
+            This action will permanently delete
+            <span className="mx-1 font-semibold text-gray-900">
+              {quizInfo?.title}
+            </span>
+            and all related data.
+          </p>
+          <div className="pt-1 text-sm text-gray-600">
+            Type
+            <span className="mx-1 rounded bg-gray-100 px-1.5 py-0.5 font-mono text-gray-900">
+              {quizInfo?.title}
+            </span>
+            to confirm.
+          </div>
+          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+          ⚠ This action cannot be undone.
+          </div>
+        </div>
+      ),
+      confirmationText: 'Delete',
+      cancellationText: 'Cancel',
+      confirmationKeyword: `${quizInfo?.title}`,
+      allowClose: true
+
+    })
+    if (confirmed) {
+      // Call the API to delete the quiz
+      await deleteQuizAPI(id)
+      navigate('/teacher/quizzes')
+      return
+    }
+    else {
+      () => {}
+    }
+  }
+
+  const handleShare = () => {
+    setShareModalOpen(true)
+  }
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -56,13 +119,25 @@ export default function QuizDashboard() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <button className="px-4 py-2 bg-gray-700 border border-gray-600 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2">
+              <button
+                onClick={handleEdit}
+                className="px-4 py-2 bg-gray-700 border border-gray-600 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2">
                 <Edit className="w-4 h-4" />
                 <span className="hidden sm:inline">Edit</span>
               </button>
-              <button className="px-4 py-2 bg-gray-700 border border-gray-600 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2">
-                <Share2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Share</span>
+              {quizInfo?.status === 'published'&& <>
+                <button
+                  onClick={handleShare}
+                  className="px-4 py-2 bg-gray-700 border border-gray-600 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2">
+                  <Share2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Share</span>
+                </button>
+              </>}
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-600 border border-red-500 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500">
+                <Trash className="w-4 h-4 text-white" />
+                <span className="hidden sm:inline">Delete</span>
               </button>
             </div>
           </div>
@@ -95,6 +170,12 @@ export default function QuizDashboard() {
           </Suspense>
         </ErrorBoundary>
       </main>
+      <ShareQuizModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        quizTitle={quizInfo?.title}
+        joinUrl={quizInfo?.inviteToken ? `${FRONTEND_URL}/join/${quizInfo?.inviteToken}` : ''}
+      />
     </div>
   )
 }

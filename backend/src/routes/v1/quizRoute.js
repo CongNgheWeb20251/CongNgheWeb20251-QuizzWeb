@@ -49,5 +49,8 @@ Router.route('/:quizId/score-distribution')
 Router.route('/:quizId/metrics')
   .get(authMiddleware.isQuizOwner, quizController.getQuizMetrics)
 
+Router.route('/:quizId/students')
+  .get(authMiddleware.isQuizOwner, quizController.getStudentQuizAttempts)
+
 
 export const quizRoute = Router

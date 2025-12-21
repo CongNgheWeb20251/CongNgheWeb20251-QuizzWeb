@@ -5,16 +5,18 @@ import ErrorBoundary from '~/components/Error/ErrorBoundary'
 import RecentSkeleton from './Components/Skeletons/RecentSkeleton'
 import ActivitySkeleton from './Components/Skeletons/ActivitySkeleton'
 import { Plus } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const TopPerformingQuizzes = lazy(() => import('./Components/TopPerformingQuizzes'))
 const RecentQuizzes = lazy(() => import('./Components/RecentQuizzes'))
 const RecentActivity = lazy(() => import('./Components/RecentActivity'))
 
 export default function TeacherDashboard() {
+  const navigate = useNavigate()
 
   const handleCreateQuiz = () => {
     // Navigate to quiz creation
-    alert('Navigate to quiz creation page')
+    navigate('/teacher/create-quiz')
   }
 
   // Main Dashboard View
@@ -30,7 +32,7 @@ export default function TeacherDashboard() {
           </div>
           <button
             onClick={handleCreateQuiz}
-            className="px-6 py-3 bg-blue-600 text-white rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+            className="px-6 py-3 bg-[#9333ea] text-white rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
           >
             <Plus className="w-5 h-5" />
             <span>Create New Quiz</span>
@@ -39,7 +41,7 @@ export default function TeacherDashboard() {
 
         {/* Top Performing Quizzes */}
         <ErrorBoundary>
-          <Suspense>
+          <Suspense fallback={<div>Loading...</div>}>
             <TopPerformingQuizzes />
           </Suspense>
         </ErrorBoundary>

@@ -5,12 +5,11 @@ import {
   Award
 } from 'lucide-react'
 
-const getTopQuizzes = () => {
-  return [
-    { _id: 'quiz1', title: 'Math Basics', completions: 150, status: 'published', students: 200 },
-    { _id: 'quiz2', title: 'Science Fundamentals', completions: 120, status: 'published', students: 180 },
-    { _id: 'quiz3', title: 'History 101', completions: 100, status: 'published', students: 160 }
-  ]
+import { getTopQuizzesAPI } from '~/apis'
+
+const getTopQuizzes = async () => {
+  const data = await getTopQuizzesAPI(3)
+  return data
 }
 
 function TopPerformingQuizzes() {
@@ -32,7 +31,6 @@ function TopPerformingQuizzes() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {data
           .sort((a, b) => b.completions - a.completions)
-          .slice(0, 3)
           .map((quiz, index) => (
             <TopQuizCard key={quiz._id} quiz={quiz} rank={index + 1} onClick={() => handleViewQuiz(quiz._id)} />
           ))}

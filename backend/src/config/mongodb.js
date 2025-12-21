@@ -28,6 +28,10 @@ export const DB_CONNECT = async () => {
       { 'expiresAt': 1 },
       { expireAfterSeconds: 0 }
     )
+    await dbInstance.collection('users').createIndex(
+      { fullName: 'text', email: 'text' },
+      { weights: { fullName: 2, email: 1 } }
+    )
 }
 
 export const DB_GET = () => {
