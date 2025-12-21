@@ -414,11 +414,13 @@ const getSessionsByUserAndQuiz = async (userId, quizId) => {
         as: 'sessions',
         pipeline: [
           { $project: { createdAt: 0, updatedAt: 0, quizId: 0 } },
-          { $match: { userId: new ObjectId(userId) } },
+          { $match:
+            { userId: new ObjectId(userId), status: 'completed' }
+          },
           { $sort: { startTime: -1 } }
         ]
       } },
-      { $project: { category: 0, createdAt: 0, updatedAt: 0, status: 0, memberIds: 0, questionOrderIds: 0, level: 0, createdBy: 0 } }
+      { $project: { category: 0, createdAt: 0, updatedAt: 0, status: 0, memberIds: 0, createdBy: 0 } }
     ]).toArray()
     return sessions[0] || []
   } catch (error) {

@@ -14,6 +14,7 @@ import http from 'http'
 import './providers/passportProvider.js'
 import passport from 'passport'
 import { joinAttemptSocket } from './sockets/joinAttemptSocket'
+import { setSocketIo } from './sockets/io'
 import { RedisDB } from './config/redis.init.js'
 import { initAuthRateLimit, initUserRateLimit } from './middlewares/rateLimit'
 
@@ -85,6 +86,8 @@ const START_SERVER = async () => {
   const io = socketIo(server, {
     cors: corsOptions
   })
+  // Share io instance for emissions in services
+  setSocketIo(io)
 
   const activeSessions = new Map()
   // Lắng nghe sự kiện kết nối từ client
@@ -92,6 +95,14 @@ const START_SERVER = async () => {
     // kết nối socket
     console.log('User connected')
     joinAttemptSocket(socket, activeSessions)
+
+    // Lắng nghe sự kiện giáo viên tham gia phòng riêng của họ
+    socket.on('join-teacher', (teacherId) => {
+      if (teacherId) {
+        socket.join(`teacher:${teacherId}`)
+        console.log(`Teacher joined room: teacher:${teacherId}`)
+      }
+    })
   })
 
   // Lắng nghe sự kiện kết nối socket

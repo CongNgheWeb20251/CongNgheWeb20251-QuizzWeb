@@ -8,6 +8,8 @@ import { sessionQuizModel } from '~/models/sessionQuizModel'
 import { nanoid } from 'nanoid'
 import { DB_GET } from '~/config/mongodb'
 import { ObjectId } from 'mongodb'
+import { notificationModel } from '~/models/notificationModel'
+import { getSocketIo } from '~/sockets/io'
 
 const createNew = async ({ userId, data }) => {
   try {
@@ -170,7 +172,18 @@ const startAttemptQuiz = async (userId, quizId) => {
     // Tạo session quiz trong DB
     const createdSession = await sessionQuizModel.createNew(newSession)
     const session = await sessionQuizModel.findOneById(createdSession.insertedId.toString())
-
+    // sau khi tạo xong session thì tạo thêm 1 bản ghi notification
+    const newNotification =await notificationModel.createNewNotification({
+      studentId: userId,
+      sessionId: createdSession.insertedId.toString(),
+      type: 'start',
+      quizId: quizId,
+      teacherId: quiz.createdBy.toString()
+    })
+    // emit kết quả notification mới cho teacher qua socket.io
+    const io = getSocketIo()
+    const socketData = await notificationModel.getNotificationById(newNotification.insertedId.toString())
+    io.to(`teacher:${quiz.createdBy.toString()}`).emit('notification:new', socketData)
     return {
       sessionId: session._id.toString(),
       quizId: session.quizId,

@@ -46,6 +46,7 @@ export default function StudentDashboard() {
     quiz: null,
     isRetake: false
   })
+
   const location = useLocation()
   const query = new URLSearchParams(location.search)
   const page = parseInt(query.get('page') || '1', 10)

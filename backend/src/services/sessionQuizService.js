@@ -2,6 +2,9 @@
 import { cloneDeep } from 'lodash'
 import { sessionQuizModel } from '~/models/sessionQuizModel'
 import { userAnswerModel } from '~/models/userAnswerModel'
+import { notificationModel } from '~/models/notificationModel'
+import { quizModel } from '~/models/quizModel'
+import { getSocketIo } from '~/sockets/io'
 
 const getQuizSessionDetails = async (sessionId) => {
   try {
@@ -96,7 +99,7 @@ const calculateQuizScore = async (sessionId) => {
       : 0
 
     // Cập nhật session
-    const updatedSession = await sessionQuizModel.update(sessionId, {
+    await sessionQuizModel.update(sessionId, {
       submitTime,
       score: totalScore,
       totalPoints,
@@ -106,12 +109,27 @@ const calculateQuizScore = async (sessionId) => {
       status: 'completed'
     })
 
+    // Tìm quiz để lấy teacherId
+    const quiz = await quizModel.findOneById(session.quizId.toString())
+    if (!quiz) {
+      throw new Error('Quiz not found')
+    }
+
+    // Sau khi câp nhật xong thì thêm 1 bản ghi notification, gồm cả thông tin teacherId
+    const newNotification = await notificationModel.createNewNotification({
+      studentId: session.userId.toString(),
+      sessionId: sessionId,
+      quizId: session.quizId.toString(),
+      teacherId: quiz.createdBy.toString(),
+      type: 'submit'
+    })
+    // emit kết quả notification mới cho teacher qua socket.io
+    const io = getSocketIo()
+    const socketData = await notificationModel.getNotificationById(newNotification.insertedId.toString())
+    io.to(`teacher:${quiz.createdBy.toString()}`).emit('notification:new', socketData)
+
     return {
-      score: totalScore,
-      totalPoints,
-      timeSpent,
-      status: 'completed',
-      session: updatedSession
+      status: 'completed'
     }
   } catch (error) {
     throw error

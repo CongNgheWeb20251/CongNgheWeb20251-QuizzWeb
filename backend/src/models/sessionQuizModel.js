@@ -306,7 +306,8 @@ const getQuizSessionResult = async (sessionId) => {
                 passingScore: 1,
                 timeLimit: 1,
                 allowRetake: 1,
-                showResults: 1
+                showResults: 1,
+                level: 1
               }
             }
           ]

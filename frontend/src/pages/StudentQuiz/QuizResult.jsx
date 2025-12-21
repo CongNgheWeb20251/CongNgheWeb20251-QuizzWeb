@@ -9,6 +9,8 @@ import LinearProgress from '@mui/material/LinearProgress'
 import PageLoader from '~/components/Loading/PageLoader'
 import { getQuizResultsAPI } from '~/apis'
 import { useParams, useNavigate } from 'react-router-dom'
+import StartQuizModal from '~/components/StudentQuiz/StartQuizModal'
+import { startAttemptQuizAPI } from '~/apis/index'
 
 import {
   CheckCircle2,
@@ -26,9 +28,27 @@ import {
 export default function QuizResult() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [startQuizModal, setStartQuizModal] = useState(false)
   const navigate = useNavigate()
   // Get sessionId from URL params
   const { sessionId } = useParams()
+
+  const handleStartQuiz = () => {
+    setStartQuizModal(true)
+  }
+
+  const handleCloseModal = () => {
+    setStartQuizModal(false)
+  }
+
+  const handleConfirmStart = () => {
+    // Handle quiz start logic here
+    handleCloseModal()
+    startAttemptQuizAPI(session?.quizId).then((res) => {
+      const { sessionId: newSessionId, quizId } = res
+      navigate(`/quizzes/${quizId}/session/${newSessionId}`)
+    })
+  }
 
   useEffect(() => {
     const fetchQuizResults = async () => {
@@ -203,7 +223,7 @@ export default function QuizResult() {
             }}
           />
         </Paper>
-        {1===1 && (
+        {session.quizInfo?.showResults && (
           <>
             {/* Question Review */}
             <Typography variant="h5" sx={{ fontWeight: 600, marginBottom: '1.5rem', color: '#374151' }}>
@@ -432,12 +452,27 @@ export default function QuizResult() {
                   backgroundColor: '#7c3aed'
                 }
               }}
+              onClick={handleStartQuiz}
             >
               Retake Quiz
             </Button>
           }
         </Box>
       </Container>
+      {startQuizModal && (
+        <StartQuizModal
+          isOpen={startQuizModal}
+          onClose={handleCloseModal}
+          onStart={handleConfirmStart}
+          quiz= {
+            {
+              ...session.quizInfo,
+              questionsCount: session.questions.length
+            }
+          }
+          isRetake={true}
+        />
+      )}
     </Box>
   )
 }
