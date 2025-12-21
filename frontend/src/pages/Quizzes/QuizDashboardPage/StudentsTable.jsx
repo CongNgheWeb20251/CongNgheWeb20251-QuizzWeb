@@ -1,5 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
+import Box from '@mui/material/Box'
+import Pagination from '@mui/material/Pagination'
+import PaginationItem from '@mui/material/PaginationItem'
 import {
   Users,
   Target,
@@ -10,87 +14,69 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react'
-
-const students =[
-  {
-    id: 's2',
-    name: 'Michael Chen',
-    email: 'michael.c@example.com',
-    status: 'completed',
-    score: 88,
-    attempts: 1,
-    lastAttempt: '2025-12-14T10:20:00',
-    timeSpent: 25
-  },
-  {
-    id: 's3',
-    name: 'Emily Rodriguez',
-    email: 'emily.r@example.com',
-    status: 'in-progress',
-    attempts: 1,
-    lastAttempt: '2025-12-16T16:45:00',
-    timeSpent: 15
-  },
-  {
-    id: 's4',
-    name: 'David Park',
-    email: 'david.p@example.com',
-    status: 'completed',
-    score: 78,
-    attempts: 2,
-    lastAttempt: '2025-12-13T11:15:00',
-    timeSpent: 30
-  },
-  {
-    id: 's5',
-    name: 'Jessica Williams',
-    email: 'jessica.w@example.com',
-    status: 'not-started',
-    attempts: 0
-  },
-  {
-    id: 's6',
-    name: 'Robert Taylor',
-    email: 'robert.t@example.com',
-    status: 'completed',
-    score: 95,
-    attempts: 1,
-    lastAttempt: '2025-12-15T09:30:00',
-    timeSpent: 22
-  },
-  {
-    id: 's7',
-    name: 'Amanda Garcia',
-    email: 'amanda.g@example.com',
-    status: 'completed',
-    score: 82,
-    attempts: 3,
-    lastAttempt: '2025-12-16T13:20:00',
-    timeSpent: 27
-  }
-]
+import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
+import { getStudentsQuizAttemptsAPI } from '~/apis'
 
 
-// eslint-disable-next-line no-unused-vars
-const fetchStudentsTable = async (quizId) => {
-  return students
+// fetch student theo quizId với các tham số page, statusFilter, search, limit
+const fetchStudentsTable = async (quizId, { page, statusFilter, search, limit }) => {
+  const normalizedStatus =
+    statusFilter === 'in-progress' ? 'doing' : statusFilter
+  // xây dựng URL với các tham số
+  const params = new URLSearchParams()
+  params.set('page', String(page))
+  params.set('limit', String(limit))
+  if (normalizedStatus && normalizedStatus !== 'all') params.set('statusFilter', normalizedStatus)
+  if (search && search.trim() !== '') params.set('search', search.trim())
+  const data = await getStudentsQuizAttemptsAPI({ quizId, searchPath: `?${params.toString()}` })
+  return data
 }
 
 function StudentsTable({ quizId }) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
+  const navigate = useNavigate()
+  const location = useLocation()
+  const query = new URLSearchParams(location.search)
+
+  const page = parseInt(query.get('page') || DEFAULT_PAGE, 10)
+  const locationSearch = query.get('search') || ''
+  const initialFilter = query.get('filter') || 'all'
+
+  const [searchQuery, setSearchQuery] = useState(locationSearch)
+  const [filterStatus, setFilterStatus] = useState(initialFilter)
+  // dùng để build URL với các tham số page, filter, search, useCallback để tránh việc hàm bị tạo lại không cần thiết
+  const buildUrl = useCallback((pageParam, filterParam, searchParam) => {
+    const params = new URLSearchParams()
+    if (pageParam && Number(pageParam) !== DEFAULT_PAGE) params.set('page', String(pageParam))
+    if (filterParam && filterParam !== 'all') params.set('filter', filterParam)
+    if (searchParam && searchParam.trim() !== '') params.set('search', searchParam.trim())
+    const qs = params.toString()
+    return `${location.pathname}${qs ? `?${qs}` : ''}`
+  }, [location.pathname])
+
+  // đồng bộ hóa trạng thái search và filter với URL khi URL thay đổi
+  useEffect(() => {
+    setSearchQuery(locationSearch)
+    setFilterStatus(initialFilter)
+  }, [locationSearch, initialFilter])
+
+  // khi searchQuery thay đổi, đợi 1000ms sau mới cập nhật URL để tránh gọi API quá nhiều lần khi người dùng gõ
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery !== locationSearch) {
+        navigate(buildUrl(1, filterStatus, searchQuery), { replace: true })
+      }
+    }, 1000)
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery, filterStatus, locationSearch, navigate, buildUrl])
+
 
   const { data } = useQuery({
-    queryKey: ['studentsTable', quizId],
-    queryFn: () => fetchStudentsTable(quizId)
+    queryKey: ['quiz', quizId, 'students', { page, limit: DEFAULT_ITEMS_PER_PAGE, statusFilter: filterStatus, search: locationSearch }],
+    queryFn: () => fetchStudentsTable(quizId, { page, limit: DEFAULT_ITEMS_PER_PAGE, statusFilter: filterStatus, search: locationSearch })
   })
 
-  const filteredStudents = data.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         student.email.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesFilter = filterStatus === 'all' || student.status === filterStatus
-    return matchesSearch && matchesFilter
-  })
+  const studentsPage = data?.students || []
+  const totalStudents = data?.totalStudents || 0
 
   return (
     <div className="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 p-6">
@@ -113,7 +99,10 @@ function StudentsTable({ quizId }) {
 
         <div className="flex items-center gap-2 bg-gray-700 p-1 rounded-xl">
           <button
-            onClick={() => setFilterStatus('all')}
+            onClick={() => {
+              setFilterStatus('all')
+              navigate(buildUrl(1, 'all', searchQuery))
+            }}
             className={`px-4 py-2 rounded-lg text-sm transition-colors ${
               filterStatus === 'all'
                 ? 'bg-gray-800 text-gray-100 shadow-sm'
@@ -123,7 +112,10 @@ function StudentsTable({ quizId }) {
             All
           </button>
           <button
-            onClick={() => setFilterStatus('completed')}
+            onClick={() => {
+              setFilterStatus('completed')
+              navigate(buildUrl(1, 'completed', searchQuery))
+            }}
             className={`px-4 py-2 rounded-lg text-sm transition-colors ${
               filterStatus === 'completed'
                 ? 'bg-gray-800 text-gray-100 shadow-sm'
@@ -133,7 +125,10 @@ function StudentsTable({ quizId }) {
             Completed
           </button>
           <button
-            onClick={() => setFilterStatus('in-progress')}
+            onClick={() => {
+              setFilterStatus('in-progress')
+              navigate(buildUrl(1, 'in-progress', searchQuery))
+            }}
             className={`px-4 py-2 rounded-lg text-sm transition-colors ${
               filterStatus === 'in-progress'
                 ? 'bg-gray-800 text-gray-100 shadow-sm'
@@ -143,7 +138,10 @@ function StudentsTable({ quizId }) {
             In Progress
           </button>
           <button
-            onClick={() => setFilterStatus('not-started')}
+            onClick={() => {
+              setFilterStatus('not-started')
+              navigate(buildUrl(1, 'not-started', searchQuery))
+            }}
             className={`px-4 py-2 rounded-lg text-sm transition-colors ${
               filterStatus === 'not-started'
                 ? 'bg-gray-800 text-gray-100 shadow-sm'
@@ -156,7 +154,7 @@ function StudentsTable({ quizId }) {
       </div>
 
       {/* Students Table */}
-      {filteredStudents.length === 0 ? (
+      {studentsPage.length === 0 ? (
         <div className="text-center py-12">
           <div className="bg-gray-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <Users className="w-8 h-8 text-gray-500" />
@@ -177,22 +175,68 @@ function StudentsTable({ quizId }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
-              {filteredStudents.map((student) => (
-                <StudentRow key={student.id} student={student} />
+              {studentsPage.map((student) => (
+                <StudentRow key={student._id} student={student} />
               ))}
             </tbody>
           </table>
+          {totalStudents > 0 && (
+            <Box sx={{ my: 3, pr: 5, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+              <Pagination
+                size="large"
+                showFirstButton
+                showLastButton
+                count={Math.ceil(totalStudents / DEFAULT_ITEMS_PER_PAGE)}
+                page={page}
+                sx={{
+                  '& .MuiPaginationItem-root': {
+                    color: 'rgba(255,255,255,0.9)',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    width: 44,
+                    height: 44,
+                    minWidth: 'auto',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'background-color 150ms, box-shadow 150ms, transform 120ms',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.06)',
+                      transform: 'translateY(-2px)'
+                    }
+                  },
+                  '& .MuiPaginationItem-root.Mui-selected': {
+                    backgroundColor: 'rgba(25,118,210,0.95) !important',
+                    color: '#fff !important',
+                    boxShadow: '0 8px 24px rgba(2,6,23,0.65)',
+                    transform: 'scale(1.05)'
+                  },
+                  '& .MuiPaginationItem-ellipsis': {
+                    color: 'rgba(255,255,255,0.6)',
+                    border: 'none',
+                    backgroundColor: 'transparent'
+                  },
+                  '& .MuiPaginationItem-text': {
+                    color: 'rgba(255,255,255,0.9)'
+                  }
+                }}
+                renderItem={(item) => (
+                  <PaginationItem
+                    component={Link}
+                    to={buildUrl(item.page, filterStatus, searchQuery)}
+                    {...item}
+                    sx={{ width: 44, height: 44, minWidth: 'auto' }}
+                  />
+                )}
+              />
+            </Box>
+          )}
         </div>
       )}
     </div>
   )
 }
-
-
-// Student Row Component
-// interface StudentRowProps {
-//   student: Student;
-// }
 
 function StudentRow({ student }) {
   const statusConfig = {
@@ -201,7 +245,7 @@ function StudentRow({ student }) {
       icon: CheckCircle2,
       label: 'Completed'
     },
-    'in-progress': {
+    doing: {
       color: 'bg-blue-500/10 text-blue-400',
       icon: AlertCircle,
       label: 'In Progress'
@@ -225,11 +269,21 @@ function StudentRow({ student }) {
     <tr className="hover:bg-gray-700/50 transition-colors">
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white">
-            {student.name.split(' ').map(n => n[0]).join('')}
+          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white">
+            {student.avatar ? (
+              <img
+                src={student.avatar}
+                alt={student.fullName}
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              <span className="text-lg font-semibold">
+                {student.fullName.charAt(0).toUpperCase()}
+              </span>
+            )}
           </div>
           <div>
-            <p className="text-gray-100">{student.name}</p>
+            <p className="text-gray-100">{student.fullName}</p>
             <p className="text-sm text-gray-400">{student.email}</p>
           </div>
         </div>
@@ -241,7 +295,7 @@ function StudentRow({ student }) {
         </div>
       </td>
       <td className="px-6 py-4">
-        {student.score !== undefined ? (
+        {student.score != undefined ? (
           <span className={`${
             student.score >= 90 ? 'text-emerald-400' :
               student.score >= 70 ? 'text-blue-400' :
@@ -257,7 +311,7 @@ function StudentRow({ student }) {
         <span className="text-gray-100">{student.attempts}</span>
       </td>
       <td className="px-6 py-4">
-        {student.lastAttempt ? (
+        {student.lastAttempt || student.lastAttempt === 0 ? (
           <span className="text-gray-400 text-sm">{formatDate(student.lastAttempt)}</span>
         ) : (
           <span className="text-gray-500">-</span>

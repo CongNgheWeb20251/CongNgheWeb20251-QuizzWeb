@@ -6,6 +6,7 @@ import { answerOptionModel } from './answerModel'
 import { pagingSkipValue } from '~/utils/algorithms'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 import { sessionQuizModel } from './sessionQuizModel'
+import { userModel } from './userModel'
 
 const QUIZ_COLLECTION_NAME = 'quizzes'
 const QUIZ_COLLECTION_SCHEMA = Joi.object({
@@ -598,8 +599,168 @@ const getQuizMetrics = async (quizId) => {
       }
     ]).toArray()
     return (
-      result[0] || null
+      result[0] || {
+        passingScore: 0,
+        totalStudents: 0,
+        totalAttempts: 0,
+        completedStudents: 0,
+        passedStudents: 0,
+        avgScore: 0,
+        highestScore: 0,
+        passRate: 0
+      }
     )
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+export const getStudentQuizAttempts = async ({ quizId, skip = 0, limit = 5, statusFilter, search }) => {
+  try {
+    // Start from quizzes collection to access memberIds
+    const attempts = await DB_GET().collection(QUIZ_COLLECTION_NAME).aggregate([
+      // 1. Match quiz
+      { $match: { _id:  new ObjectId(quizId) } },
+
+      // 2. Bung danh sách member
+      { $unwind: '$memberIds' },
+
+      // 3. Lookup USERS + FULL TEXT SEARCH
+      {
+        $lookup: {
+          from: userModel.USER_COLLECTION_NAME,
+          let: { userId: '$memberIds' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$_id', '$$userId'] },
+                ...(search
+                  ? { $text: { $search: search.trim() } }
+                  : {})
+              }
+            },
+            {
+              $project: {
+                fullName: 1,
+                email: 1,
+                avatar: 1
+              }
+            }
+          ],
+          as: 'user'
+        }
+      },
+
+      // user không match text search sẽ bị loại
+      { $unwind: '$user' },
+
+      // 4. Lookup SESSION QUIZ
+      {
+        $lookup: {
+          // Use the correct session quiz collection name
+          from: sessionQuizModel.SESSION_QUIZ_COLLECTION_NAME,
+          let: { userId: '$memberIds', quizId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$userId', '$$userId'] },
+                    { $eq: ['$quizId', '$$quizId'] }
+                  ]
+                }
+              }
+            },
+            { $sort: { startTime: -1 } } // attempt mới nhất
+          ],
+          as: 'sessions'
+        }
+      },
+
+      // 5. Tính attempts + latestSession
+      {
+        $addFields: {
+          attempts: { $size: '$sessions' },
+          latestSession: { $arrayElemAt: ['$sessions', 0] }
+        }
+      },
+
+      // 6. Status
+      {
+        $addFields: {
+          status: {
+            $cond: [
+              { $eq: ['$attempts', 0] },
+              'not-started',
+              '$latestSession.status'
+            ]
+          }
+        }
+      },
+
+      // 7. Filter STATUS (sau khi đã tính)
+      {
+        $match: {
+          ...(statusFilter ? { status: statusFilter } : {})
+        }
+      },
+
+      // 8. FACET: pagination + total
+      {
+        $facet: {
+          data: [
+            { $skip: skip },
+            { $limit: limit },
+
+            {
+              $project: {
+                _id: '$user._id',
+                fullName: '$user.fullName',
+                email: '$user.email',
+                avatar: '$user.avatar',
+
+                status: 1,
+                attempts: 1,
+
+                // lastAttempt = startTime
+                lastAttempt: {
+                  $cond: [
+                    { $gt: ['$attempts', 0] },
+                    '$latestSession.startTime',
+                    null
+                  ]
+                },
+
+                // score chỉ khi completed
+                score: {
+                  $cond: [
+                    { $eq: ['$latestSession.status', 'completed'] },
+                    '$latestSession.score',
+                    null
+                  ]
+                },
+
+                // timeSpent chỉ khi completed
+                timeSpent: {
+                  $cond: [
+                    { $eq: ['$latestSession.status', 'completed'] },
+                    '$latestSession.timeSpent',
+                    null
+                  ]
+                }
+              }
+            }
+          ],
+
+          total: [{ $count: 'count' }]
+        }
+      }
+    ]).toArray()
+    const res = attempts[0]
+    return {
+      students: res.data || [],
+      totalStudents: res.total[0]?.count || 0
+    }
   } catch (error) {
     throw new Error(error)
   }
@@ -623,5 +784,6 @@ export const quizModel = {
   findOneByInviteToken,
   addMemberToQuiz,
   getSessionsByUserAndQuiz,
-  getQuizMetrics
+  getQuizMetrics,
+  getStudentQuizAttempts
 }

@@ -121,8 +121,9 @@ const draftQuiz = async (req, res, next) => {
 const joinQuizByInvite = async (req, res, next) => {
   try {
     const userId = req.jwtDecoded._id
+    const userRole = req.jwtDecoded.role
     const { inviteToken } = req.params
-    const result = await quizService.joinQuizByInvite(userId, inviteToken)
+    const result = await quizService.joinQuizByInvite(userId, userRole, inviteToken)
     res.status(StatusCodes.OK).json(result)
   } catch (error) {
     next(error)
@@ -169,6 +170,17 @@ const getQuizMetrics = async (req, res, next) => {
   }
 }
 
+const getStudentQuizAttempts = async (req, res, next) => {
+  try {
+    const { quizId } = req.params
+    const { page, limit, statusFilter, search } = req.query
+    const result = await quizService.getStudentQuizAttempts(quizId, page, limit, statusFilter, search)
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
 
 export const quizController = {
   createNew,
@@ -185,5 +197,6 @@ export const quizController = {
   draftQuiz,
   deleteQuiz,
   getScoreDistribution,
-  getQuizMetrics
+  getQuizMetrics,
+  getStudentQuizAttempts
 }

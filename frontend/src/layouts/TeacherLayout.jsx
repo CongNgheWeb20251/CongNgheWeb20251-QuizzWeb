@@ -8,6 +8,7 @@ import IconButton from '@mui/material/IconButton'
 import { Menu, X } from 'lucide-react'
 import UserAvatar from '~/components/UserAvatar/UserAvatar'
 import './TeacherLayout.css'
+import Notification from '~/components/Notification/Notification'
 
 function TeacherLayout() {
   const navigate = useNavigate()
@@ -154,10 +155,15 @@ function TeacherLayout() {
       <main className="main-content">
         {/* Top Bar */}
         <div className="top-bar">
-          <IconButton onClick={handleDrawerToggle} className="menu-button" sx={{ color: '#e5e7eb' }}>
+          <IconButton onClick={handleDrawerToggle} className="menu-button-mobile" sx={{ color: '#e5e7eb' }}>
             <Menu size={20} />
           </IconButton>
+          <div className="logo header__logo-mobile">
+            <span className="logo-qui">Qui</span>
+            <span className="logo-zzy">zzy</span>
+          </div>
           <div className="topbar-right">
+            <Notification />
             <UserAvatar />
           </div>
         </div>

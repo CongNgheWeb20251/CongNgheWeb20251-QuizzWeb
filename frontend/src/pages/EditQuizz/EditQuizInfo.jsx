@@ -155,7 +155,7 @@ export default function EditQuizInfo() {
   }
 
   const handleBack = () => {
-    navigate('/teacher/quizzes')
+    navigate(`/teacher/quizzes/${id}`)
   }
 
   if (isLoading || !quizData) {
@@ -191,7 +191,7 @@ export default function EditQuizInfo() {
             }}
             onClick={handleBack}
           >
-            Back to Quiz List
+            Back to Quiz Details
           </Button>
           <Typography variant="h4" sx={{ fontWeight: 600, color: '#0f172a' }}>
             Edit Quiz Information

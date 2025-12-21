@@ -28,6 +28,8 @@ import AccessDenied from './pages/AccessDenied/AccessDenied'
 import QuizAttemptsList from './pages/Student/QuizHistory/QuizAttemptsList'
 import JoinQuiz from './pages/Student/JoinQuiz/JoinQuiz'
 import TeacherLayout from '~/layouts/TeacherLayout'
+import QuizDashboard from './pages/Quizzes/QuizDetail2'
+import TeacherDashboard from './pages/Dashboard/TeacherDashboard'
 
 const ProtectedRoute = ({ user }) => {
   if (!user) {
@@ -81,11 +83,11 @@ function App() {
         </Route>
         <Route element={<RoleRoute user={currUser} requiredPermission={permissions.VIEW_TEACHER_DASHBOARD} />}>
           <Route element={<TeacherLayout />}>
-            <Route path="/teacher/dashboard" element={<Dashboard />} />
+            <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
             <Route path="/teacher/quizzes" element={<Quizzes />} />
-            <Route path="/teacher/quizzes/:id" element={<QuizDetail />} />
+            {/* <Route path="/teacher/quizzes/:id" element={<QuizDetail />} /> */}
           </Route>
-          {/* <Route path="/teacher/quizzes/:id" element={<QuizDashboard />} /> */}
+          <Route path="/teacher/quizzes/:id" element={<QuizDashboard />} />
         </Route>
         <Route element={<RoleRoute user={currUser} requiredPermission={permissions.VIEW_PREVIEW_QUIZ} />}>
           <Route path="/teacher/quizzes/:id/preview" element={<PreviewQuiz />} />

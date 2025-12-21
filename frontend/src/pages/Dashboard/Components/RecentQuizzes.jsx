@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { formatDistanceToNow } from 'date-fns'
 import {
   Users,
   CheckCircle2,
@@ -10,14 +11,11 @@ import {
   FileText
 } from 'lucide-react'
 
-const getRecentQuizzes = () => {
-  return [
-    { _id: 'quiz1', title: 'Algebra Basics', completions: 80, status: 'doing', students: 120 },
-    { _id: 'quiz2', title: 'World History', completions: 65, status: 'completed', students: 100 },
-    { _id: 'quiz3', title: 'Biology 101', completions: 50, status: 'doing', students: 90 },
-    { _id: 'quiz4', title: 'Chemistry Basics', completions: 70, status: 'doing', students: 110 },
-    { _id: 'quiz5', title: 'English Literature', completions: 90, status: 'completed', students: 130 }
-  ]
+import { getRecentQuizzesAPI } from '~/apis'
+
+const getRecentQuizzes = async() => {
+  const data = await getRecentQuizzesAPI(5)
+  return data
 }
 
 function RecentQuizzes() {
@@ -33,7 +31,7 @@ function RecentQuizzes() {
 
   const handleCreateQuiz = () => {
     // Navigate to quiz creation
-    alert('Navigate to quiz creation page')
+    navigate('/teacher/create-quiz')
   }
 
   const { data: quizzes } = useQuery({
@@ -58,11 +56,11 @@ function RecentQuizzes() {
         <EmptyQuizzesState onCreateQuiz={handleCreateQuiz} />
       ) : (
         <div className="space-y-3">
-          {quizzes.slice(0, 5).map((quiz) => (
+          {quizzes.map((quiz) => (
             <QuizListItem
-              key={quiz._id}
+              key={quiz.quizId}
               quiz={quiz}
-              onClick={() => handleViewQuiz(quiz._id)}
+              onClick={() => handleViewQuiz(quiz.quizId)}
             />
           ))}
         </div>
@@ -77,7 +75,7 @@ function QuizListItem({ quiz, onClick }) {
     doing: { color: 'bg-blue-500/10 text-blue-400 border-blue-500/20', icon: Clock }
   }
 
-  const config = statusConfig[quiz.status]
+  const config = statusConfig[quiz.latestSessionStatus]
   const StatusIcon = config.icon
 
   return (
@@ -90,22 +88,28 @@ function QuizListItem({ quiz, onClick }) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <h3 className="text-gray-100 mb-1 truncate">{quiz.title}</h3>
+        <h3 className="text-gray-100 mb-1 truncate">{quiz.quizTitle}</h3>
         <div className="flex items-center gap-3 text-sm text-gray-400">
           <span className="flex items-center gap-1">
             <Users className="w-4 h-4" />
-            {quiz.students} students
+            {quiz.totalStudents} students
           </span>
           <span className="flex items-center gap-1">
             <Target className="w-4 h-4" />
-            {quiz.completions}% completed
+            {quiz.attempts} attempts
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock className="w-4 h-4" />
+            {quiz.latestStartTime
+              ? formatDistanceToNow(quiz.latestStartTime, { addSuffix: true })
+              : 'No sessions yet'}
           </span>
         </div>
       </div>
 
       <div className="flex items-center gap-2">
         <div className={`px-3 py-1 rounded-lg text-sm border ${config.color}`}>
-          {quiz.status.charAt(0).toUpperCase() + quiz.status.slice(1)}
+          {quiz.latestSessionStatus.charAt(0).toUpperCase() + quiz.latestSessionStatus.slice(1)}
         </div>
         <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-gray-400 transition-colors" />
       </div>
