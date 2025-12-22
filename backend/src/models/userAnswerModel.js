@@ -122,10 +122,10 @@ const deleteOne = async (userAnswerId) => {
   }
 }
 
-const updateBySessionAndQuestion = async (sessionId, questionId, updateData) => {
+const updateBySessionAndQuestion = async (sessionId, questionId, updateData, userId) => {
   try {
     const userAnswer = await DB_GET().collection(USER_ANSWER_COLLECTION_NAME).updateOne(
-      { sessionId: new ObjectId(sessionId), questionId: new ObjectId(questionId) },
+      { sessionId: new ObjectId(sessionId), questionId: new ObjectId(questionId), userId: new ObjectId(userId) },
       { $set: updateData },
       {
         upsert: true,

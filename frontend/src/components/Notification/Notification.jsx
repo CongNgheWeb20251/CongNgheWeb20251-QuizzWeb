@@ -15,11 +15,19 @@ const getRecentActivities = async () => {
 function Notification() {
   const [notificationOpen, setNotificationOpen] = useState(false)
   const currentUser = useSelector(selectCurrentUser)
+  const [newNotification, setNewNotification] = useState(false)
 
   const { data: activities, isLoading } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => getRecentActivities()
   })
+
+  const toggleOpen = () => {
+    if (notificationOpen) {
+      setNewNotification(false)
+    }
+    setNotificationOpen(!notificationOpen)
+  }
 
   useEffect(() => {
     if (!currentUser?._id) return
@@ -33,6 +41,7 @@ function Notification() {
         const next = [activity, ...prev]
         return next.slice(0, 5)
       })
+      setNewNotification(true)
     }
     // Lắng nghe sự kiện notification mới từ server
     socketIoInstance.on('notification:new', handler)
@@ -47,11 +56,11 @@ function Notification() {
     <>
       <div className="relative">
         <button
-          onClick={() => setNotificationOpen(!notificationOpen)}
+          onClick={toggleOpen}
           className="p-2 hover:bg-gray-700 rounded-lg transition-colors relative"
         >
           <Bell className="w-5 h-5 text-gray-400" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          {newNotification && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>}
         </button>
 
         {/* Notification Dropdown Panel */}

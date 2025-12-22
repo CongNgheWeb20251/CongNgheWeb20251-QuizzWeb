@@ -18,10 +18,10 @@ const getQuizSessionDetails = async (sessionId) => {
 const submitAnswers = async (sessionId, answersData) => {
   try {
     // Cập nhật câu trả lời vào bảng userAnswer
-    const { questionId, answerIds } = answersData
+    const { questionId, answerIds, userId } = answersData
     const result = await userAnswerModel.updateBySessionAndQuestion(sessionId, questionId, {
       selectedAnswerIds: answerIds
-    })
+    }, userId)
     return result
 
   } catch (error) {

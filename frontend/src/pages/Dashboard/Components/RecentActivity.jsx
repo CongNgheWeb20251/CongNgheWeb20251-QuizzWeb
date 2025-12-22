@@ -1,5 +1,5 @@
 import React from 'react'
-import { differenceInHours, format, formatDistanceToNowStrict } from 'date-fns'
+import { differenceInHours, format } from 'date-fns'
 import { useQuery } from '@tanstack/react-query'
 import {
   Activity,
@@ -85,9 +85,19 @@ export const ActivityItem = ({ activity }) => {
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp)
-    const hours = differenceInHours(new Date(), date)
-    if (hours < 24) return formatDistanceToNowStrict(date, { addSuffix: true })
-    return format(date, 'MMM d')
+    const now = new Date()
+    const hours = differenceInHours(now, date)
+
+    // Nếu trong vòng 24 giờ: hiển thị giờ phút
+    if (hours < 24 && date.getDate() === now.getDate()) {
+      return format(date, 'HH:mm')
+    }
+    // Nếu trong năm nay: hiển thị ngày tháng + giờ phút
+    if (date.getFullYear() === now.getFullYear()) {
+      return format(date, 'MMM d, HH:mm')
+    }
+    // Nếu năm khác: hiển thị đầy đủ
+    return format(date, 'MMM d, yyyy HH:mm')
   }
 
   return (
