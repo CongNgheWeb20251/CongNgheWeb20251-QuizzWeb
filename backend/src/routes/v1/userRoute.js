@@ -49,6 +49,12 @@ Router.route('/logout')
 Router.route('/refresh_token')
   .get(userController.refreshToken)
 
+Router.route('/forgot-password')
+  .post(authRateLimit, userController.forgotPassword)
+
+Router.route('/reset-password')
+  .post(authRateLimit, userValidation.resetPassword, userController.resetPassword)
+
 Router.route('/update')
   .put(
     authMiddleware.isAuthorized,

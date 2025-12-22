@@ -129,6 +129,28 @@ const refreshToken = async (req, res, next) => {
   }
 }
 
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body
+    const result = await userService.forgotPassword(email)
+    res.status(StatusCodes.OK).json(result)
+  }
+  catch (error) {
+    next(error)
+  }
+}
+
+const resetPassword = async (req, res, next) => {
+  try {
+    const { email, token, password } = req.body
+    const result = await userService.resetPassword(email, token, password)
+    res.status(StatusCodes.OK).json(result)
+  }
+  catch (error) {
+    next(error)
+  }
+}
+
 const update = async (req, res, next) => {
   try {
     // Biến jwtDecoded chứa thông tin người dùng đã xác thực sau khi đi qua authMiddleware.isAuthorized
@@ -163,6 +185,8 @@ export const userController = {
   googleOAuthCallback,
   logout,
   refreshToken,
+  forgotPassword,
+  resetPassword,
   update,
   getCurrentUser
 }
