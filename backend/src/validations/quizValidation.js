@@ -4,15 +4,16 @@ import ApiError from '~/utils/ApiError'
 
 const createNew = async (req, res, next) => {
   const quizzSchema = Joi.object({
-    title: Joi.string().required().trim().strict(),
-    description: Joi.string().optional().trim().strict(),
-    category: Joi.string().required().trim().strict(),
-    difficulty: Joi.string().required().trim().strict(),
+    title: Joi.string().required().trim(),
+    description: Joi.string().allow('').trim(),
+    category: Joi.string().required().trim(),
+    difficulty: Joi.string().required().trim(),
     passingScore: Joi.number().required(),
     timeLimit: Joi.number().required()
   })
   try {
-    await quizzSchema.validateAsync(req.body, { abortEarly: false, allowUnknown: true })
+    const validatedData = await quizzSchema.validateAsync(req.body, { abortEarly: false, allowUnknown: true })
+    req.body = validatedData
     next()
   }
   catch (error) {
@@ -22,17 +23,18 @@ const createNew = async (req, res, next) => {
 
 const updateInfo = async (req, res, next) => {
   const quizzUpdateSchema = Joi.object({
-    title: Joi.string().optional().trim().strict(),
-    description: Joi.string().optional().trim().strict(),
-    category: Joi.string().optional().trim().strict(),
-    level: Joi.string().optional().trim().strict(),
+    title: Joi.string().optional().trim(),
+    description: Joi.string().optional().trim(),
+    category: Joi.string().optional().trim(),
+    level: Joi.string().optional().trim(),
     passingScore: Joi.number().optional(),
     timeLimit: Joi.number().optional(),
     allowRetake: Joi.boolean().optional(),
     showResults: Joi.boolean().optional()
   })
   try {
-    await quizzUpdateSchema.validateAsync(req.body, { abortEarly: false, allowUnknown: true })
+    const validatedData = await quizzUpdateSchema.validateAsync(req.body, { abortEarly: false, allowUnknown: true })
+    req.body = validatedData
     next()
   }
   catch (error) {

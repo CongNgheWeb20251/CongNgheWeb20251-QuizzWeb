@@ -25,9 +25,10 @@ import AddIcon from '@mui/icons-material/Add'
 import { toast } from 'react-toastify'
 import { createQuestionsInBatchAPI } from '~/apis'
 import { isEqual, cloneDeep } from 'lodash'
-import { Save } from 'lucide-react'
+import { Save, CircleAlert } from 'lucide-react'
 import PageLoader from '~/components/Loading/PageLoader'
 import QuestionContentMdEditor from '~/components/Form/QuestionContentMdEditor'
+import { useConfirm } from 'material-ui-confirm'
 
 const addTempIds = (rawQuestions = []) => rawQuestions.map((question, index) => {
   const tempId = question.tempId ?? index + 1
@@ -47,12 +48,14 @@ function CreateQuizStep2() {
   const [questions, setQuestions] = useState(() => addTempIds(quizData?.questions || []))
   const [originalQuestions, setOriginalQuestions] = useState(() => cloneDeep(addTempIds(quizData?.questions || [])))
   const { id } = useParams()
+  const confirm = useConfirm()
 
   useEffect(() => {
     setIsLoading(true)
     dispatch(fetchQuizzDetailsAPI(id)).finally(() => setIsLoading(false))
   }, [id, dispatch])
 
+  // hàm này để đồng bộ lại questions khi quizData thay đổi (lần đầu load hoặc sau khi save draft)
   useEffect(() => {
     if (quizData?.questions?.length) {
       const questionsData = addTempIds(quizData.questions)
@@ -233,7 +236,7 @@ function CreateQuizStep2() {
   }
 
   const handleSave = async () => {
-    if (!validateQuestions()) return
+    if (!validateQuestions()) throw new Error('Validation failed')
 
     // Kiểm tra xem có thay đổi không
     if (!hasChanges()) {
@@ -252,34 +255,77 @@ function CreateQuizStep2() {
       return questionData
     })
     // console.log('Questions to save:', questionsToSave)
-    toast.promise(
-      createQuestionsInBatchAPI(quizData._id, questionsToSave),
-      {
-        pending: 'Updating...'
-      }
-    ).then(res => {
+    try {
+      const res = await toast.promise(
+        createQuestionsInBatchAPI(quizData._id, questionsToSave),
+        {
+          pending: 'Updating...'
+        }
+      )
       if (!res.error) {
         toast.success('Draft saved successfully!')
-        dispatch(fetchQuizzDetailsAPI(id))
+        // dispatch lại dữ liệu quizDetails để cập nhật câu hỏi với _id từ server
+        await dispatch(fetchQuizzDetailsAPI(id))
+      } else {
+        throw new Error(res.error)
       }
-    }).catch(error => {
-      // toast.error('Failed to save draft. Please try again.')
+    } catch (error) {
+      toast.error('Failed to save draft. Please try again.')
       // console.error('Save draft error:', error)
-    })
+      throw error
+    }
   }
 
   const handlePreview = () => {
     localStorage.setItem('previewQuiz', JSON.stringify({ ...quizData, questions }))
   }
 
-  const handleFinish = () => {
-    if (!validateQuestions()) return
+  const handleFinish = async () => {
     if (!hasChanges()) {
       navigate(`/teacher/quizzes/${quizData._id}`)
       return
     }
-    handleSave()
-    navigate(`/teacher/quizzes/${quizData._id}`)
+
+    const { confirmed } = await confirm({
+      title: (
+        <div className="flex items-center gap-2">
+          <CircleAlert color="orange" />
+          <span>Unsaved changes</span>
+        </div>
+      ),
+      description: (
+        <div className="mt-4 space-y-2 mb-2">
+          <p className="text-sm text-gray-600">
+            You have unsaved changes in this question.
+          </p>
+          <p className="text-sm text-gray-600">
+            Do you want to save your changes before finishing?
+          </p>
+          <div className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-600">
+            ⚠ If you don’t save, your changes will be lost.
+          </div>
+        </div>
+      ),
+      confirmationText: 'Save & Finish',
+      cancellationText: 'No, Finish Without Saving',
+      confirmationButtonProps: {
+        color: 'primary',
+        variant: 'contained'
+      }
+    })
+    if (confirmed) {
+      try {
+        await handleSave()
+        navigate(`/teacher/quizzes/${quizData._id}`)
+      } catch (error) {
+        // console.error('Save failed:', error)
+      }
+      return
+    }
+    else {
+      navigate(`/teacher/quizzes/${quizData._id}`)
+      return
+    }
   }
 
   if (isLoading || !quizData) {
@@ -424,6 +470,8 @@ function CreateQuizStep2() {
                           className="cq-question-type"
                           value={question.type}
                           onChange={(e) => handleQuestionChange(question.tempId, 'type', e.target.value)}
+                          disabled={Boolean(question._id)}
+                          title={question._id ? 'Cannot change type for existing questions' : 'Select question type'}
                         >
                           <option value="single-choice">Single Choice</option>
                           <option value="multiple-choice">Multiple Choice</option>

@@ -7,7 +7,7 @@ const ANSWER_OPTION_COLLECTION_NAME = 'answerOptions'
 const ANSWER_OPTION_COLLECTION_SCHEMA = Joi.object({
   questionId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
   quizId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
-  content: Joi.string().required().trim().strict(),
+  content: Joi.string().required().trim(),
   isCorrect: Joi.boolean().default(false),
 
   createdAt: Joi.date().timestamp('javascript').default(Date.now),

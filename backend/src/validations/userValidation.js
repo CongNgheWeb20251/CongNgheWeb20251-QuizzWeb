@@ -52,7 +52,8 @@ const update = async (req, res, next) => {
     new_password: Joi.string().pattern(PASSWORD_RULE).message(`new_password: ${PASSWORD_RULE_MESSAGE}`)
   })
   try {
-    await userSchema.validateAsync(req.body, { abortEarly: false, allowUnknown: true })
+    const validatedData = await userSchema.validateAsync(req.body, { abortEarly: false, allowUnknown: true })
+    req.body = validatedData
     next()
   }
   catch (error) {

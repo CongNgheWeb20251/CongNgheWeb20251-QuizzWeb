@@ -7,7 +7,7 @@ const QUESTION_COLLECTION_NAME = 'questions'
 const QUESTION_COLLECTION_SCHEMA = Joi.object({
   content: Joi.string().required().trim(),
   // options: Joi.object().required(),
-  correctAnswerIds: Joi.array().items(Joi.string()).default([]),
+  // correctAnswerIds: Joi.array().items(Joi.string()).default([]),
   // level: Joi.string().required().trim().strict(),
   type: Joi.string().required().trim().strict(),
   quizId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
