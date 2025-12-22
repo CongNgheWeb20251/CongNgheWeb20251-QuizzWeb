@@ -227,6 +227,77 @@ const refreshToken = async (clientRefreshToken) => {
   }
 }
 
+const forgotPassword = async (email) => {
+  try {
+    const user = await userModel.findOneByEmail(email)
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
+    }
+
+    const token = uuidv4()
+    
+    // Lưu token vào otpModel
+    const otpData = {
+      email: email,
+      token: token,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 phút hết hạn
+    }
+    await otpModel.createNew(otpData)
+
+    const resetLink = `${WEBSITE_DOMAIN}/account/reset-password?email=${email}&token=${token}`
+    const to = email
+    const html = `
+    <h1>Password Reset Request</h1>
+    <p>We received a request to reset your password. Click the link below to reset it:</p>
+    <h3>${resetLink}</h3>
+    <p>If you did not request a password reset, please ignore this email.</p>
+    <p>Thank you!</p>
+    `
+    const customSubject = 'Quizzy: Password Reset Request'
+    
+    try {
+      await BrevoProvider.sendEmail(to, customSubject, html)
+    } catch (emailError) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to send password reset email:', emailError.message)
+    }
+
+    return { message: 'Password reset link has been sent to your email.' }
+  }
+  catch (error) {
+    throw error
+  }
+}
+
+const resetPassword = async (email, token, password) => {
+  try {
+    const user = await userModel.findOneByEmail(email)
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
+    }
+
+    // Tìm token trong otpModel theo email và token
+    const existingOtp = await otpModel.findOneByEmailToken({ email, token })
+    if (!existingOtp) {
+      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Invalid or expired reset token!')
+    }
+
+    // Update mật khẩu mới
+    const updateData = {
+      password: bcrypt.hashSync(password, 8)
+    }
+    await userModel.update(user._id, updateData)
+
+    // Xóa token sau khi reset thành công
+    await otpModel.clearTokenByEmail(email)
+    
+    return { message: 'Password has been reset successfully.' }
+  }
+  catch (error) {
+    throw error
+  }
+}
+
 const update = async (userId, userAvatarFile, updateData) => {
   try {
     // Kiểm tra xem người dùng có tồn tại không
@@ -286,6 +357,8 @@ export const userService = {
   login,
   loginWithGoogle,
   refreshToken,
+  forgotPassword,
+  resetPassword,
   update,
   getCurrentUser
 }

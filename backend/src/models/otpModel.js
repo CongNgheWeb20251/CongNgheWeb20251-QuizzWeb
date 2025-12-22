@@ -70,10 +70,24 @@ const updateByEmail = async (email, updateData) => {
   }
 }
 
+const clearTokenByEmail = async (email) => {
+  try {
+    const updateResult = await DB_GET().collection(OTP_COLLECTION_NAME).findOneAndUpdate(
+      { email: email },
+      { $set: { token: '', updatedAt: Date.now() } },
+      { returnDocument: 'after' }
+    )
+    return updateResult
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 
 export const otpModel = {
   createNew,
   findOneById,
   findOneByEmailToken,
-  updateByEmail
+  updateByEmail,
+  clearTokenByEmail
 }
