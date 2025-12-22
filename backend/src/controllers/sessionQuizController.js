@@ -13,9 +13,10 @@ const getQuizSessionDetails = async (req, res, next) => {
 
 const submitAnswers = async (req, res, next) => {
   try {
+    const userId = req.user._id
     const { sessionId } = req.params
     const answersData = req.body
-    await sessionQuizService.submitAnswers(sessionId, answersData)
+    await sessionQuizService.submitAnswers(sessionId, answersData, userId)
     res.status(StatusCodes.OK).json({ message: 'Answers submitted successfully' })
   } catch (error) {
     next(error)

@@ -5,7 +5,7 @@ import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
 const QUESTION_COLLECTION_NAME = 'questions'
 const QUESTION_COLLECTION_SCHEMA = Joi.object({
-  content: Joi.string().required().trim().strict(),
+  content: Joi.string().required().trim(),
   // options: Joi.object().required(),
   correctAnswerIds: Joi.array().items(Joi.string()).default([]),
   // level: Joi.string().required().trim().strict(),
