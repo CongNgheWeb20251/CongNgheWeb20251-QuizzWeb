@@ -190,11 +190,11 @@ export default function StudentQuizPage() {
 
     submitQuizSessionAPI(sessionId).then(() => {
       toast.success('Quiz submitted successfully!')
-      navigate('/dashboard')
+      navigate(`/quizzes/${quizId}/session/${sessionId}/result`)
     }).catch(() => {
       toast.error('Failed to submit quiz. Please try again.')
     })
-  }, [sessionId, navigate])
+  }, [sessionId, navigate, quizId])
 
   const answeredCount = Object.keys(answers).length
   const progress = (answeredCount / quiz?.questions.length) * 100

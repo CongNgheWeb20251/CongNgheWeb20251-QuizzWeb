@@ -733,11 +733,26 @@ export const getStudentQuizAttempts = async ({ quizId, skip = 0, limit = 5, stat
                   ]
                 },
 
-                // score chỉ khi completed
+                // score hiển thị theo % khi completed
                 score: {
                   $cond: [
-                    { $eq: ['$latestSession.status', 'completed'] },
-                    '$latestSession.score',
+                    {
+                      $and: [
+                        { $eq: ['$latestSession.status', 'completed'] },
+                        { $gt: ['$latestSession.totalPoints', 0] }
+                      ]
+                    },
+                    {
+                      $round: [
+                        {
+                          $multiply: [
+                            { $divide: ['$latestSession.score', '$latestSession.totalPoints'] },
+                            100
+                          ]
+                        },
+                        0
+                      ]
+                    },
                     null
                   ]
                 },

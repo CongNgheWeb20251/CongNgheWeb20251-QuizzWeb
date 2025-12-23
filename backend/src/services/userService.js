@@ -124,7 +124,7 @@ const verifyAccount = async (resBody) => {
   }
 }
 
-const login = async (resBody, device) => {
+const login = async (resBody) => {
   try {
     //
     const existingUser = await userModel.findOneByEmail(resBody.email)
@@ -240,7 +240,7 @@ const forgotPassword = async (email) => {
     }
 
     const token = uuidv4()
-    
+
     // Lưu token vào otpModel
     const otpData = {
       email: email,
@@ -251,15 +251,14 @@ const forgotPassword = async (email) => {
 
     const resetLink = `${WEBSITE_DOMAIN}/account/reset-password?email=${email}&token=${token}`
     const to = email
-    const html = `
-    <h1>Password Reset Request</h1>
-    <p>We received a request to reset your password. Click the link below to reset it:</p>
-    <h3>${resetLink}</h3>
-    <p>If you did not request a password reset, please ignore this email.</p>
-    <p>Thank you!</p>
-    `
+    const html = generateVerifyEmailTemplate({
+      link: resetLink,
+      title: 'Reset Your Quizzy Password',
+      content: 'We received a request to reset your password for your Quizzy account. Click the button below to set a new password for your account.',
+      linkText: 'Reset Password'
+    })
     const customSubject = 'Quizzy: Password Reset Request'
-    
+
     try {
       await BrevoProvider.sendEmail(to, customSubject, html)
     } catch (emailError) {
@@ -295,7 +294,7 @@ const resetPassword = async (email, token, password) => {
 
     // Xóa token sau khi reset thành công
     await otpModel.clearTokenByEmail(email)
-    
+
     return { message: 'Password has been reset successfully.' }
   }
   catch (error) {

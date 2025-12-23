@@ -70,7 +70,7 @@ function App() {
         <Route path="/signup" element={<Register />} />
         <Route path='/account/verification' element={<AccountVerification />} />
         <Route path='/forgot-password' element={<ForgotPassword />} />
-        <Route path='/reset-password' element={<ResetPassword />} />
+        <Route path='/account/reset-password' element={<ResetPassword />} />
       </Route>
       <Route element={<ProtectedRoute user={currUser} />}>
         {/* Teacher permissions */}

@@ -34,6 +34,7 @@ import { startAttemptQuizAPI, fetchQuizzesByStudentAPI } from '~/apis/index'
 import Pagination from '@mui/material/Pagination'
 import PaginationItem from '@mui/material/PaginationItem'
 import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
+import Logo from '~/components/Logo'
 
 export default function StudentDashboard() {
   const [quizzes, setQuizzes] = useState([])
@@ -146,9 +147,12 @@ export default function StudentDashboard() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-2">
           <div className="flex items-center justify-between">
-            <div className="logo">
-              <span className="logo-qui">Qui</span>
-              <span className="logo-zzy">zzy</span>
+            <div className="logo flex gap-2 items-center">
+              <Logo className="inline-block" />
+              <div>
+                <span className="logo-qui">Qui</span>
+                <span className="logo-zzy">zzy</span>
+              </div>
             </div>
             <div className="flex items-center gap-4">
               { /* avatar */ }
