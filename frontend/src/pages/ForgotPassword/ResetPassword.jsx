@@ -21,7 +21,7 @@ function ResetPassword() {
       // TODO: Replace with your actual API call
       // await resetPassword(token, password)
       console.log('Resetting password with token:', token)
-      
+
       toast.promise(
         // Simulated API call - replace with actual
         new Promise((resolve) => setTimeout(resolve, 1000)),

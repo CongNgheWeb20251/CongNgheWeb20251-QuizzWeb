@@ -96,6 +96,18 @@ export const createQuestionsInBatchAPI = async (quizId, questions) => {
   return res.data
 }
 
+// Create 1 question
+export const createQuestionAPI = async (questionData) => {
+  const res = await authorizedAxiosInstance.post('/v1/questions', questionData)
+  return res.data
+}
+
+// Update 1 question
+export const updateQuestionAPI = async (questionId, questionData) => {
+  const res = await authorizedAxiosInstance.put(`/v1/questions/${questionId}`, questionData)
+  return res.data
+}
+
 
 export const publishQuizAPI = async (quizId) => {
   const res = await authorizedAxiosInstance.post(`/v1/quizzes/${quizId}/publish`)

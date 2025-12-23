@@ -23,11 +23,12 @@ import { selectCurrentActiveQuizz, fetchQuizzDetailsAPI } from '~/redux/activeQu
 import { useParams } from 'react-router-dom'
 import AddIcon from '@mui/icons-material/Add'
 import { toast } from 'react-toastify'
-import { createQuestionsInBatchAPI } from '~/apis'
+import { createQuestionsInBatchAPI, createQuestionAPI, updateQuestionAPI } from '~/apis'
 import { isEqual, cloneDeep } from 'lodash'
-import { Save } from 'lucide-react'
+import { Save, CircleAlert } from 'lucide-react'
 import PageLoader from '~/components/Loading/PageLoader'
 import QuestionContentMdEditor from '~/components/Form/QuestionContentMdEditor'
+import { useConfirm } from 'material-ui-confirm'
 
 const addTempIds = (rawQuestions = []) => rawQuestions.map((question, index) => {
   const tempId = question.tempId ?? index + 1
@@ -47,12 +48,14 @@ function CreateQuizStep2() {
   const [questions, setQuestions] = useState(() => addTempIds(quizData?.questions || []))
   const [originalQuestions, setOriginalQuestions] = useState(() => cloneDeep(addTempIds(quizData?.questions || [])))
   const { id } = useParams()
+  const confirm = useConfirm()
 
   useEffect(() => {
     setIsLoading(true)
     dispatch(fetchQuizzDetailsAPI(id)).finally(() => setIsLoading(false))
   }, [id, dispatch])
 
+  // hàm này để đồng bộ lại questions khi quizData thay đổi (lần đầu load hoặc sau khi save draft)
   useEffect(() => {
     if (quizData?.questions?.length) {
       const questionsData = addTempIds(quizData.questions)
@@ -140,6 +143,11 @@ function CreateQuizStep2() {
   const handleAddOption = (questionId) => {
     setQuestions(questions.map(q => {
       if (q.tempId === questionId) {
+        // Prevent adding more than 5 options
+        if (q.options && q.options.length >= 5) {
+          toast.info('Maximum 5 options allowed per question.')
+          return q
+        }
         const maxOptionIndex = q.options && q.options.length ? Math.max(...q.options.map(o => Number(o.tempId) % 10)) : 0
         const newOption = {
           tempId: q.tempId * 10 + maxOptionIndex + 1,
@@ -214,6 +222,11 @@ function CreateQuizStep2() {
 
       // Check if all options have content (except for true-false which has fixed content)
       if (question.type !== 'true-false') {
+        // Check max options limit
+        if (question.options.length > 5) {
+          toast.info(`Question ${i + 1}: Maximum 5 options allowed.`)
+          return false
+        }
         for (let j = 0; j < question.options.length; j++) {
           const option = question.options[j]
           if (!option.content || option.content.trim() === '') {
@@ -233,7 +246,7 @@ function CreateQuizStep2() {
   }
 
   const handleSave = async () => {
-    if (!validateQuestions()) return
+    if (!validateQuestions()) throw new Error('Validation failed')
 
     // Kiểm tra xem có thay đổi không
     if (!hasChanges()) {
@@ -252,34 +265,143 @@ function CreateQuizStep2() {
       return questionData
     })
     // console.log('Questions to save:', questionsToSave)
-    toast.promise(
-      createQuestionsInBatchAPI(quizData._id, questionsToSave),
-      {
-        pending: 'Updating...'
-      }
-    ).then(res => {
+    try {
+      const res = await toast.promise(
+        createQuestionsInBatchAPI(quizData._id, questionsToSave),
+        {
+          pending: 'Updating...'
+        }
+      )
       if (!res.error) {
         toast.success('Draft saved successfully!')
-        dispatch(fetchQuizzDetailsAPI(id))
+        // dispatch lại dữ liệu quizDetails để cập nhật câu hỏi với _id từ server
+        await dispatch(fetchQuizzDetailsAPI(id))
+      } else {
+        throw new Error(res.error)
       }
-    }).catch(error => {
-      // toast.error('Failed to save draft. Please try again.')
+    } catch (error) {
+      toast.error('Failed to save draft. Please try again.')
       // console.error('Save draft error:', error)
+      throw error
+    }
+  }
+
+  const handleSave1Question = async (questionTempId) => {
+    const question = questions.find(q => q.tempId === questionTempId)
+    const originalQuestion = originalQuestions.find(q => q.tempId === questionTempId)
+
+    if (!question) {
+      toast.error('Question not found!')
+      return
+    }
+
+    // Kiểm tra xem question này có thay đổi không
+    if (isEqual(question, originalQuestion)) {
+      toast.info('No changes to save for this question.')
+      return
+    }
+
+    // Validate question
+    if (!question.content || question.content.trim() === '') {
+      toast.error('Question content cannot be empty.')
+      return
+    }
+
+    const hasCorrectAnswer = question.options.some(opt => opt.isCorrect)
+    if (!hasCorrectAnswer) {
+      toast.error('Please select at least one correct answer.')
+      return
+    }
+
+    if (question.type !== 'true-false') {
+      for (let j = 0; j < question.options.length; j++) {
+        const option = question.options[j]
+        if (!option.content || option.content.trim() === '') {
+          toast.error(`Option ${j + 1}: Option content cannot be empty.`)
+          return
+        }
+      }
+    }
+
+    // Loại bỏ tempId trước khi save
+    const { tempId, ...questionData } = question
+    questionData.options = questionData.options.map(opt => {
+      const { tempId, ...optionData } = opt
+      return optionData
     })
+
+    try {
+      const dataToSave = {
+        ...questionData,
+        quizId: quizData._id
+      }
+
+      if (question._id) {
+        await updateQuestionAPI(question._id, dataToSave)
+      } else {
+        await createQuestionAPI(dataToSave)
+      }
+
+      // Refresh quiz details
+      await dispatch(fetchQuizzDetailsAPI(id))
+      toast.success('Question saved successfully!')
+
+    } catch (error) {
+      toast.error('Failed to save question. Please try again.')
+      // console.error('Save question error:', error)
+    }
   }
 
   const handlePreview = () => {
     localStorage.setItem('previewQuiz', JSON.stringify({ ...quizData, questions }))
   }
 
-  const handleFinish = () => {
-    if (!validateQuestions()) return
+  const handleFinish = async () => {
     if (!hasChanges()) {
       navigate(`/teacher/quizzes/${quizData._id}`)
       return
     }
-    handleSave()
-    navigate(`/teacher/quizzes/${quizData._id}`)
+
+    const { confirmed } = await confirm({
+      title: (
+        <div className="flex items-center gap-2">
+          <CircleAlert color="orange" />
+          <span>Unsaved changes</span>
+        </div>
+      ),
+      description: (
+        <div className="mt-4 space-y-2 mb-2">
+          <p className="text-sm text-gray-600">
+            You have unsaved changes in this question.
+          </p>
+          <p className="text-sm text-gray-600">
+            Do you want to save your changes before finishing?
+          </p>
+          <div className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-600">
+            ⚠ If you don’t save, your changes will be lost.
+          </div>
+        </div>
+      ),
+      confirmationText: 'Save & Finish',
+      cancellationText: 'No, Finish Without Saving',
+      confirmationButtonProps: {
+        color: 'primary',
+        variant: 'contained'
+      }
+    })
+    if (confirmed) {
+      try {
+        await handleSave()
+        navigate(`/teacher/quizzes/${quizData._id}`)
+      } catch (error) {
+        // console.error('Save failed:', error)
+      }
+      return
+    }
+    else {
+      navigate(`/teacher/quizzes/${quizData._id}`)
+      return
+    }
   }
 
   if (isLoading || !quizData) {
@@ -314,6 +436,7 @@ function CreateQuizStep2() {
                 backgroundColor: '#f8fafc'
               }
             }}
+            className='interceptor-loading'
             onClick={handleSave}
           >
             <Save size={20} style={{ marginRight: '0.5rem' }} />
@@ -424,11 +547,22 @@ function CreateQuizStep2() {
                           className="cq-question-type"
                           value={question.type}
                           onChange={(e) => handleQuestionChange(question.tempId, 'type', e.target.value)}
+                          disabled={Boolean(question._id)}
+                          title={question._id ? 'Cannot change type for existing questions' : 'Select question type'}
                         >
                           <option value="single-choice">Single Choice</option>
                           <option value="multiple-choice">Multiple Choice</option>
                           <option value="true-false">True/False</option>
                         </select>
+                        <button
+                          type="button"
+                          className="interceptor-loading bg-emerald-500 hover:bg-emerald-600 text-white border-none rounded-md px-3 py-2 text-sm font-medium cursor-pointer flex items-center gap-1.5 transition-all duration-200"
+                          onClick={() => handleSave1Question(question.tempId)}
+                          title="Save this question"
+                        >
+                          <Save size={16} />
+                          Save
+                        </button>
                         {questions.length > 1 && (
                           <button
                             type="button"
@@ -626,6 +760,7 @@ function CreateQuizStep2() {
                   backgroundColor: '#059669'
                 }
               }}
+              className='interceptor-loading'
               onClick={handleFinish}
             >
               Finish

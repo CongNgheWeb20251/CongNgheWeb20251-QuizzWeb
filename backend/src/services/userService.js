@@ -62,7 +62,12 @@ const createNew = async (userData) => {
     // <h3>${verificationLink}</h3>
     // <h3>Sincerely!</h3>
     // `
-    const html = generateVerifyEmailTemplate(verificationLink)
+    const html = generateVerifyEmailTemplate({
+      link: verificationLink,
+      title: 'Verify Your Email Address',
+      content: 'Thank you for registering with Quizzy! Please verify your email address by clicking the button below to activate your account and start using our services.',
+      linkText: 'Verify Email'
+    })
     // await ResendProvider.sendEmail({ to, subject, html })
     // Sử dụng Brevo để gửi email
     const customSubject = 'Quizzy: Please verify your email before using our services!'

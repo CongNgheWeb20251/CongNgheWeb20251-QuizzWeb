@@ -21,7 +21,7 @@ function ForgotPassword() {
       // TODO: Replace with your actual API call
       // await sendPasswordResetEmail(email)
       console.log('Sending reset email to:', email)
-      
+
       toast.promise(
         // Simulated API call - replace with actual
         new Promise((resolve) => setTimeout(resolve, 1000)),
