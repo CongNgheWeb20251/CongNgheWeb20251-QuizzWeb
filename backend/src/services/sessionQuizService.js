@@ -15,10 +15,10 @@ const getQuizSessionDetails = async (sessionId) => {
     throw error
   }
 }
-const submitAnswers = async (sessionId, answersData) => {
+const submitAnswers = async (sessionId, answersData, userId) => {
   try {
     // Cập nhật câu trả lời vào bảng userAnswer
-    const { questionId, answerIds, userId } = answersData
+    const { questionId, answerIds } = answersData
     const result = await userAnswerModel.updateBySessionAndQuestion(sessionId, questionId, {
       selectedAnswerIds: answerIds
     }, userId)

@@ -170,7 +170,7 @@ const ProfileTab = () => {
             <TextField
               fullWidth
               label="Role"
-              defaultValue={currentUser?.role}
+              defaultValue={currentUser?.role === 'teacher' ? 'Teacher' : 'Student'}
               variant="outlined"
               InputLabelProps={{ shrink: true }}
               InputProps={{ readOnly: true }}

@@ -13,7 +13,7 @@ const getQuizSessionDetails = async (req, res, next) => {
 
 const submitAnswers = async (req, res, next) => {
   try {
-    const userId = req.user._id
+    const userId = req.jwtDecoded._id
     const { sessionId } = req.params
     const answersData = req.body
     await sessionQuizService.submitAnswers(sessionId, answersData, userId)

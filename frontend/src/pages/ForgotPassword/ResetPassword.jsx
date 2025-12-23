@@ -1,34 +1,37 @@
+import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Lock from '@mui/icons-material/Lock'
+import Visibility from '@mui/icons-material/Visibility'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import Alert from '@mui/material/Alert'
 import InputAdornment from '@mui/material/InputAdornment'
+import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import { FIELD_REQUIRED_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from '~/utils/validators'
 import '~/pages/SignIn/SignIn.css'
+import { resetPasswordAPI } from '~/apis'
 
 function ResetPassword() {
   const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') || 'preview-token' // Default token for preview
+  const email = searchParams.get('email')
+
   const { register, handleSubmit, formState: { errors }, watch } = useForm()
 
   const handleResetPassword = async (data) => {
     const { password } = data
     try {
-      // TODO: Replace with your actual API call
-      // await resetPassword(token, password)
-      console.log('Resetting password with token:', token)
-
       toast.promise(
-        // Simulated API call - replace with actual
-        new Promise((resolve) => setTimeout(resolve, 1000)),
+        resetPasswordAPI({ email, token, password }),
         {
           pending: 'Resetting password...',
-          success: 'Password reset successfully!',
-          error: 'Failed to reset password'
+          success: 'Password reset successfully!'
         }
       ).then(() => {
         navigate('/signin')
@@ -87,7 +90,7 @@ function ResetPassword() {
                   fullWidth
                   label="New Password"
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Enter new password"
                   variant="outlined"
                   error={!!errors['password']}
@@ -100,6 +103,17 @@ function ResetPassword() {
                       <InputAdornment position="start">
                         <Lock />
                       </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="Toggle password visibility"
+                          edge="end"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
                     )
                   }}
                 />
@@ -111,7 +125,7 @@ function ResetPassword() {
                   fullWidth
                   label="Confirm Password"
                   name="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Confirm new password"
                   variant="outlined"
                   error={!!errors['confirmPassword']}
@@ -123,6 +137,17 @@ function ResetPassword() {
                     startAdornment: (
                       <InputAdornment position="start">
                         <Lock />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="Toggle confirm password visibility"
+                          edge="end"
+                          onClick={() => setShowConfirmPassword((prev) => !prev)}
+                        >
+                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
                       </InputAdornment>
                     )
                   }}

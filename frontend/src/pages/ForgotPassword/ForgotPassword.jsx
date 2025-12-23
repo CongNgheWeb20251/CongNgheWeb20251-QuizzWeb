@@ -10,6 +10,7 @@ import { toast } from 'react-toastify'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import { FIELD_REQUIRED_MESSAGE, EMAIL_RULE, EMAIL_RULE_MESSAGE } from '~/utils/validators'
 import '~/pages/SignIn/SignIn.css'
+import { forgotPassAPI } from '~/apis'
 
 function ForgotPassword() {
   const [emailSent, setEmailSent] = useState(false)
@@ -18,17 +19,11 @@ function ForgotPassword() {
   const handleSendEmail = async (data) => {
     const { email } = data
     try {
-      // TODO: Replace with your actual API call
-      // await sendPasswordResetEmail(email)
-      console.log('Sending reset email to:', email)
-
       toast.promise(
-        // Simulated API call - replace with actual
-        new Promise((resolve) => setTimeout(resolve, 1000)),
+        forgotPassAPI({ email }),
         {
           pending: 'Sending email...',
-          success: 'Reset link sent to your email!',
-          error: 'Failed to send email'
+          success: 'Reset link sent to your email!'
         }
       ).then(() => {
         setEmailSent(true)

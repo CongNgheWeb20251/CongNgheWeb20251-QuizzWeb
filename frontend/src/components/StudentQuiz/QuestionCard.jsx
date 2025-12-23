@@ -34,7 +34,9 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
 
 
   const handleAnswerChange = (questionId, optionId) => {
-    setAnswers({ ...answers, [questionId]: [optionId] })
+    // Normalize to string to align with RadioGroup value handling
+    const normalized = optionId != null ? optionId.toString() : ''
+    setAnswers({ ...answers, [questionId]: [normalized] })
   }
 
   const handleMultipleAnswerChange = (questionId, optionId) => {
@@ -114,7 +116,7 @@ const QuestionCard = ({ question, index, viewMode, answers, setAnswers }) => {
       {['single-choice', 'true-false'].includes(question?.type) ? (
         <RadioGroup
           value={answers[question._id]?.[0]?.toString() || ''}
-          onChange={(e) => handleAnswerChange(question._id, parseInt(e.target.value))}
+          onChange={(e) => handleAnswerChange(question._id, e.target.value)}
         >
           {question?.options.map((option) => {
             const isSelected = answers[question._id]?.includes(option._id)

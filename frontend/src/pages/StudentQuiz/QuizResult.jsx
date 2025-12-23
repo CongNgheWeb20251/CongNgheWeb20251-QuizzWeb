@@ -23,7 +23,7 @@ import {
   Home,
   Award
 } from 'lucide-react'
-
+import MDEditor from '@uiw/react-md-editor'
 
 export default function QuizResult() {
   const [session, setSession] = useState(null)
@@ -161,7 +161,7 @@ export default function QuizResult() {
               style={{ marginBottom: '1rem' }}
             />
             <Typography variant="h4" sx={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: { xs: '1.5rem', sm: '2rem' } }}>
-              {passed ? 'Congratulations! 🎉' : 'Quiz Completed'}
+              {passed ? 'Congratulations!' : 'Quiz Completed'}
             </Typography>
             <Typography variant="body1" sx={{ color: '#64748b', fontSize: { xs: '0.875rem', sm: '1rem' } }}>
               {session.quizInfo?.title || 'Quiz'}
@@ -289,16 +289,22 @@ export default function QuizResult() {
                     </Box>
                   </Box>
 
-                  <Typography
-                    variant="body1"
+                  <Box
                     sx={{
                       marginBottom: '1.5rem',
-                      fontSize: { xs: '1rem', sm: '1.1rem' },
-                      fontWeight: 500
+                      fontSize: { xs: '1rem', sm: '1.1rem' }
                     }}
                   >
-                    {question.content}
-                  </Typography>
+                    <MDEditor.Markdown
+                      source={question?.content}
+                      style={{
+                        whiteSpace: 'pre-wrap',
+                        padding: question?.content ? '10px' : '0px',
+                        border: question?.content ? '0.5px solid rgba(0, 0, 0, 0.2)' : 'none',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  </Box>
 
                   {/* Options */}
                   <Box>

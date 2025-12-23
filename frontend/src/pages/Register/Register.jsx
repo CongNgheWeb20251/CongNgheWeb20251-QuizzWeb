@@ -5,9 +5,12 @@ import Facebook from '@mui/icons-material/Facebook'
 import Person from '@mui/icons-material/Person'
 import Email from '@mui/icons-material/Email'
 import Lock from '@mui/icons-material/Lock'
+import Visibility from '@mui/icons-material/Visibility'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import School from '@mui/icons-material/School'
 import PersonOutline from '@mui/icons-material/PersonOutline'
 import InputAdornment from '@mui/material/InputAdornment'
+import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
 
 import './Register.css'
@@ -22,6 +25,7 @@ import { API_ROOT } from '~/utils/constants'
 function Register() {
   const navigate = useNavigate()
   const [accountType, setAccountType] = useState('student')
+  const [showPassword, setShowPassword] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm()
 
   const handleRegister = (data) => {
@@ -183,7 +187,7 @@ function Register() {
                   fullWidth
                   label="Password"
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
                   variant="outlined"
                   error={!!errors['password']}
@@ -195,6 +199,17 @@ function Register() {
                     startAdornment: (
                       <InputAdornment position="start">
                         <Lock />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="Toggle password visibility"
+                          edge="end"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
                       </InputAdornment>
                     )
                   }}

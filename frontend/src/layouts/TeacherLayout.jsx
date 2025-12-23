@@ -9,6 +9,7 @@ import { Menu, X } from 'lucide-react'
 import UserAvatar from '~/components/UserAvatar/UserAvatar'
 import './TeacherLayout.css'
 import Notification from '~/components/Notification/Notification'
+import Logo from '~/components/Logo'
 
 function TeacherLayout() {
   const navigate = useNavigate()
@@ -25,6 +26,7 @@ function TeacherLayout() {
     return 'dashboard'
   }
 
+  // eslint-disable-next-line no-unused-vars
   const [selectedMenu, setSelectedMenu] = useState(getActiveMenu())
 
   const handleMenuClick = (menuId) => {
@@ -75,9 +77,12 @@ function TeacherLayout() {
         anchor="left"
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <div className="logo" style={{ fontSize: '1.25rem' }}>
-            <span className="logo-qui">Qui</span>
-            <span className="logo-zzy">zzy</span>
+          <div className="logo flex gap-2 items-center" style={{ fontSize: '1.25rem' }}>
+            <Logo />
+            <div>
+              <span className="logo-qui">Qui</span>
+              <span className="logo-zzy">zzy</span>
+            </div>
           </div>
           <IconButton onClick={handleDrawerToggle} size="small" sx={{ color: '#e5e7eb' }}>
             <X size={18} />
