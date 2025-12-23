@@ -44,13 +44,13 @@ const updateQuestion = async (req, res, next) => {
 
 const deleteQuestion = async (req, res, next) => {
   try {
-    const { quizId, questionId } = req.params 
+    const { questionId } = req.params
 
-    if (!questionId || !quizId) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'questionId and quizId are required')
+    if (!questionId) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'questionId is required')
     }
 
-    await questionService.deleteQuestion(questionId, quizId)
+    await questionService.deleteQuestion(questionId)
     res.status(StatusCodes.OK).json({
       message: 'Question deleted successfully',
       questionId
@@ -60,8 +60,20 @@ const deleteQuestion = async (req, res, next) => {
   }
 }
 
+const createNew = async (req, res, next) => {
+  try {
+    const questionData = req.body
+    const createdQuestion = await questionService.createNew(questionData)
+    res.status(StatusCodes.CREATED).json(createdQuestion)
+  } catch (error) {
+    next(error)
+  }
+}
+
+
 export const questionController = {
   updateQuestionsInBatch,
   updateQuestion,
-  deleteQuestion
+  deleteQuestion,
+  createNew
 }

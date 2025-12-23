@@ -78,7 +78,7 @@ const updateQuestionsInBatch = async (quizId, questions) => {
               { content: opt.content, isCorrect: opt.isCorrect }
             )
           } else {
-            // option mới, tạo mới
+            // option mới, tạo mới, trong hàm tạo mới này đã xử lí push optionId vào question
             await optionService.createNew({
               questionId: q._id.toString(),
               quizId,
@@ -113,20 +113,23 @@ const updateQuestionsInBatch = async (quizId, questions) => {
   }
 }
 
-const createNew = async (quizId, data) => {
+const createNew = async (data) => {
   try {
     const result = await questionModel.createNew({
-      quizId: quizId,
+      quizId: data.quizId,
       content: data.content,
       type: data.type,
       points: data.points
     })
+
     const question = await questionModel.findOneById(result.insertedId)
+    // push vào quiz
     await quizModel.pushQuestionIds(question)
+    // tạo options tương ứng với question, trong hàm createNew đã xử lí push optionId vào question
     await Promise.all(data.options.map(async (opt) => {
       await optionService.createNew({
         questionId: question._id.toString(),
-        quizId,
+        quizId: data.quizId,
         content: opt.content,
         isCorrect: opt.isCorrect
       })
@@ -145,37 +148,52 @@ const updateQuestion = async (questionId, updateData) => {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Question not found')
     }
 
-    // Validate content nếu có update
-    if (updateData.content) {
-      if (updateData.content.length < 10 || updateData.content.length > 500) {
-        throw new ApiError(
-          StatusCodes.UNPROCESSABLE_ENTITY,
-          'Content must be between 10 and 500 characters'
-        )
-      }
-    }
-
-    // Validate level
-    if (updateData.level && !['easy', 'medium', 'hard'].includes(updateData.level)) {
-      throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, 'Invalid level')
-    }
-
     // Update question
-    const updatedQuestion = await questionModel.update(questionId, updateData)
+    const updatedQuestion = await questionModel.update(questionId, {
+      content: updateData.content,
+      type: updateData.type,
+      points: updateData.points
+    })
 
     // Nếu có cập nhật options
     if (updateData.options && Array.isArray(updateData.options)) {
-      // Xóa options cũ
-      await answerOptionModel.deleteByQuestionId(questionId)
+      // Lấy danh sách option IDs hiện tại của question này
+      const existingOptions = await answerOptionModel.findByQuestionId(questionId)
+      const existingOptionIds = existingOptions.map(opt => opt._id.toString())
 
-      // Tạo options mới - Loop 
-      for (const option of updateData.options) {
-        await answerOptionModel.createNew({
-          questionId: questionId,
-          quizId: question.quizId.toString(),
-          content: option.content,
-          isCorrect: option.isCorrect || false
-        })
+      // Lấy danh sách option IDs được gửi từ frontend
+      const incomingOptionIds = updateData.options
+        .filter(opt => opt._id)
+        .map(opt => opt._id.toString())
+
+      // Tìm options bị xóa (có trong DB nhưng không có trong request)
+      const deletedOptionIds = existingOptionIds.filter(
+        id => !incomingOptionIds.includes(id)
+      )
+
+      // Xóa các options bị xóa
+      for (const optionId of deletedOptionIds) {
+        await answerOptionModel.deleteOne(optionId)
+        await questionModel.pullOptionIds({ _id: optionId, questionId: questionId })
+      }
+
+      // Xử lý create và update options
+      for (const opt of updateData.options) {
+        if (opt._id) {
+          // option đã có, update
+          await answerOptionModel.update(
+            opt._id,
+            { content: opt.content, isCorrect: opt.isCorrect }
+          )
+        } else {
+          // option mới, tạo mới, trong hàm tạo mới này đã xử lí push optionId vào question
+          await optionService.createNew({
+            questionId: questionId.toString(),
+            quizId: question.quizId.toString(),
+            content: opt.content,
+            isCorrect: opt.isCorrect
+          })
+        }
       }
     }
 
@@ -185,17 +203,12 @@ const updateQuestion = async (questionId, updateData) => {
   }
 }
 
-const deleteQuestion = async (questionId, quizId) => {
+const deleteQuestion = async (questionId) => {
   try {
     // Kiểm tra question tồn tại
     const question = await questionModel.findOneById(questionId)
     if (!question) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Question not found')
-    }
-
-    // Kiểm tra question thuộc quiz này
-    if (question.quizId.toString() !== quizId) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Question does not belong to this quiz')
     }
 
     // Xóa tất cả answerOptions của câu hỏi
@@ -205,7 +218,7 @@ const deleteQuestion = async (questionId, quizId) => {
     await questionModel.deleteOne(questionId)
 
     // Xóa questionId từ quiz
-    await quizModel.pullQuestionIds({ _id: questionId, quizId })
+    await quizModel.pullQuestionIds({ _id: questionId, quizId: question.quizId.toString() })
 
     return {
       message: 'Question deleted successfully',

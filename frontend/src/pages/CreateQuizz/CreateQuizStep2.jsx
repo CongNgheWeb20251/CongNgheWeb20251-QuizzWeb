@@ -23,7 +23,7 @@ import { selectCurrentActiveQuizz, fetchQuizzDetailsAPI } from '~/redux/activeQu
 import { useParams } from 'react-router-dom'
 import AddIcon from '@mui/icons-material/Add'
 import { toast } from 'react-toastify'
-import { createQuestionsInBatchAPI } from '~/apis'
+import { createQuestionsInBatchAPI, createQuestionAPI, updateQuestionAPI } from '~/apis'
 import { isEqual, cloneDeep } from 'lodash'
 import { Save, CircleAlert } from 'lucide-react'
 import PageLoader from '~/components/Loading/PageLoader'
@@ -143,6 +143,11 @@ function CreateQuizStep2() {
   const handleAddOption = (questionId) => {
     setQuestions(questions.map(q => {
       if (q.tempId === questionId) {
+        // Prevent adding more than 5 options
+        if (q.options && q.options.length >= 5) {
+          toast.info('Maximum 5 options allowed per question.')
+          return q
+        }
         const maxOptionIndex = q.options && q.options.length ? Math.max(...q.options.map(o => Number(o.tempId) % 10)) : 0
         const newOption = {
           tempId: q.tempId * 10 + maxOptionIndex + 1,
@@ -217,6 +222,11 @@ function CreateQuizStep2() {
 
       // Check if all options have content (except for true-false which has fixed content)
       if (question.type !== 'true-false') {
+        // Check max options limit
+        if (question.options.length > 5) {
+          toast.info(`Question ${i + 1}: Maximum 5 options allowed.`)
+          return false
+        }
         for (let j = 0; j < question.options.length; j++) {
           const option = question.options[j]
           if (!option.content || option.content.trim() === '') {
@@ -273,6 +283,72 @@ function CreateQuizStep2() {
       toast.error('Failed to save draft. Please try again.')
       // console.error('Save draft error:', error)
       throw error
+    }
+  }
+
+  const handleSave1Question = async (questionTempId) => {
+    const question = questions.find(q => q.tempId === questionTempId)
+    const originalQuestion = originalQuestions.find(q => q.tempId === questionTempId)
+
+    if (!question) {
+      toast.error('Question not found!')
+      return
+    }
+
+    // Kiểm tra xem question này có thay đổi không
+    if (isEqual(question, originalQuestion)) {
+      toast.info('No changes to save for this question.')
+      return
+    }
+
+    // Validate question
+    if (!question.content || question.content.trim() === '') {
+      toast.error('Question content cannot be empty.')
+      return
+    }
+
+    const hasCorrectAnswer = question.options.some(opt => opt.isCorrect)
+    if (!hasCorrectAnswer) {
+      toast.error('Please select at least one correct answer.')
+      return
+    }
+
+    if (question.type !== 'true-false') {
+      for (let j = 0; j < question.options.length; j++) {
+        const option = question.options[j]
+        if (!option.content || option.content.trim() === '') {
+          toast.error(`Option ${j + 1}: Option content cannot be empty.`)
+          return
+        }
+      }
+    }
+
+    // Loại bỏ tempId trước khi save
+    const { tempId, ...questionData } = question
+    questionData.options = questionData.options.map(opt => {
+      const { tempId, ...optionData } = opt
+      return optionData
+    })
+
+    try {
+      const dataToSave = {
+        ...questionData,
+        quizId: quizData._id
+      }
+
+      if (question._id) {
+        await updateQuestionAPI(question._id, dataToSave)
+      } else {
+        await createQuestionAPI(dataToSave)
+      }
+
+      // Refresh quiz details
+      await dispatch(fetchQuizzDetailsAPI(id))
+      toast.success('Question saved successfully!')
+
+    } catch (error) {
+      toast.error('Failed to save question. Please try again.')
+      // console.error('Save question error:', error)
     }
   }
 
@@ -360,6 +436,7 @@ function CreateQuizStep2() {
                 backgroundColor: '#f8fafc'
               }
             }}
+            className='interceptor-loading'
             onClick={handleSave}
           >
             <Save size={20} style={{ marginRight: '0.5rem' }} />
@@ -477,6 +554,15 @@ function CreateQuizStep2() {
                           <option value="multiple-choice">Multiple Choice</option>
                           <option value="true-false">True/False</option>
                         </select>
+                        <button
+                          type="button"
+                          className="interceptor-loading bg-emerald-500 hover:bg-emerald-600 text-white border-none rounded-md px-3 py-2 text-sm font-medium cursor-pointer flex items-center gap-1.5 transition-all duration-200"
+                          onClick={() => handleSave1Question(question.tempId)}
+                          title="Save this question"
+                        >
+                          <Save size={16} />
+                          Save
+                        </button>
                         {questions.length > 1 && (
                           <button
                             type="button"
@@ -674,6 +760,7 @@ function CreateQuizStep2() {
                   backgroundColor: '#059669'
                 }
               }}
+              className='interceptor-loading'
               onClick={handleFinish}
             >
               Finish

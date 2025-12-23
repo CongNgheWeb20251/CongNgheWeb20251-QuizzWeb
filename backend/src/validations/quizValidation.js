@@ -4,8 +4,8 @@ import ApiError from '~/utils/ApiError'
 
 const createNew = async (req, res, next) => {
   const quizzSchema = Joi.object({
-    title: Joi.string().required().trim(),
-    description: Joi.string().allow('').trim(),
+    title: Joi.string().required().trim().replace(/\s+/g, ' '),
+    description: Joi.string().allow('').trim().replace(/\s+/g, ' '),
     category: Joi.string().required().trim(),
     difficulty: Joi.string().required().trim(),
     passingScore: Joi.number().required(),
@@ -23,10 +23,10 @@ const createNew = async (req, res, next) => {
 
 const updateInfo = async (req, res, next) => {
   const quizzUpdateSchema = Joi.object({
-    title: Joi.string().optional().trim(),
-    description: Joi.string().optional().trim(),
-    category: Joi.string().optional().trim(),
-    level: Joi.string().optional().trim(),
+    title: Joi.string().optional().trim().replace(/\s+/g, ' '),
+    description: Joi.string().optional().trim().replace(/\s+/g, ' '),
+    category: Joi.string().optional().trim().replace(/\s+/g, ' '),
+    level: Joi.string().optional().trim().replace(/\s+/g, ' '),
     passingScore: Joi.number().optional(),
     timeLimit: Joi.number().optional(),
     allowRetake: Joi.boolean().optional(),

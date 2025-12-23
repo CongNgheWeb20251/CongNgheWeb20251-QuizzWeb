@@ -47,7 +47,7 @@ const login = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   const userSchema = Joi.object({
-    fullName: Joi.string().trim().strict(),
+    fullName: Joi.string().trim().strict().replace(/\s+/g, ' '),
     current_password: Joi.string().pattern(PASSWORD_RULE).message(`current_password: ${PASSWORD_RULE_MESSAGE}`),
     new_password: Joi.string().pattern(PASSWORD_RULE).message(`new_password: ${PASSWORD_RULE_MESSAGE}`)
   })

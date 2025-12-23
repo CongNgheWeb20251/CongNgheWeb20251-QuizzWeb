@@ -24,8 +24,8 @@ import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import { useForm } from 'react-hook-form'
 import { useConfirm } from 'material-ui-confirm'
 import { toast } from 'react-toastify'
-import { useDispatch } from 'react-redux'
-import { updateUserAPI, logoutUserAPI } from '~/redux/user/userSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { updateUserAPI, logoutUserAPI, selectCurrentUser } from '~/redux/user/userSlice'
 
 const StyledSection = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(4)
@@ -41,7 +41,7 @@ const DangerButton = styled(Button)(({ theme }) => ({
 }))
 
 const AccountTab = () => {
-
+  const currUser = useSelector(selectCurrentUser)
   const { register, handleSubmit, watch, formState: { errors } } = useForm()
   const dispatch = useDispatch()
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
@@ -97,69 +97,71 @@ const AccountTab = () => {
         <Typography variant="h6" gutterBottom>
           Account Security
         </Typography>
-        <form onSubmit={handleSubmit(submitChangePassword)}>
-          <Box>
-            <TextField
-              fullWidth
-              margin="normal"
-              type="password"
-              label="Current Password"
-              name="current_password"
-              {...register('current_password', {
-                required: FIELD_REQUIRED_MESSAGE,
-                pattern: {
-                  value: PASSWORD_RULE,
-                  message: PASSWORD_RULE_MESSAGE
-                }
-              })}
-              error={!!errors['current_password']}
-            />
-            <FieldErrorAlert errors={errors} fieldName={'current_password'} />
-          </Box>
-          <Box>
-            <TextField
-              fullWidth
-              margin="normal"
-              type="password"
-              label="New Password"
-              name="new_password"
-              {...register('new_password', {
-                required: FIELD_REQUIRED_MESSAGE,
-                pattern: {
-                  value: PASSWORD_RULE,
-                  message: PASSWORD_RULE_MESSAGE
-                }
-              })}
-              error={!!errors['new_password']}
-            />
-            <FieldErrorAlert errors={errors} fieldName={'new_password'} />
-          </Box>
-          <Box>
-            <TextField
-              fullWidth
-              margin="normal"
-              type="password"
-              label="Confirm New Password"
-              name="new_password_confirmation"
-              {...register('new_password_confirmation', {
-                validate: (value) => {
-                  if (value === watch('new_password')) return true
-                  return 'Password confirmation does not match.'
-                }
-              })}
-              error={!!errors['new_password_confirmation']}
-            />
-            <FieldErrorAlert errors={errors} fieldName={'new_password_confirmation'} />
-          </Box>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
-          >
-            Update Password
-          </Button>
-        </form>
+        { (currUser?.authProvider === 'local' || currUser?.authProvider === 'hybrid') &&
+          <form onSubmit={handleSubmit(submitChangePassword)}>
+            <Box>
+              <TextField
+                fullWidth
+                margin="normal"
+                type="password"
+                label="Current Password"
+                name="current_password"
+                {...register('current_password', {
+                  required: FIELD_REQUIRED_MESSAGE,
+                  pattern: {
+                    value: PASSWORD_RULE,
+                    message: PASSWORD_RULE_MESSAGE
+                  }
+                })}
+                error={!!errors['current_password']}
+              />
+              <FieldErrorAlert errors={errors} fieldName={'current_password'} />
+            </Box>
+            <Box>
+              <TextField
+                fullWidth
+                margin="normal"
+                type="password"
+                label="New Password"
+                name="new_password"
+                {...register('new_password', {
+                  required: FIELD_REQUIRED_MESSAGE,
+                  pattern: {
+                    value: PASSWORD_RULE,
+                    message: PASSWORD_RULE_MESSAGE
+                  }
+                })}
+                error={!!errors['new_password']}
+              />
+              <FieldErrorAlert errors={errors} fieldName={'new_password'} />
+            </Box>
+            <Box>
+              <TextField
+                fullWidth
+                margin="normal"
+                type="password"
+                label="Confirm New Password"
+                name="new_password_confirmation"
+                {...register('new_password_confirmation', {
+                  validate: (value) => {
+                    if (value === watch('new_password')) return true
+                    return 'Password confirmation does not match.'
+                  }
+                })}
+                error={!!errors['new_password_confirmation']}
+              />
+              <FieldErrorAlert errors={errors} fieldName={'new_password_confirmation'} />
+            </Box>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+            >
+              Update Password
+            </Button>
+          </form>
+        }
       </StyledSection>
 
       <StyledSection>
