@@ -10,7 +10,7 @@
 
 const apiRoot = import.meta.env.DEV
   ? 'http://localhost:8017' // Development
-  : 'https://congngheweb20251-quizzweb.onrender.com' // Production
+  : '/api' // Production goes through Vercel rewrite to Render backend
 
 export const API_ROOT = apiRoot
 
