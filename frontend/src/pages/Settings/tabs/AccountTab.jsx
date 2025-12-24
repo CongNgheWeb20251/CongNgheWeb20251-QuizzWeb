@@ -3,7 +3,6 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import Switch from '@mui/material/Switch'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
@@ -15,10 +14,9 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContentText from '@mui/material/DialogContentText'
 
-import { styled } from '@mui/material/styles'
 import LogoutIcon from '@mui/icons-material/Logout'
 
-
+import { StyledSection, DangerButton, StyledSectionTitle, StyledList, StyledSwitch } from '../styles/AccountTab.styles'
 import { FIELD_REQUIRED_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from '~/utils/validators'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import { useForm } from 'react-hook-form'
@@ -27,18 +25,6 @@ import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { updateUserAPI, logoutUserAPI, selectCurrentUser } from '~/redux/user/userSlice'
 
-const StyledSection = styled(Box)(({ theme }) => ({
-  marginBottom: theme.spacing(4)
-}))
-
-const DangerButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.error.main,
-  borderColor: theme.palette.error.main,
-  '&:hover': {
-    backgroundColor: theme.palette.error.light,
-    borderColor: theme.palette.error.main
-  }
-}))
 
 const AccountTab = () => {
   const currUser = useSelector(selectCurrentUser)
@@ -94,9 +80,9 @@ const AccountTab = () => {
   return (
     <Box>
       <StyledSection>
-        <Typography variant="h6" gutterBottom>
+        <StyledSectionTitle variant="h6" gutterBottom>
           Account Security
-        </Typography>
+        </StyledSectionTitle>
         { (currUser?.authProvider === 'local' || currUser?.authProvider === 'hybrid') &&
           <form onSubmit={handleSubmit(submitChangePassword)}>
             <Box>
@@ -165,62 +151,38 @@ const AccountTab = () => {
       </StyledSection>
 
       <StyledSection>
-        <Typography variant="h6" gutterBottom>
+        <StyledSectionTitle variant="h6" gutterBottom>
           Two-Factor Authentication
-        </Typography>
-        <ListItem>
+        </StyledSectionTitle>
+        <ListItem sx={{ padding: 0 }}>
           <ListItemText
             primary="Enable Two-Factor Authentication"
             secondary="Add an extra layer of security to your account"
+            sx={{
+              '& .MuiListItemText-primary': {
+                color: '#FFFFFF',
+                fontWeight: 500
+              },
+              '& .MuiListItemText-secondary': {
+                color: '#94A3B8'
+              }
+            }}
           />
           <ListItemSecondaryAction>
-            <Switch
+            <StyledSwitch
               edge="end"
               checked={twoFactorEnabled}
               onChange={handleTwoFactorToggle}
+              disabled= {currUser?.require_2fa}
             />
           </ListItemSecondaryAction>
         </ListItem>
       </StyledSection>
 
       <StyledSection>
-        <Typography variant="h6" gutterBottom>
-          Connected Accounts
-        </Typography>
-        <List>
-          <ListItem>
-            <ListItemText primary="Google" secondary="Connected" />
-            <ListItemSecondaryAction>
-              <Button variant="outlined" size="small">
-                Disconnect
-              </Button>
-            </ListItemSecondaryAction>
-          </ListItem>
-          <Divider />
-          <ListItem>
-            <ListItemText primary="Facebook" secondary="Not connected" />
-            <ListItemSecondaryAction>
-              <Button variant="outlined" size="small">
-                Connect
-              </Button>
-            </ListItemSecondaryAction>
-          </ListItem>
-          <Divider />
-          <ListItem>
-            <ListItemText primary="X" secondary="Not connected" />
-            <ListItemSecondaryAction>
-              <Button variant="outlined" size="small">
-                Connect
-              </Button>
-            </ListItemSecondaryAction>
-          </ListItem>
-        </List>
-      </StyledSection>
-
-      <StyledSection>
-        <Typography variant="h6" gutterBottom color="error">
+        <StyledSectionTitle variant="h6" gutterBottom sx={{ color: '#EF4444' }}>
           Danger Zone
-        </Typography>
+        </StyledSectionTitle>
         <DangerButton
           variant="outlined"
           onClick={() => setDeleteDialogOpen(true)}

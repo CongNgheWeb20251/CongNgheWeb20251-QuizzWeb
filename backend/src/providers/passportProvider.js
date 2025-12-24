@@ -2,7 +2,7 @@ import passport from 'passport'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import { userModel } from '~/models/userModel.js'
 import { env } from '~/config/environment'
-import { SERVER_DOMAIN } from '~/utils/constants'
+import { CALLBACK_URL } from '~/utils/constants'
 import { Strategy as FacebookStrategy } from 'passport-facebook'
 
 passport.use(
@@ -10,7 +10,7 @@ passport.use(
     {
       clientID: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${SERVER_DOMAIN}/v1/users/google/callback`,
+      callbackURL: `${CALLBACK_URL}/v1/users/google/callback`,
       passReqToCallback: true
     },
     async (request, accessToken, refreshToken, profile, done) => {
@@ -59,7 +59,7 @@ passport.use(
     {
       clientID: env.FACEBOOK_APP_ID,
       clientSecret: env.FACEBOOK_APP_SECRET,
-      callbackURL: `${SERVER_DOMAIN}/v1/users/facebook/callback`,
+      callbackURL: `${CALLBACK_URL}/v1/users/facebook/callback`,
       profileFields: ['id', 'displayName', 'emails', 'photos'],
       passReqToCallback: true
     },
