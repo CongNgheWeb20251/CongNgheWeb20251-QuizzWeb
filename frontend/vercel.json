@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://congngheweb20251-quizzweb.onrender.com/:path*"
+    },
+    {
       "source": "/assets/(.*)",
       "destination": "/assets/$1"
     },
