@@ -35,5 +35,5 @@ export const pickUser = (user) => {
   if (!user) {
     return {}
   }
-  return pick(user, ['_id', 'email', 'username', 'fullName', 'avatar', 'role', 'isActive', 'createdAt', 'updatedAt', 'require_2fa', 'authProvider'])
+  return pick(user, ['_id', 'email', 'username', 'fullName', 'avatar', 'role', 'isActive', 'createdAt', 'updatedAt', 'require_2fa', 'authProvider', 'googleId', 'facebookId'])
 }

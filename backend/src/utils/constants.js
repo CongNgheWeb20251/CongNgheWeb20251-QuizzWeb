@@ -13,3 +13,5 @@ export const DEFAULT_FILTER = 'all'
 
 export const WEBSITE_DOMAIN = (env.BUILD_MODE === 'production' ? env.WEBSITE_DOMAIN_PRODUCTION : env.WEBSITE_DOMAIN_DEV)
 export const SERVER_DOMAIN = (env.BUILD_MODE === 'production' ? env.APP_DOMAIN_PRODUCTION : env.APP_DOMAIN_DEV)
+// Bên config vercel đã rewrite /api về đúng backend domain nên ở đây chỉ cần thêm /api vào là được
+export const CALLBACK_URL = (env.BUILD_MODE === 'production' ? `${env.WEBSITE_DOMAIN_PRODUCTION}/api` : env.APP_DOMAIN_DEV)
