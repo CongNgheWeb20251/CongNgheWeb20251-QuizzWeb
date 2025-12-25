@@ -29,10 +29,21 @@ function QuestionContentMdEditor({ questionContentProp, onUpdateQuestionContent 
   // State xử lý giá trị markdown khi chỉnh sửa
   const [questionContent, setQuestionContent] = useState(questionContentProp)
 
+  // Hàm escape thẻ <script> để hiển thị dưới dạng text
+  // Tránh việc người dùng chèn mã độc vào nội dung câu hỏi
+  const escapeScriptTags = (content) => {
+    if (!content) return content
+    return content.replace(/<script[\s\S]*?<\/script>/gi, (match) =>
+      match.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    )
+  }
+
   const updateQuestionContent = () => {
     setMarkdownEditMode(false)
-    // console.log('questionContent: ', questionContent)
-    onUpdateQuestionContent(questionContent || '')
+    // Ensure any raw <script> blocks are escaped so they display as text
+    const safeContent = escapeScriptTags(questionContent || '')
+    setQuestionContent(safeContent)
+    onUpdateQuestionContent(safeContent)
   }
 
   return (

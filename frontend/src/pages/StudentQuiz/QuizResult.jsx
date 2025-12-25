@@ -21,14 +21,20 @@ import {
   Square,
   RotateCcw,
   Home,
-  Award
+  Award,
+  Bot
 } from 'lucide-react'
 import MDEditor from '@uiw/react-md-editor'
+import AIChatbot from '~/components/BotAI'
+import Tooltip from '@mui/material/Tooltip'
 
 export default function QuizResult() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
   const [startQuizModal, setStartQuizModal] = useState(false)
+  const [question, setQuestion] = useState(null)
+  const [isCorrect, setIsCorrect] = useState(false)
+  const [openAIChatbot, setOpenAIChatbot] = useState(false)
   const navigate = useNavigate()
   // Get sessionId from URL params
   const { sessionId } = useParams()
@@ -48,6 +54,17 @@ export default function QuizResult() {
       const { sessionId: newSessionId, quizId } = res
       navigate(`/quizzes/${quizId}/session/${newSessionId}`)
     })
+  }
+  const handleOpenAIChatbot = (question, isCorrect) => {
+    setQuestion(question)
+    setIsCorrect(isCorrect)
+    setOpenAIChatbot(true)
+  }
+
+  const handleCloseAIChatbot = () => {
+    setOpenAIChatbot(false)
+    setQuestion(null)
+    setIsCorrect(false)
   }
 
   useEffect(() => {
@@ -266,6 +283,20 @@ export default function QuizResult() {
                       <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                         Question {index + 1}
                       </Typography>
+                      <Tooltip
+                        title={'Get AI Explanation'}
+                        arrow
+                        placement="top"
+                      >
+                        <span>
+                          <Bot
+                            size={24}
+                            color="#8b5cf6"
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => handleOpenAIChatbot(question, isCorrect)}
+                          />
+                        </span>
+                      </Tooltip>
                     </Box>
                     <Box sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                       <Chip
@@ -477,6 +508,14 @@ export default function QuizResult() {
             }
           }
           isRetake={true}
+        />
+      )}
+      {openAIChatbot && (
+        <AIChatbot
+          open={openAIChatbot}
+          onClose={handleCloseAIChatbot}
+          question={question}
+          isCorrect={isCorrect}
         />
       )}
     </Box>

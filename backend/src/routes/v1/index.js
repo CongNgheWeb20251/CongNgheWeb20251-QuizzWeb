@@ -6,6 +6,7 @@ import { studentRoute } from './studentRoute.js'
 import { dashboardRoute } from './dashboardRoute.js'
 import { notificationRoute } from './notificationRoute.js'
 import { questionRoute } from './questionRoute.js'
+import { chatbotRoute } from './chatbotRoute.js'
 
 const Router = express.Router()
 
@@ -22,5 +23,6 @@ Router.use('/student', studentRoute)
 Router.use('/dashboard', dashboardRoute)
 Router.use('/notifications', notificationRoute)
 Router.use('/questions', questionRoute)
+Router.use('/ai', chatbotRoute)
 
 export const Router_V1 = Router

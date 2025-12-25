@@ -40,6 +40,10 @@ export const env = {
   // Redis
   PASSWORD_REDIS: process.env.PASSWORD_REDIS,
   HOST_REDIS: process.env.HOST_REDIS,
-  PORT_REDIS: process.env.PORT_REDIS
+  PORT_REDIS: process.env.PORT_REDIS,
+
+  // Gemini AI
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY
+
 
 }
