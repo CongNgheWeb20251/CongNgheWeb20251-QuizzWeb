@@ -187,3 +187,9 @@ export const getNotificationsByTeacherAPI = async () => {
   return res.data
 }
 
+// AI Chatbot API
+export const askAIQuestionAPI = async (question) => {
+  const res = await authorizedAxiosInstance.post('v1/ai/ask', { question })
+  return res.data
+}
+
