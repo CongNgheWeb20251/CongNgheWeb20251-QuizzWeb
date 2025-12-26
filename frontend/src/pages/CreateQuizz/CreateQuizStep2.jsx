@@ -23,7 +23,7 @@ import { selectCurrentActiveQuizz, fetchQuizzDetailsAPI } from '~/redux/activeQu
 import { useParams } from 'react-router-dom'
 import AddIcon from '@mui/icons-material/Add'
 import { toast } from 'react-toastify'
-import { createQuestionsInBatchAPI, createQuestionAPI, updateQuestionAPI } from '~/apis'
+import { createQuestionsInBatchAPI, createQuestionAPI, updateQuestionAPI, deleteQuestionAPI } from '~/apis'
 import { isEqual, cloneDeep } from 'lodash'
 import { Save, CircleAlert } from 'lucide-react'
 import PageLoader from '~/components/Loading/PageLoader'
@@ -188,8 +188,45 @@ function CreateQuizStep2() {
     setQuestions(prev => [...prev, newQuestion])
   }
 
-  const handleRemoveQuestion = (questionId) => {
-    if (questions.length > 1) {
+  const handleRemoveQuestion = async (questionId) => {
+    if (questions.length <= 1) return
+
+    const question = questions.find(q => q.tempId === questionId)
+    if (!question) return
+
+    // If question exists in DB (has _id), confirm and call delete API, then refresh
+    if (question._id) {
+      const { confirmed } = await confirm({
+        title: (
+          <div className="flex items-center gap-2">
+            <CircleAlert color="red" />
+            <span>Delete question</span>
+          </div>
+        ),
+        description: (
+          <div className="mt-2 text-sm text-gray-600">
+            This will permanently delete the question from the database.
+          </div>
+        ),
+        confirmationText: 'Delete',
+        cancellationText: 'Cancel',
+        allowClose: true
+      })
+
+      if (!confirmed) return
+
+      try {
+        await toast.promise(deleteQuestionAPI(question._id), {
+          pending: 'Deleting question...'
+        })
+        // cập nh lại state questions
+        setQuestions(questions.filter(q => q.tempId !== questionId))
+        toast.success('Question deleted')
+      } catch (err) {
+        toast.error('Failed to delete question. Please try again.')
+      }
+    } else {
+      // Nếu question chưa tồn tại trong DB (chưa có _id) thì chỉ cần xoá khỏi state
       setQuestions(questions.filter(q => q.tempId !== questionId))
     }
   }

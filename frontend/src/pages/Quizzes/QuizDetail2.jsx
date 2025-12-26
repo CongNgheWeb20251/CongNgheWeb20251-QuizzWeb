@@ -1,4 +1,5 @@
-import { useState } from 'react'
+/* eslint-disable no-unused-vars */
+import { useState, useEffect } from 'react'
 import {
   ArrowLeft,
   Edit,
@@ -7,34 +8,48 @@ import {
 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import ErrorBoundary from '~/components/Error/ErrorBoundary'
 import TableSkeleton from './QuizDashboardPage/skeletons/TableSkeleton'
 import MetricsSkeleton from './QuizDashboardPage/skeletons/MetricsSkeleton'
-import { getQuizInfo, deleteQuizAPI } from '~/apis'
+import { getQuizInfo, deleteQuizAPI, publishQuizAPI } from '~/apis'
 import ShareQuizModal from '~/components/Modal/ShareQuizModal'
 import { useConfirm } from 'material-ui-confirm'
 import { FRONTEND_URL } from '~/utils/constants'
+import { set } from 'lodash'
 
 const ScoreDistributionCard = lazy(() => import('./QuizDashboardPage/ScoreDistributionCard'))
 const StudentsTable = lazy(() => import('./QuizDashboardPage/StudentsTable'))
 const KeyMetrics = lazy(() => import('./QuizDashboardPage/KeyMetrics'))
 
 
-// fetch quiz info
-function useQuizInfo(quizId) {
-  return useQuery({
-    queryKey: ['quizInfo', quizId],
-    queryFn: () => getQuizInfo(quizId),
-    enabled: Boolean(quizId), // chỉ chạy khi có quizId từ params
-    suspense: false // header cần hiển thị ngay nên không dùng suspense
-  })
-}
+// fetch quiz info directly to always get fresh data on each visit
 
 export default function QuizDashboard() {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { data: quizInfo } = useQuizInfo(id)
+  const [quizInfo, setQuizInfo] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let mounted = true
+    if (!id) return
+    setLoading(true)
+    setError(null)
+    const fetchData = async () => {
+      try {
+        const data = await getQuizInfo(id)
+        if (mounted) setQuizInfo(data)
+      } catch (err) {
+        if (mounted) setError(err)
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+    fetchData()
+    return () => { mounted = false }
+  }, [id])
+
   const [shareModalOpen, setShareModalOpen] = useState(false)
   const confirm = useConfirm()
 
@@ -91,8 +106,60 @@ export default function QuizDashboard() {
     }
   }
 
-  const handleShare = () => {
-    setShareModalOpen(true)
+  const handleShare = async () => {
+    if (quizInfo?.status === 'published') {
+      setShareModalOpen(true)
+      return
+    }
+
+    // Quiz đang draft > hiện confirm
+    const { confirmed } = await confirm({
+      title: (
+        <div className="flex items-center gap-2">
+          <CircleAlert color="orange" />
+          <span>Quiz is not published yet</span>
+        </div>
+      ),
+      description: (
+        <div className="mt-4 space-y-3">
+          <p className="text-sm text-gray-600">
+            The quiz
+            <span className="mx-1 font-semibold text-gray-900">
+              {quizInfo?.title}
+            </span>
+            is currently in
+            <span className="mx-1 rounded bg-gray-100 px-1.5 py-0.5 font-mono text-gray-900">
+              Draft
+            </span>
+            status.
+          </p>
+
+          <p className="text-sm text-gray-600">
+            You need to publish this quiz before sharing it with students.
+          </p>
+
+          <div className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700">
+            Students cannot access draft quizzes.
+          </div>
+        </div>
+      ),
+      confirmationText: 'Publish now',
+      cancellationText: 'Cancel',
+      allowClose: true
+    })
+
+    if (confirmed) {
+      await publishQuizAPI(quizInfo._id)
+      // cần cập nhật lại quizInfo sau khi publish
+      const updatedQuizInfo = { ...quizInfo, status: 'published' }
+      setQuizInfo(updatedQuizInfo)
+      // Sau khi publish xong thì mở share
+      setShareModalOpen(true)
+      return
+    }
+    else {
+      () => {}
+    }
   }
 
   return (
@@ -125,14 +192,12 @@ export default function QuizDashboard() {
                 <Edit className="w-4 h-4" />
                 <span className="hidden sm:inline">Edit</span>
               </button>
-              {quizInfo?.status === 'published'&& <>
-                <button
-                  onClick={handleShare}
-                  className="px-4 py-2 bg-gray-700 border border-gray-600 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2">
-                  <Share2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Share</span>
-                </button>
-              </>}
+              <button
+                onClick={handleShare}
+                className="px-4 py-2 bg-gray-700 border border-gray-600 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2">
+                <Share2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Share</span>
+              </button>
               <button
                 onClick={handleDelete}
                 className="px-4 py-2 bg-red-600 border border-red-500 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500">

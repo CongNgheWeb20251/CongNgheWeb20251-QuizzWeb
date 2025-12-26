@@ -107,6 +107,11 @@ export const updateQuestionAPI = async (questionId, questionData) => {
   const res = await authorizedAxiosInstance.put(`/v1/questions/${questionId}`, questionData)
   return res.data
 }
+// Delete 1 question
+export const deleteQuestionAPI = async (questionId) => {
+  const res = await authorizedAxiosInstance.delete(`/v1/questions/${questionId}`)
+  return res.data
+}
 
 
 export const publishQuizAPI = async (quizId) => {
