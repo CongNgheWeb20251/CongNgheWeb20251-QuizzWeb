@@ -14,6 +14,11 @@ const apiRoot = import.meta.env.DEV
 
 export const API_ROOT = apiRoot
 
+// Socket.IO URL
+export const SOCKET_URL = import.meta.env.DEV
+  ? 'http://localhost:8017' // Development
+  : 'https://congngheweb20251-quizzweb.onrender.com' // Production - direct connection
+
 // Frontend URL for invite links
 export const FRONTEND_URL = import.meta.env.DEV
   ? 'http://localhost:5173' // Development

@@ -43,7 +43,7 @@ Router.route('/facebook/callback')
     userController.googleOAuthCallback
   )
 
-Router.route('/logout')
+Router.route('/:id/logout')
   .delete(userController.logout)
 
 Router.route('/refresh_token')
@@ -66,5 +66,14 @@ Router.route('/update')
 
 Router.route('/me')
   .get(authMiddleware.isAuthorized, userRateLimit, userController.getCurrentUser)
+
+Router.route('/get_2fa_qr_code')
+  .get(authMiddleware.isAuthorized, userRateLimit, userController.get2FA_QRCode)
+
+Router.route('/setup_2fa')
+  .post(authMiddleware.isAuthorized, userRateLimit, userController.setup2FA)
+
+Router.route('/verify_2fa')
+  .put(authMiddleware.isAuthorized, userRateLimit, userController.verify2FA)
 
 export const userRoute = Router

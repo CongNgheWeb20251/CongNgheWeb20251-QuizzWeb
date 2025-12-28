@@ -35,10 +35,15 @@ passport.use(
             user = await userModel.findOneById(newUser.insertedId)
           }
           else {
-            // đã có user thì cập nhật thêm googleId và chuyển authProvider thành hybrid
+            // đã có user thì cập nhật thêm googleId và chuyển authProvider
+            // Nếu trước đó là khác local và khác hybrid thì thành google thôi, còn trước đó là local thì thành hybrid
+            let authProvider = 'google'
+            if (localUser.authProvider === 'local' || localUser.authProvider === 'hybrid') {
+              authProvider = 'hybrid'
+            }
             const updatedData = {
               googleId: profile.id,
-              authProvider: 'hybrid',
+              authProvider: authProvider,
               avatar: profile?.photos[0]?.value || null,
               isActive: true
             }

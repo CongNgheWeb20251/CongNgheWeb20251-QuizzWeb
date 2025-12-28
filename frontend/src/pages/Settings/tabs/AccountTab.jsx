@@ -23,15 +23,17 @@ import { useForm } from 'react-hook-form'
 import { useConfirm } from 'material-ui-confirm'
 import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
-import { updateUserAPI, logoutUserAPI, selectCurrentUser } from '~/redux/user/userSlice'
+import { updateUserAPI, logoutUserAPI, selectCurrentUser, updateCurrentUser } from '~/redux/user/userSlice'
+import Setup2FA from '~/components/2FA/Setup2FA'
 
 
 const AccountTab = () => {
   const currUser = useSelector(selectCurrentUser)
   const { register, handleSubmit, watch, formState: { errors } } = useForm()
   const dispatch = useDispatch()
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(currUser?.require_2fa || false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [openSetup2FA, setOpenSetup2FA] = useState(false)
 
   const confirmChangePassword = useConfirm()
 
@@ -69,6 +71,17 @@ const AccountTab = () => {
 
   const handleTwoFactorToggle = () => {
     setTwoFactorEnabled(!twoFactorEnabled)
+    setOpenSetup2FA(true)
+  }
+  const updateSuccessSetup2FA = (updatedUser) => {
+    dispatch(updateCurrentUser(updatedUser))
+    setOpenSetup2FA(false)
+  }
+
+  // Hàm này dùng để đóng modal Setup2FA khi người dùng hủy bỏ việc thiết lập 2FA
+  const handleCloseSetup2FA = () => {
+    setOpenSetup2FA(false)
+    setTwoFactorEnabled(currUser?.require_2fa || false)
   }
 
   const handleDeleteAccount = () => {
@@ -79,6 +92,11 @@ const AccountTab = () => {
 
   return (
     <Box>
+      <Setup2FA
+        isOpen={openSetup2FA}
+        toggleOpen={handleCloseSetup2FA}
+        updateSuccessSetup2FA={updateSuccessSetup2FA}
+      />
       <StyledSection>
         <StyledSectionTitle variant="h6" gutterBottom>
           Account Security
