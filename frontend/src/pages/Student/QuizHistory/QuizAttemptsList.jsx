@@ -18,6 +18,7 @@ import { format } from 'date-fns'
 import PageLoader from '~/components/Loading/PageLoader'
 import StartQuizModal from '~/components/StudentQuiz/StartQuizModal'
 import { startAttemptQuizAPI } from '~/apis/index'
+import UserAvatar from '~/components/UserAvatar/UserAvatar'
 
 
 const formatDate = (timestamp) => {
@@ -98,6 +99,8 @@ export default function QuizAttemptsList() {
   }
 
   const startDate = quizAttempts?.startTime
+  const endDate = quizAttempts?.endTime
+  const isExpired = endDate && new Date(endDate) < new Date()
 
   // Process sessions to add calculated fields
   const processedSessions = quizAttempts?.sessions.map((session, index) => ({
@@ -139,9 +142,15 @@ export default function QuizAttemptsList() {
         {/* Attempts List */}
         {processedSessions.length === 0 ? (
           <div className="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-100">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-              <BarChart3 className="w-8 h-8 text-blue-600" />
-            </div>
+            {isExpired ?
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-rose-100 rounded-full mb-4">
+                <XCircle className="w-8 h-8 text-rose-600" />
+              </div>
+              :
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                <BarChart3 className="w-8 h-8 text-blue-600" />
+              </div>
+            }
             {(() => {
               const now = new Date()
               const start = startDate ? new Date(startDate) : null
@@ -153,6 +162,24 @@ export default function QuizAttemptsList() {
                     <h3 className="text-xl text-gray-900 mb-2">Quiz Not Yet Available</h3>
                     <p className="text-gray-600 mb-6">
                       The quiz will be available on {formatDate(startDate)} at {formatTime(startDate)}.
+                    </p>
+                    <button
+                      onClick={onBack}
+                      className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition"
+                      aria-label="Go Home"
+                    >
+                      Go Home
+                    </button>
+                  </>
+                )
+              }
+
+              if (isExpired) {
+                return (
+                  <>
+                    <h3 className="text-xl text-gray-900 mb-2">Quiz Expired</h3>
+                    <p className="text-gray-600 mb-6">
+                      This quiz ended on {formatDate(endDate)} at {formatTime(endDate)}. You missed the deadline.
                     </p>
                     <button
                       onClick={onBack}
