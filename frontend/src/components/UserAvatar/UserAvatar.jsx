@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import Avatar from '@mui/material/Avatar'
 import IconButton from '@mui/material/IconButton'
 import Menu from '@mui/material/Menu'
@@ -11,9 +11,10 @@ import Box from '@mui/material/Box'
 import Logout from '@mui/icons-material/Logout'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { useSelector, useDispatch } from 'react-redux'
-import { selectCurrentUser, logoutUserAPI } from '~/redux/user/userSlice'
+import { selectCurrentUser, logoutUserAPI, updateCurrentUser } from '~/redux/user/userSlice'
 import { useNavigate } from 'react-router-dom'
 import { useConfirm } from 'material-ui-confirm'
+import Require2FA from '~/components/2FA/Require2FA'
 
 function UserAvatar() {
   const [anchorEl, setAnchorEl] = useState(null)
@@ -68,74 +69,83 @@ function UserAvatar() {
 
   if (!currentUser) return null
 
+  const updateSuccessVerify2FA = (updatedUser) => {
+    dispatch(updateCurrentUser(updatedUser))
+  }
+
   return (
-    <Box>
-      <IconButton
-        onClick={handleClick}
-        size="small"
-        sx={{ ml: 2 }}
-        aria-controls={open ? 'account-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-      >
-        <Avatar
-          sx={{ width: 40, height: 40, bgcolor: 'primary.main' }}
-          alt={currentUser.displayName || currentUser.email}
-          src={currentUser.avatar}
+    <Fragment>
+      {currentUser.require_2fa && !currentUser.is_2fa_verified &&
+      <Require2FA updateSuccessVerify2FA={updateSuccessVerify2FA} />
+      }
+      <Box>
+        <IconButton
+          onClick={handleClick}
+          size="small"
+          sx={{ ml: 2 }}
+          aria-controls={open ? 'account-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? 'true' : undefined}
         >
-          {getInitials(currentUser.displayName || currentUser.email)}
-        </Avatar>
-      </IconButton>
-      <Menu
-        anchorEl={anchorEl}
-        id="account-menu"
-        open={open}
-        onClose={handleClose}
-        onClick={handleClose}
-        PaperProps={{
-          elevation: 3,
-          sx: {
-            minWidth: 200,
-            overflow: 'visible',
-            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.15))',
-            mt: 1.5,
-            '& .MuiAvatar-root': {
-              width: 32,
-              height: 32,
-              ml: -0.5,
-              mr: 1
+          <Avatar
+            sx={{ width: 40, height: 40, bgcolor: 'primary.main' }}
+            alt={currentUser.displayName || currentUser.email}
+            src={currentUser.avatar}
+          >
+            {getInitials(currentUser.displayName || currentUser.email)}
+          </Avatar>
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          id="account-menu"
+          open={open}
+          onClose={handleClose}
+          onClick={handleClose}
+          PaperProps={{
+            elevation: 3,
+            sx: {
+              minWidth: 200,
+              overflow: 'visible',
+              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.15))',
+              mt: 1.5,
+              '& .MuiAvatar-root': {
+                width: 32,
+                height: 32,
+                ml: -0.5,
+                mr: 1
+              }
             }
-          }
-        }}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-      >
-        <Box sx={{ px: 2, py: 1.5 }}>
-          <Typography variant="subtitle1" fontWeight="600">
-            {currentUser.displayName || 'User'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-word' }}>
-            {currentUser.email}
-          </Typography>
-        </Box>
-        <Divider />
-        <MenuItem onClick={handleSettings}>
-          <ListItemIcon>
-            <SettingsIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Settings</ListItemText>
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleLogout}>
-          <ListItemIcon>
-            <Logout fontSize="small" color="error" />
-          </ListItemIcon>
-          <ListItemText>
-            <Typography color="error">Logout</Typography>
-          </ListItemText>
-        </MenuItem>
-      </Menu>
-    </Box>
+          }}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <Typography variant="subtitle1" fontWeight="600">
+              {currentUser.displayName || 'User'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-word' }}>
+              {currentUser.email}
+            </Typography>
+          </Box>
+          <Divider />
+          <MenuItem onClick={handleSettings}>
+            <ListItemIcon>
+              <SettingsIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Settings</ListItemText>
+          </MenuItem>
+          <Divider />
+          <MenuItem onClick={handleLogout}>
+            <ListItemIcon>
+              <Logout fontSize="small" color="error" />
+            </ListItemIcon>
+            <ListItemText>
+              <Typography color="error">Logout</Typography>
+            </ListItemText>
+          </MenuItem>
+        </Menu>
+      </Box>
+    </Fragment>
   )
 }
 

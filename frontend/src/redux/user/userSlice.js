@@ -42,8 +42,13 @@ export const updateUserAPI = createAsyncThunk(
 
 export const logoutUserAPI = createAsyncThunk(
   'user/logout',
-  async (showNotification = true) => {
-    const response = await authorizedAxiosInstance.delete('/v1/users/logout')
+  async (showNotification = true, { getState }) => {
+    // Lấy ra user id từ redux store qua thunkAPI.getState()
+    const state = getState()
+    const userId = state.user?.currentUser?._id
+
+    // Nếu backend cần userId gửi kèm, có thể gửi dưới dạng body cho DELETE:
+    const response = await authorizedAxiosInstance.delete(`/v1/users/${userId}/logout`)
     if (showNotification) {
       toast.success('You have been logged out successfully!', { theme: 'colored' })
     }

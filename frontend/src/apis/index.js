@@ -107,6 +107,11 @@ export const updateQuestionAPI = async (questionId, questionData) => {
   const res = await authorizedAxiosInstance.put(`/v1/questions/${questionId}`, questionData)
   return res.data
 }
+// Delete 1 question
+export const deleteQuestionAPI = async (questionId) => {
+  const res = await authorizedAxiosInstance.delete(`/v1/questions/${questionId}`)
+  return res.data
+}
 
 
 export const publishQuizAPI = async (quizId) => {
@@ -190,6 +195,22 @@ export const getNotificationsByTeacherAPI = async () => {
 // AI Chatbot API
 export const askAIQuestionAPI = async (question) => {
   const res = await authorizedAxiosInstance.post('v1/ai/ask', { question })
+  return res.data
+}
+
+//------------------------------------------
+export const get2FA_QRCodeAPI = async () => {
+  const res = await authorizedAxiosInstance.get('v1/users/get_2fa_qr_code')
+  return res.data
+}
+
+export const setup_2FA_API = async (otpToken) => {
+  const res = await authorizedAxiosInstance.post('v1/users/setup_2fa', { otpToken })
+  return res.data
+}
+
+export const verify_2FA_API = async (otpToken) => {
+  const res = await authorizedAxiosInstance.put('v1/users/verify_2fa', { otpToken })
   return res.data
 }
 

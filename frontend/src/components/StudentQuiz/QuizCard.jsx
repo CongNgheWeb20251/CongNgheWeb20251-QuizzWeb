@@ -142,7 +142,9 @@ const QuizCard = ({ quiz, index, openMenuId, toggleMenu, onStartQuiz }) => {
 
             {openMenuId === quiz._id && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20 animate-scale-in">
-                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                <button
+                  onClick={() => handleNavigateToResults(quiz._id)}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                   <Eye className="w-4 h-4" />
                   View Details
                 </button>

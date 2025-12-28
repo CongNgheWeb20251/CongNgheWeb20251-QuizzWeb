@@ -13,6 +13,12 @@ import { BrevoProvider } from '~/providers/BrevoProvider'
 import { cloudinaryProvider } from '~/providers/cloudinaryProvider'
 import { otpModel } from '~/models/otpModel'
 import { generateVerifyEmailTemplate } from '~/utils/generateTemplate'
+import { authenticator } from 'otplib'
+import qrcode from 'qrcode'
+import { twoFASecretKeyModel } from '~/models/twoFASecretKeyModel'
+import { userSessionModel } from '~/models/userSessionModel'
+
+const serviceName = '2FA-Quizzy (MERN)'
 
 
 const createNew = async (userData) => {
@@ -134,6 +140,10 @@ const login = async (resBody) => {
     if (!existingUser.isActive) {
       throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Account is not active! Please verify your account first.')
     }
+    // Nếu authProvider là google thì không cho login bằng password
+    if (existingUser.authProvider === 'google') {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'This account is registered via Google OAuth. Please use Google Sign-In to log in.')
+    }
     if (!bcrypt.compareSync(resBody.password, existingUser.password)) {
       throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid password!')
     }
@@ -159,6 +169,7 @@ const login = async (resBody) => {
       env.REFRESH_TOKEN_LIFE
     )
     const resUser = pickUser(existingUser)
+    resUser['is_2fa_verified'] = false
     // resUser['last_login'] = userSession.last_login || null
     // Trả về thông tin kèm theo 2 token bên trên
     return {
@@ -237,6 +248,10 @@ const forgotPassword = async (email) => {
     const user = await userModel.findOneByEmail(email)
     if (!user) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
+    }
+    // Nếu authProvider là google thì không cho reset password
+    if (user.authProvider === 'google' || user.authProvider === 'facebook') {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'This account is registered via Google OAuth. Password reset is not applicable.')
     }
 
     const token = uuidv4()
@@ -355,6 +370,102 @@ const getCurrentUser = async (userId) => {
   }
 }
 
+const get2FA_QRCode = async (userId) => {
+  try {
+    const user = await userModel.findOneById(userId)
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
+    }
+    // Biến lưu trữ 2fa secret key của user trong Database > 2fa_secret_keys tại đây
+    let twoFactorSecretKeyValue = null
+    const twoFactorSecretKey = await twoFASecretKeyModel.getSecretKeyByUserId(userId)
+    if (twoFactorSecretKey) {
+      twoFactorSecretKeyValue = twoFactorSecretKey.value
+    }
+    else {
+      // Tạo mới secret key và lưu vào db
+      twoFactorSecretKeyValue = authenticator.generateSecret()
+      await twoFASecretKeyModel.createNew({
+        userId: userId,
+        value: twoFactorSecretKeyValue
+      })
+    }
+    const otpAuthToken = authenticator.keyuri(user.email, serviceName, twoFactorSecretKeyValue)
+    // Tạo QR code từ OTP token trên
+    const qrCodeImageUrl = await qrcode.toDataURL(otpAuthToken)
+
+    return { qrCodeImageUrl }
+  } catch (error) {
+    throw error
+  }
+}
+
+const setup2FA = async (userId, reqBody, device) => {
+  try {
+    const user = await userModel.findOneById(userId)
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
+    }
+    const twoFactorSecretKey = await twoFASecretKeyModel.getSecretKeyByUserId(userId)
+    if (!twoFactorSecretKey) {
+      throw new ApiError(StatusCodes.NOT_FOUND, '2FA secret key not found!')
+    }
+    const secretKey = twoFactorSecretKey.value
+    const otpTokenFromClient = reqBody.otpToken
+    if (!otpTokenFromClient) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'OTP token is required!')
+    }
+    // Verify OTP token
+    const isValid = authenticator.verify({ token: otpTokenFromClient, secret: secretKey })
+    if (!isValid) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid OTP token!')
+    }
+    // Cập nhật trạng thái 2fa của user
+    const updatedUser = await userModel.update(userId, { require_2fa: true })
+    userSessionModel.createNew({ userId: userId, device_id: device, is_2fa_verified: true })
+    return {
+      ...pickUser(updatedUser),
+      is_2fa_verified: true
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const verify2FA = async (userId, reqBody, device) => {
+  try {
+    const user = await userModel.findOneById(userId)
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
+    }
+    const twoFactorSecretKey = await twoFASecretKeyModel.getSecretKeyByUserId(userId)
+    if (!twoFactorSecretKey) {
+      throw new ApiError(StatusCodes.NOT_FOUND, '2FA secret key not found!')
+    }
+    const secretKey = twoFactorSecretKey.value
+    const otpTokenFromClient = reqBody.otpToken
+    if (!otpTokenFromClient) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'OTP token is required!')
+    }
+    // Verify OTP token
+    const isValid = authenticator.verify({ token: otpTokenFromClient, secret: secretKey })
+    if (!isValid) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid OTP token!')
+    }
+    const userSession = await userSessionModel.getSessionByUserId(user._id, device)
+    // Cập nhật trạng thái 2fa của user
+    if (!userSession) {
+      await userSessionModel.createNew({ userId: userId, device_id: device, is_2fa_verified: true })
+    }
+    return {
+      ...pickUser(user),
+      is_2fa_verified: true
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 export const userService = {
   createNew,
   verifyAccount,
@@ -364,5 +475,8 @@ export const userService = {
   forgotPassword,
   resetPassword,
   update,
-  getCurrentUser
+  getCurrentUser,
+  get2FA_QRCode,
+  setup2FA,
+  verify2FA
 }

@@ -323,7 +323,7 @@ export default function QuizAttemptsList() {
           onClose={handleCloseModal}
           onStart={handleConfirmStart}
           quiz= {quizAttempts}
-          isRetake={true}
+          isRetake={false}
         />
       )}
     </div>

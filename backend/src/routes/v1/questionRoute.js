@@ -10,6 +10,7 @@ Router.use(authMiddleware.isAuthorized)
 Router.use(userRateLimit)
 Router.post('', questionValidation.createSingleQuestion, questionController.createNew)
 Router.put('/:questionId', questionController.updateQuestion)
+Router.delete('/:questionId', questionController.deleteQuestion)
 
 
 export const questionRoute = Router
