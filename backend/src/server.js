@@ -21,6 +21,9 @@ import { initAuthRateLimit, initUserRateLimit } from './middlewares/rateLimit'
 const START_SERVER = async () => {
   const app = express()
 
+  // set trust proxy for rate limit trước khi dùng reverse proxy của vercel, render
+  app.set('trust proxy', 1)
+
   app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store')
   next()

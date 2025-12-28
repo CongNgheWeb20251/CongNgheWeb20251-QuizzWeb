@@ -30,6 +30,7 @@ import {
 import QuestionCard from '~/components/StudentQuiz/QuestionCard'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchQuizzDetailsAPI, selectCurrentActiveQuizz } from '~/redux/activeQuizz/activeQuizzSlice'
+import { selectCurrentUser } from '~/redux/user/userSlice'
 import { useParams } from 'react-router-dom'
 import { fetchSessionQuizAPI, submitQuizSessionAPI } from '~/apis'
 import { useNavigate } from 'react-router-dom'
@@ -42,6 +43,7 @@ export default function StudentQuizPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [timeRemaining, setTimeRemaining] = useState(0)
   const quiz = useSelector(selectCurrentActiveQuizz)
+  const currentUser = useSelector(selectCurrentUser)
   const dispatch = useDispatch()
   const { quizId, sessionId } = useParams()
   const [isLoading, setIsLoading] = useState(false)
@@ -294,7 +296,28 @@ export default function StudentQuizPage() {
               top: '2rem'
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: '1rem' }}>
+            {/* info user */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+              <Box sx={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', backgroundColor: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {currentUser?.avatar ? (
+                  <img src={currentUser.avatar} alt={currentUser.fullName || currentUser.email} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <span style={{ color: 'white', fontWeight: 700 }}>
+                    {(currentUser?.fullName || currentUser?.email || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()}
+                  </span>
+                )}
+              </Box>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  {currentUser?.fullName || currentUser?.email}
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#64748b' }}>
+                  {currentUser?.email}
+                </Typography>
+              </Box>
+            </Box>
+
+            <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: '0.5rem' }}>
               Questions
             </Typography>
 
